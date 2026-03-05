@@ -606,24 +606,8 @@ html, body {
 /* ── Chat screen layout ── */
 #chat {
   padding-bottom: 0 !important;
-  padding-top: max(env(safe-area-inset-top), 18px);
-  padding-left: 18px;
-  padding-right: 18px;
   gap: 0;
-  /* Tinggi diatur JS via visualViewport */
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  width: 100%; max-width: 430px;
-  margin: 0 auto;
-  transform: none !important;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .28s;
-  overflow: hidden;
-}
-#chat.active {
-  opacity: 1;
-  pointer-events: all;
+  /* Sama seperti screen lain — absolute, bukan fixed */
 }
 #chat .tb {
   flex-shrink: 0;
