@@ -97,6 +97,10 @@ export function showScreen(id) {
   if (id === 'news')    initNews();
   if (id === 'cycle')   renderCycleScreen(entries);
   if (id === 'chat')    { /* chat already initialized via openChat */ }
+
+  // Sembunyikan nav bar saat di chat screen, tampilkan kembali di screen lain
+  const nav = document.getElementById('nav');
+  if (nav) nav.style.display = id === 'chat' ? 'none' : '';
 }
 
 // expose globally for inline HTML onclick

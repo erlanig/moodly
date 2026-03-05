@@ -605,8 +605,14 @@ html, body {
 
 /* ── Chat screen layout ── */
 #chat {
-  padding-bottom: max(env(safe-area-inset-bottom), 82px);
+  padding-bottom: 0 !important;
+  padding-top: max(env(safe-area-inset-top), 18px);
+  padding-left: 18px;
+  padding-right: 18px;
   gap: 0;
+  height: 100dvh;
+  /* Ikuti viewport saat keyboard muncul */
+  height: 100%;
 }
 #chat .tb {
   flex-shrink: 0;
@@ -733,8 +739,12 @@ html, body {
 .chat-composer {
   flex-shrink: 0;
   display: flex; align-items: flex-end; gap: 9px;
-  padding: 10px 0 8px;
+  padding: 10px 0 max(env(safe-area-inset-bottom), 14px);
   border-top: 1.5px solid var(--border);
+  background: var(--bg);
+  /* Naik otomatis saat keyboard muncul di mobile */
+  position: sticky;
+  bottom: 0;
 }
 .chat-input {
   flex: 1;
