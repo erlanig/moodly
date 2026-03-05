@@ -53,6 +53,7 @@ async function boot() {
   // Build static UI
   buildCheckinUI();
   buildNavHandlers();
+  initViewportHandler();
 
   // Show home
   showScreen('home');
@@ -96,9 +97,15 @@ export function showScreen(id) {
   if (id === 'insight') updateInsight(entries, getPeriods());
   if (id === 'news')    initNews();
   if (id === 'cycle')   renderCycleScreen(entries);
-  if (id === 'chat')    { /* chat already initialized via openChat */ }
+  if (id === 'chat') {
+    // Trigger viewport update setelah screen aktif
+    setTimeout(() => window._chatViewportUpdate?.(), 50);
+  } else {
+    // Reset tinggi chat saat keluar
+    window._chatViewportReset?.();
+  }
 
-  // Sembunyikan nav bar saat di chat screen, tampilkan kembali di screen lain
+  // Sembunyikan nav bar saat di chat screen
   const nav = document.getElementById('nav');
   if (nav) nav.style.display = id === 'chat' ? 'none' : '';
 }
@@ -267,6 +274,41 @@ function buildNavHandlers() {
     const ov = document.getElementById('art-ov');
     if (ov.classList.contains('open')) closeArt();
   });
+}
+
+/* ════════════════
+   VISUAL VIEWPORT (keyboard handler)
+   Buat chat screen resize mengikuti keyboard
+════════════════ */
+function initViewportHandler() {
+  const chatEl = document.getElementById('chat');
+  if (!chatEl) return;
+
+  function updateChatHeight() {
+    if (!chatEl.classList.contains('active')) return;
+    const vv = window.visualViewport;
+    if (!vv) return;
+    // Tinggi = visualViewport height, posisi top mengikuti offset
+    const h = vv.height;
+    const t = vv.offsetTop;
+    chatEl.style.height = h + 'px';
+    chatEl.style.top    = t + 'px';
+    // Scroll messages ke bawah saat keyboard muncul
+    const msgs = document.getElementById('chat-messages');
+    if (msgs) msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', updateChatHeight);
+    window.visualViewport.addEventListener('scroll', updateChatHeight);
+  }
+
+  // Reset saat keluar chat
+  window._chatViewportReset = () => {
+    chatEl.style.height = '';
+    chatEl.style.top    = '';
+  };
+  window._chatViewportUpdate = updateChatHeight;
 }
 
 /* ════════════════

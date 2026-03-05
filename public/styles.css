@@ -610,9 +610,20 @@ html, body {
   padding-left: 18px;
   padding-right: 18px;
   gap: 0;
-  height: 100dvh;
-  /* Ikuti viewport saat keyboard muncul */
-  height: 100%;
+  /* Tinggi diatur JS via visualViewport */
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  width: 100%; max-width: 430px;
+  margin: 0 auto;
+  transform: none !important;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .28s;
+  overflow: hidden;
+}
+#chat.active {
+  opacity: 1;
+  pointer-events: all;
 }
 #chat .tb {
   flex-shrink: 0;
@@ -739,12 +750,9 @@ html, body {
 .chat-composer {
   flex-shrink: 0;
   display: flex; align-items: flex-end; gap: 9px;
-  padding: 10px 0 max(env(safe-area-inset-bottom), 14px);
+  padding: 10px 0 12px;
   border-top: 1.5px solid var(--border);
   background: var(--bg);
-  /* Naik otomatis saat keyboard muncul di mobile */
-  position: sticky;
-  bottom: 0;
 }
 .chat-input {
   flex: 1;
