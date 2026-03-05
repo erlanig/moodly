@@ -89,17 +89,8 @@ async function callChatAPI(history, ctx) {
   const name    = ctx.userName || 'pengguna';
   const mood    = ctx.mood ? `${ctx.mood.l} (${ctx.mood.e}), intensitas: ${ctx.intensity || 'tidak diketahui'}` : 'belum check-in';
   const causes  = ctx.causes?.length ? ctx.causes.join(', ') : 'tidak disebutkan';
+  const phase   = ctx.cyclePhase || 'tidak diketahui';
   const hasMood = !!ctx.mood;
-
-  // Info siklus lengkap
-  const phaseNames = { mens:'Menstruasi 🩸', foll:'Folikular 🌱', ovul:'Ovulasi ⭐', lute:'Luteal 🌙' };
-  const phaseName  = ctx.cyclePhase ? (phaseNames[ctx.cyclePhase] || ctx.cyclePhase) : 'tidak diketahui';
-  const cycleInfo  = ctx.dayOfCycle
-    ? `${phaseName}, hari ke-${ctx.dayOfCycle} dari ${ctx.cycleLen || 28} hari`
-    : 'belum ada data siklus';
-  const periodHist = ctx.periods?.length
-    ? ctx.periods.map(p => `${p.startDate}${p.endDate?' s/d '+p.endDate:''} (${p.flow||'flow tidak dicatat'})`).join(', ')
-    : 'belum ada riwayat';
 
   // Siapkan daftar artikel yang tersedia untuk referensi
   const availableArts = (artStore || []).slice(0, 6).map((a, i) =>
@@ -113,11 +104,10 @@ Jes berbicara seperti manusia beneran — ada jeda, ada empati yang terasa organ
 
 KONTEKS PENGGUNA:
 - Nama: ${name}
-- Check-in hari ini: ${hasMood ? 'sudah' : 'belum'}
+- Check-in: ${hasMood ? 'sudah' : 'BELUM hari ini'}
 - Mood: ${mood}
 - Penyebab: ${causes}
-- Siklus saat ini: ${cycleInfo}
-- Riwayat menstruasi terakhir: ${periodHist}
+- Fase siklus: ${phase}
 
 ARTIKEL TERSEDIA HARI INI:
 ${availableArts || 'Tidak ada artikel tersedia'}
@@ -222,7 +212,7 @@ function appendMessage(role, text, animate = false, articleIdx = null) {
 
     // Label AI — inline style agar tidak bergantung CSS cache
     const label = document.createElement('div');
-    label.innerHTML = `<svg width="8" height="8" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="#c0c0c0" stroke-width="2" stroke-linejoin="round"/></svg>&nbsp;Dijawab oleh AI · Jes`;
+    label.innerHTML = `<svg width="8" height="8" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="#c0c0c0" stroke-width="2" stroke-linejoin="round"/></svg>&nbsp;Jawaban diberikan oleh AI`;
     label.style.cssText = [
       'display:flex', 'align-items:center', 'gap:4px',
       'font-size:9px', 'color:#c0c0c0', 'font-weight:500',
