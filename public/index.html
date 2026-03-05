@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f4faf7">
+<meta name="apple-mobile-web-app-title" content="Moodly">
+<link rel="apple-touch-icon" href="img/moodly.png">
+<title>Moodly</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="app">
+
+<!-- ═══════════════ SPLASH ═══════════════ -->
+<div id="splash" class="screen">
+  <div class="sp-title">mood<span class="sp-title-g">ly</span></div>
+</div>
+
+<!-- ═══════════════ HOME ═══════════════ -->
+<div id="home" class="screen">
+  <div class="tb">
+    <div class="tb-logo">
+      <!-- <div class="tb-dot">
+        <img src="img/moodly.png" alt="M" onerror="this.parentElement.innerHTML='🌱'">
+      </div> -->
+      <div class="tb-name">mood<b>ly</b></div>
+    </div>
+    <div class="tb-pill" onclick="window._showProf()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="8" r="4" stroke="#3a5c46" stroke-width="2"/>
+        <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#3a5c46" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span id="tb-uname">Profil</span>
+      <!-- <span class="sync-dot" title="Firebase sync"></span> -->
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="hero-tag" id="hero-tag">Selamat pagi ☀️</div>
+    <div class="hero-h" id="hero-h">Hari ini<br>gimana perasaanmu?</div>
+    <div class="hero-sub">Jujur aja, ga ada yang ngejudge 🤝</div>
+    <div class="hero-foot">
+      <div class="hero-streak">🔥 <span id="streak">0</span> hari</div>
+      <button class="hero-cta" onclick="window._startCheckin()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="10" stroke="#0a9e3f" stroke-width="2"/>
+          <path d="M12 8v8M8 12h8" stroke="#0a9e3f" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        Check-in
+      </button>
+    </div>
+  </div>
+
+  <!-- Cycle banner -->
+  <div id="home-cycle-banner" class="cycle-banner none" onclick="window._showScreen('cycle')"></div>
+
+  <div class="stats">
+    <div class="scard">
+      <div class="scard-ic g">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+          <path d="M9 11l3 3L22 4" stroke="#1db954" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" stroke="#1db954" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div><div class="scard-val" id="s-total">0</div><div class="scard-lbl">Total Check-in</div></div>
+    </div>
+    <div class="scard">
+      <div class="scard-ic o">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z" stroke="#f57c00" stroke-width="1.8" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div><div class="scard-val" id="s-avg">—</div><div class="scard-lbl">Rata-rata Mood</div></div>
+    </div>
+  </div>
+
+  <div class="slbl">Terakhir Check-in</div>
+  <div id="last-wrap"></div>
+  <!-- Chat banner -->
+  <div class="home-chat-banner" onclick="window._openChatDirect()">
+    <div class="hcb-left">
+      <div class="hcb-avatar">🌱</div>
+      <div>
+        <div class="hcb-title">Moodly AI</div>
+        <div class="hcb-sub">Hai! Aku Jes, mau dengerin kamu 💚</div>
+      </div>
+    </div>
+    <div class="hcb-arrow">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+        <path d="M5 12h14M12 5l7 7-7 7" stroke="#1db954" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="slbl">Artikel Hari Ini</div>
+  <div id="home-prev"></div>
+</div>
+
+<!-- ═══════════════ CHECK-IN ═══════════════ -->
+<div id="checkin" class="screen">
+  <div class="ci-hd">
+    <div class="ci-row">
+      <span class="ci-tag">Check-in Harian</span>
+      <span class="ci-num" id="ci-num">1 / 3</span>
+    </div>
+    <div class="ci-title" id="ci-title">Mood kamu?</div>
+    <div class="progress">
+      <div class="prog-seg on" id="seg1"></div>
+      <div class="prog-seg" id="seg2"></div>
+      <div class="prog-seg" id="seg3"></div>
+    </div>
+  </div>
+
+  <!-- Step 1: Mood -->
+  <div class="step on" id="st1">
+    <div class="step-hint">Pilih yang paling deket sama perasaanmu sekarang</div>
+    <div class="mood-grid" id="mood-grid"></div>
+    <button class="cta" id="btn1" disabled onclick="window._goStep(2)">Lanjut →</button>
+  </div>
+
+  <!-- Step 2: Cause -->
+  <div class="step" id="st2">
+    <div class="step-hint">Bisa pilih lebih dari satu</div>
+    <div class="cause-grid" id="cause-grid"></div>
+    <button class="cta" onclick="window._goStep(3)">Lanjut →</button>
+    <button class="cta out" onclick="window._goStep(1)">← Kembali</button>
+  </div>
+
+  <!-- Step 3: Intensity -->
+  <div class="step" id="st3">
+    <div class="step-hint">Seberapa besar dampaknya hari ini?</div>
+    <div class="int-row" id="int-row"></div>
+    <button class="cta" id="btn3" disabled onclick="window._submitCheckin()">Selesai ✓</button>
+    <button class="cta out" onclick="window._goStep(2)">← Kembali</button>
+  </div>
+</div>
+
+<!-- ═══════════════ CYCLE ═══════════════ -->
+<div id="cycle" class="screen">
+  <div class="tb">
+    <div>
+      <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em">Tracker Siklus</div>
+      <div class="ins-h" style="font-size:22px">Cycle<br>Tracker 🌸</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <!-- Log period button -->
+      <div class="tb-icon" onclick="window._showLogPeriod()" title="Catat Menstruasi"
+           style="width:36px;height:36px;background:var(--mens-bg);border-color:var(--mens-border)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <path d="M12 5v14M5 12h14" stroke="#ff6b8a" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <!-- Settings button -->
+      <div class="tb-icon" onclick="window._showCycleSetup()" title="Pengaturan Siklus">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" stroke="#3a5c46" stroke-width="2"/>
+          <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" stroke="#3a5c46" stroke-width="2"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Current phase card -->
+  <div id="phase-card-wrap"></div>
+
+  <!-- 28-day strip -->
+  <div class="cycle-strip">
+    <div class="card-ttl" style="margin-bottom:8px">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="10" stroke="#1db954" stroke-width="2"/>
+        <path d="M12 6v6l4 2" stroke="#1db954" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      Siklus Bulan Ini
+    </div>
+    <div class="cycle-days" id="cycle-days"></div>
+  </div>
+
+  <!-- Phase mini cards -->
+  <div class="phase-row" id="phase-row"></div>
+
+  <!-- Period History -->
+  <div class="period-hist">
+    <div class="card-ttl">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+        <rect x="3" y="4" width="18" height="18" rx="2" stroke="#ff6b8a" stroke-width="2"/>
+        <path d="M3 10h18M8 2v4M16 2v4" stroke="#ff6b8a" stroke-width="2"/>
+      </svg>
+      Riwayat Menstruasi
+      <button onclick="window._showLogPeriod()"
+        style="margin-left:auto;padding:3px 10px;border-radius:100px;border:1.5px solid var(--mens-border);background:var(--mens-bg);color:var(--mens);font-family:inherit;font-size:10px;font-weight:700;cursor:pointer">
+        + Tambah
+      </button>
+    </div>
+    <div id="period-hist-list"></div>
+  </div>
+
+  <!-- Predictions -->
+  <div class="pred-card">
+    <div class="card-ttl">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z" stroke="#1db954" stroke-width="1.8" stroke-linejoin="round"/>
+      </svg>
+      Prediksi Berikutnya
+    </div>
+    <div class="pred-list" id="pred-list"></div>
+  </div>
+
+  <!-- Mood-Phase Correlation -->
+  <div class="corr-card">
+    <div class="card-ttl">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+        <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#1db954" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Mood per Fase Siklus
+    </div>
+    <div id="corr-rows"></div>
+  </div>
+
+  <!-- Cycle tips pill -->
+  <div class="pill">
+    <div class="pill-hd ph-p">🌸 Tips Fase Ini</div>
+    <div class="pill-txt" id="cycle-tip">Catat siklus pertamamu untuk tips yang personal.</div>
+  </div>
+</div>
+
+<!-- ═══════════════ INSIGHT ═══════════════ -->
+<div id="insight" class="screen">
+  <div class="tb">
+    <div>
+      <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em">7 Hari Terakhir</div>
+      <div class="ins-h">Weekly<br>Insights ✨</div>
+    </div>
+    <div class="tb-icon" onclick="window._exportPDF()" title="Ekspor PDF">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" stroke="#3a5c46" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M7 10l5 5 5-5M12 15V3" stroke="#3a5c46" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="card-ttl">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M18 20V10M12 20V4M6 20v-6" stroke="#1db954" stroke-width="2.5" stroke-linecap="round"/></svg>
+      Grafik Mood Mingguan
+    </div>
+    <div class="bars-wrap" id="chart-bars"></div>
+  </div>
+
+  <div class="cal-card">
+    <div class="card-ttl">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="#1db954" stroke-width="2"/><path d="M3 10h18M8 2v4M16 2v4" stroke="#1db954" stroke-width="2"/></svg>
+      Kalender Bulan Ini
+      <span style="font-size:9px;color:var(--muted);margin-left:4px">(🩸 = mens · emoji = mood)</span>
+    </div>
+    <div class="cal-wdays">
+      <div>Min</div><div>Sen</div><div>Sel</div><div>Rab</div><div>Kam</div><div>Jum</div><div>Sab</div>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+  </div>
+
+  <!-- Weekly analysis -->
+  <div class="pill">
+    <div class="pill-hd ph-g">
+      <svg width="9" height="9" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#0a9e3f" stroke-width="2.5"/><path d="M12 16v-4M12 8h.01" stroke="#0a9e3f" stroke-width="2.5" stroke-linecap="round"/></svg>
+      Analisis Mingguan
+    </div>
+    <div class="pill-txt" id="ins-txt">Belum cukup data. Check-in dulu yuk!</div>
+  </div>
+
+  <!-- Causes -->
+  <div class="pill">
+    <div class="pill-hd ph-a">
+      <svg width="9" height="9" viewBox="0 0 24 24" fill="none"><path d="M3 3h18M3 9h18M3 15h18M3 21h18" stroke="#e65100" stroke-width="2" stroke-linecap="round"/></svg>
+      Penyebab Terbanyak
+    </div>
+    <div class="pill-txt" style="margin-bottom:5px">Yang paling sering muncul minggu ini:</div>
+    <div class="chips" id="cause-chips"><span style="font-size:12px;color:var(--muted)">Belum ada data</span></div>
+  </div>
+
+  <!-- Cycle insight mini -->
+  <div class="ins-cycle-mini">
+    <div class="card-ttl">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#ff6b8a" stroke-width="2"/><path d="M12 6v6l4 2" stroke="#ff6b8a" stroke-width="2" stroke-linecap="round"/></svg>
+      <span style="color:#ff6b8a">Riwayat Siklus & Prediksi</span>
+    </div>
+    <div id="ins-cycle-mini-list"></div>
+  </div>
+
+  <!-- Journal -->
+  <div class="pill">
+    <div class="pill-hd ph-g">📔 Jurnal Terkini</div>
+    <div id="journal"></div>
+  </div>
+</div>
+
+<!-- ═══════════════ NEWS ═══════════════ -->
+<div id="news" class="screen">
+  <div class="news-hd">
+    <div>
+      <div class="news-lbl">Artikel & Tips</div>
+      <div class="news-title">Mental<br>Health Hub 🧠</div>
+    </div>
+    <div class="news-right">
+      <div class="date-pill" id="date-pill">
+        <svg width="9" height="9" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="#0a9e3f" stroke-width="2"/><path d="M3 10h18M8 2v4M16 2v4" stroke="#0a9e3f" stroke-width="2"/></svg>
+        Hari ini
+      </div>
+      <div class="rf-btn" onclick="window._forceRefresh()">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" id="rf-ic">
+          <path d="M23 4v6h-6M1 20v-6h6" stroke="#3a5c46" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15" stroke="#3a5c46" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Refresh
+      </div>
+    </div>
+  </div>
+
+  <div class="ftabs" id="ftabs">
+    <button class="ftab on"  onclick="window._filterNews('semua',this)">Semua</button>
+    <button class="ftab"     onclick="window._filterNews('mood',this)">Mood</button>
+    <button class="ftab"     onclick="window._filterNews('stres',this)">Stres & Cemas</button>
+    <button class="ftab"     onclick="window._filterNews('tidur',this)">Tidur</button>
+    <button class="ftab"     onclick="window._filterNews('self-care',this)">Self-Care</button>
+    <button class="ftab"     onclick="window._filterNews('motivasi',this)">Motivasi</button>
+  </div>
+
+  <div id="news-wrap">
+    <div class="ldwrap">
+      <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+      <div class="ld-txt">Menyiapkan artikel hari ini…</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ CHAT ═══════════════ -->
+<div id="chat" class="screen">
+  <div class="tb">
+    <button class="chat-back" onclick="window._showScreen('home')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+        <path d="M19 12H5M12 19l-7-7 7-7" stroke="#3a5c46" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <div class="chat-hd-info">
+      <div class="chat-avatar">🌱</div>
+      <div>
+        <div class="chat-hd-name">Jes AI</div>
+        <div class="chat-hd-sub">Teman curhatmu di Moodly 💚</div>
+      </div>
+    </div>
+    <div style="width:32px"></div>
+  </div>
+
+  <div class="chat-messages" id="chat-messages"></div>
+
+  <div class="chat-quick-wrap">
+    <div class="chat-quick" id="chat-quick"></div>
+  </div>
+
+  <div class="chat-composer">
+    <textarea
+      id="chat-input"
+      class="chat-input"
+      placeholder="Tulis pesanmu…"
+      rows="1"
+      onkeydown="window._chatKeydown(event)"
+      oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'"
+    ></textarea>
+    <button class="chat-send" id="chat-send" onclick="window._sendChat()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+        <path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+</div><!-- /app -->
+
+<!-- ═══════════════ BOTTOM NAV ═══════════════ -->
+<nav id="nav">
+  <button class="ni on" id="ni-home" onclick="window._showScreen('home')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/>
+      <path d="M9 21V12h6v9"/>
+    </svg>
+    <span class="ni-lbl" style="color:white">Home</span>
+  </button>
+  <button class="ni" id="ni-checkin" onclick="window._startCheckin()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#8aab97" stroke-width="2" stroke-linecap="round">
+      <circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>
+    </svg>
+    <span class="ni-lbl">Check</span>
+  </button>
+  <button class="ni" id="ni-cycle" onclick="window._showScreen('cycle')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#8aab97" stroke-width="2" stroke-linecap="round">
+      <circle cx="12" cy="12" r="9"/>
+      <path d="M12 7v5l3 3"/>
+    </svg>
+    <span class="ni-lbl">Siklus</span>
+  </button>
+  <button class="ni" id="ni-insight" onclick="window._showScreen('insight')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#8aab97" stroke-width="2" stroke-linecap="round">
+      <path d="M18 20V10M12 20V4M6 20v-6"/>
+    </svg>
+    <span class="ni-lbl">Insight</span>
+  </button>
+  <button class="ni" id="ni-news" onclick="window._showScreen('news')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#8aab97" stroke-width="2" stroke-linecap="round">
+      <path d="M4 22h16a2 2 0 002-2V4a2 2 0 00-2-2H8a2 2 0 00-2 2v16a2 2 0 01-2 2zm0 0a2 2 0 01-2-2V8"/>
+      <path d="M10 10h6M10 14h6M10 18h4"/>
+    </svg>
+    <span class="ni-lbl">Artikel</span>
+  </button>
+</nav>
+
+<!-- ═══════════════ MODALS ═══════════════ -->
+
+<!-- Name modal -->
+<div id="name-modal" class="modal-bg">
+  <div class="modal-sheet">
+    <div class="sh-handle"></div>
+    <div class="sh-title">Halo! Siapa namamu? 👋</div>
+    <div class="sh-sub">Biar Moodly bisa nyapa kamu setiap hari.</div>
+    <input class="txt-in" type="text" id="name-in" placeholder="Masukkan namamu..." maxlength="20" autocomplete="off">
+    <button class="cta" onclick="window._saveName()">Simpan & Mulai →</button>
+  </div>
+</div>
+
+<!-- Profile modal -->
+<div id="prof-modal" class="modal-bg" onclick="if(event.target===this)window._closeProf()">
+  <div class="modal-sheet">
+    <div class="sh-handle"></div>
+    <div class="pm-av">
+      <img src="img/moodly.png" alt="" onerror="this.parentElement.innerHTML='🌱'">
+    </div>
+    <div class="pm-name" id="pm-name">—</div>
+    <div class="pm-stats">
+      <div class="pmst"><div class="pmst-v" id="pm-ci">0</div><div class="pmst-l">Check-in</div></div>
+      <div class="pmst"><div class="pmst-v" id="pm-st">0</div><div class="pmst-l">Streak 🔥</div></div>
+      <div class="pmst"><div class="pmst-v" id="pm-av">—</div><div class="pmst-l">Avg Mood</div></div>
+    </div>
+    <div class="pm-lbl">Ubah Nama</div>
+    <input class="txt-in" type="text" id="pm-in" placeholder="Nama baru..." maxlength="20" autocomplete="off" style="margin-bottom:10px">
+    <button class="cta" style="margin-bottom:9px" onclick="window._updateName()">Simpan Nama</button>
+    <button class="dng-btn" onclick="window._clearData()">Hapus Semua Data</button>
+  </div>
+</div>
+
+<!-- Cycle settings modal -->
+<div id="cycle-settings-modal" class="modal-bg" onclick="if(event.target===this)window._closeCycleSettings()">
+  <div class="modal-sheet">
+    <div class="sh-handle"></div>
+    <div class="sh-title">⚙️ Pengaturan Siklus</div>
+    <div class="sh-sub">Sesuaikan rata-rata panjang siklus kamu agar prediksi lebih akurat.</div>
+
+    <div class="input-row">
+      <label>Rata-rata panjang siklus (hari)</label>
+      <input class="num-in" type="number" id="cyc-avg-len" min="21" max="45" value="28">
+    </div>
+    <div class="input-row">
+      <label>Rata-rata durasi menstruasi (hari)</label>
+      <input class="num-in" type="number" id="cyc-avg-dur" min="2" max="10" value="5">
+    </div>
+    <p style="font-size:11px;color:var(--muted);margin:4px 0 14px;line-height:1.5">
+      💡 Pengaturan ini dipakai sebagai <b>default</b>. Prediksi akan makin akurat setelah kamu mencatat beberapa siklus.
+    </p>
+    <button class="cta pink" onclick="window._saveCycleSetup()">Simpan 🌸</button>
+    <button class="cta out" style="margin-top:8px" onclick="window._closeCycleSettings()">Batal</button>
+  </div>
+</div>
+
+<!-- Log period modal -->
+<div id="log-period-modal" class="modal-bg" onclick="if(event.target===this)window._closeLogPeriod()">
+  <div class="modal-sheet">
+    <div class="sh-handle"></div>
+    <div class="sh-title">🩸 Catat Menstruasi</div>
+    <div class="sh-sub">Isi tanggal mulai & selesai, lalu pilih kondisi hari ini.</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:5px">Tanggal Mulai *</div>
+        <input class="date-in" type="date" id="log-start" style="width:100%">
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:5px">Tanggal Selesai</div>
+        <input class="date-in" type="date" id="log-end" style="width:100%">
+      </div>
+    </div>
+
+    <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:6px">Seberapa deras?</div>
+    <div class="flow-row" id="flow-row"></div>
+
+    <div style="font-size:11px;font-weight:700;color:var(--text2);margin:10px 0 6px">Gejala yang dirasakan</div>
+    <div class="sym-grid" id="sym-grid"></div>
+
+    <button class="cta pink" style="margin-top:14px" onclick="window._submitLogPeriod()">Simpan Catatan 🌸</button>
+    <button class="cta out" style="margin-top:8px" onclick="window._closeLogPeriod()">Batal</button>
+  </div>
+</div>
+
+<!-- ═══════════════ ARTICLE OVERLAY ═══════════════ -->
+<div id="art-ov">
+  <div class="art-topbar">
+    <div class="art-back" onclick="window._closeArt()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+        <path d="M19 12H5M12 19l-7-7 7-7" stroke="#3a5c46" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="art-tb-info">
+      <div class="art-tb-src" id="art-tb-src">—</div>
+      <div class="art-tb-ttl" id="art-tb-ttl">—</div>
+    </div>
+  </div>
+  <div class="art-scroll">
+    <div class="art-body" id="art-body"></div>
+  </div>
+</div>
+
+<!-- ═══════════════ SUCCESS ═══════════════ -->
+<div id="success">
+  <div class="suc-ring" id="suc-em">🎉</div>
+  <div class="suc-t">Check-in selesai!</div>
+  <div class="suc-s" id="suc-s">Proud of you buat check-in hari ini 🫂</div>
+  <!-- <button id="post-checkin-chat" class="suc-chat-btn" style="display:none"
+    onclick="window._openChat(this.dataset.mood, this.dataset.intensity, this.dataset.causes)">
+    💬 Curhat ke AI →
+  </button> -->
+</div>
+
+<!-- ═══════════════ SCRIPTS (ES Modules) ═══════════════ -->
+<script type="module" src="app.js"></script>
+
+</body>
+
+<!-- ═══════ MOODLY MODAL SYSTEM ═══════ -->
+<div id="moodly-modal-bg">
+  <div class="moodly-modal-card">
+    <div class="mm-icon" id="mm-icon"></div>
+    <div class="mm-title" id="mm-title"></div>
+    <div class="mm-msg" id="mm-msg"></div>
+    <div class="mm-btns" id="mm-btns"></div>
+  </div>
+</div>
+
+<style>
+#moodly-modal-bg {
+  position: fixed; inset: 0; z-index: 900;
+  display: flex; align-items: center; justify-content: center; padding: 24px;
+  background: rgba(0,0,0,.48); backdrop-filter: blur(8px);
+  visibility: hidden; opacity: 0;
+  transition: opacity .22s, visibility .22s;
+}
+#moodly-modal-bg.show { visibility: visible; opacity: 1; }
+.moodly-modal-card {
+  background: #fff; border-radius: 24px;
+  padding: 28px 22px 20px; width: 100%; max-width: 310px;
+  text-align: center;
+  transform: scale(.88) translateY(16px);
+  transition: transform .28s cubic-bezier(.34,1.56,.64,1);
+  box-shadow: 0 24px 60px rgba(0,0,0,.22);
+}
+#moodly-modal-bg.show .moodly-modal-card { transform: none; }
+.mm-icon {
+  font-size: 44px; margin-bottom: 10px; display: block;
+  animation: mm-pop .35s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes mm-pop { from{transform:scale(.2);opacity:0} to{transform:scale(1);opacity:1} }
+.mm-title { font-size: 17px; font-weight: 800; color: #0f2419; margin-bottom: 6px; letter-spacing: -.02em; }
+.mm-msg   { font-size: 13px; color: #8aab97; line-height: 1.6; margin-bottom: 18px; }
+.mm-btns  { display: flex; flex-direction: column; gap: 8px; }
+.mm-btn-confirm {
+  padding: 13px; border-radius: 14px; border: none; width: 100%;
+  font-family: inherit; font-size: 14px; font-weight: 700;
+  background: linear-gradient(135deg, #1db954, #0a9e3f); color: #fff;
+  cursor: pointer; transition: transform .12s, opacity .12s;
+}
+.mm-btn-confirm.danger { background: linear-gradient(135deg, #ef4444, #c62828); }
+.mm-btn-confirm:active { transform: scale(.96); opacity: .9; }
+.mm-btn-cancel {
+  padding: 12px; border-radius: 14px; width: 100%;
+  border: 1.5px solid #e0f0e8; background: #f4faf7;
+  font-family: inherit; font-size: 14px; font-weight: 600;
+  color: #8aab97; cursor: pointer; transition: background .15s;
+}
+.mm-btn-cancel:active { background: #e0f0e8; }
+</style>
+
+<script>
+(function() {
+  var bg = document.getElementById('moodly-modal-bg');
+  function show() { bg.classList.add('show'); }
+  function hide() { bg.classList.remove('show'); }
+  bg.addEventListener('click', function(e) { if (e.target === bg) hide(); });
+
+  window._moodlyAlert = function(o) {
+    o = o || {};
+    document.getElementById('mm-icon').textContent  = o.icon  || 'ℹ️';
+    document.getElementById('mm-title').textContent = o.title || 'Info';
+    document.getElementById('mm-msg').textContent   = o.msg   || '';
+    var btn = document.createElement('button');
+    btn.className   = 'mm-btn-confirm';
+    btn.textContent = o.okTxt || 'OK';
+    btn.onclick     = hide;
+    var btns = document.getElementById('mm-btns');
+    btns.innerHTML = '';
+    btns.appendChild(btn);
+    show();
+  };
+
+  window._moodlyConfirm = function(o) {
+    o = o || {};
+    document.getElementById('mm-icon').textContent  = o.icon  || '❓';
+    document.getElementById('mm-title').textContent = o.title || 'Yakin?';
+    document.getElementById('mm-msg').textContent   = o.msg   || '';
+    var btnOk = document.createElement('button');
+    btnOk.className   = 'mm-btn-confirm' + (o.danger ? ' danger' : '');
+    btnOk.textContent = o.confirmTxt || 'Ya';
+    btnOk.onclick     = function() { hide(); if (o.onConfirm) o.onConfirm(); };
+    var btnCancel = document.createElement('button');
+    btnCancel.className   = 'mm-btn-cancel';
+    btnCancel.textContent = o.cancelTxt || 'Batal';
+    btnCancel.onclick     = hide;
+    var btns = document.getElementById('mm-btns');
+    btns.innerHTML = '';
+    btns.appendChild(btnOk);
+    btns.appendChild(btnCancel);
+    show();
+  };
+
+  window._moodlyToast = function(msg, dur) {
+    dur = dur || 2500;
+    var t = document.getElementById('moodly-toast');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'moodly-toast';
+      t.style.cssText = 'position:fixed;bottom:96px;left:50%;transform:translateX(-50%) translateY(20px);background:#0f2419;color:#fff;padding:10px 20px;border-radius:100px;font-size:13px;font-weight:600;font-family:inherit;z-index:800;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap;max-width:calc(100% - 40px);text-align:center';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.style.opacity = '1';
+    t.style.transform = 'translateX(-50%) translateY(0)';
+    clearTimeout(t._t);
+    t._t = setTimeout(function() {
+      t.style.opacity = '0';
+      t.style.transform = 'translateX(-50%) translateY(20px)';
+    }, dur);
+  };
+})();
+</script>
+
+</body>
+</html>

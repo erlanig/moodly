@@ -1,0 +1,8 @@
+{
+  "routes": [
+    { "src": "/", "dest": "/index.html" },
+    { "src": "/admin", "dest": "/admin.html" },
+    { "src": "/chat", "dest": "/chat.html" },
+    { "src": "/(.*)", "dest": "/$1" }
+  ]
+}

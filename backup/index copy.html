@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#ffffff">
+<meta name="apple-mobile-web-app-title" content="Moodly">
+<link rel="apple-touch-icon" href="img/moodly.png">
+<link rel="manifest" href="manifest.json">
+<title>Moodly — check-in 30 detik</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --g1: #1db954;
+  --g2: #0a9e3f;
+  --g3: #07c55e;
+  --grad: linear-gradient(135deg, #1db954 0%, #0d8c3e 100%);
+  --grad-light: linear-gradient(135deg, #e8faf0 0%, #d0f5e3 100%);
+  --white: #ffffff;
+  --bg: #f4faf7;
+  --surface: #ffffff;
+  --text: #0f2419;
+  --text2: #3a5c46;
+  --muted: #8aab97;
+  --border: #e0f0e8;
+  --shadow: 0 4px 24px rgba(13,140,62,0.10);
+  --shadow-lg: 0 8px 40px rgba(13,140,62,0.18);
+  --r: 24px;
+  --r-sm: 16px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%; width: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+#splash.hide { 
+  opacity: 0; 
+  pointer-events: none;
+  transform: scale(1.1); /* Tambahan: efek zoom out sedikit saat hilang */
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+@keyframes floatLogo {
+  0% { transform: scale(0.9) translateY(0); opacity: 0; }
+  50% { transform: scale(1) translateY(-10px); opacity: 1; }
+  100% { transform: scale(0.95) translateY(0); }
+}
+
+#app {
+  height: 100dvh;
+  width: 100%;
+  max-width: 430px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+/* ── SCREENS ── */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: max(env(safe-area-inset-top),20px) 20px max(env(safe-area-inset-bottom),90px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  transform: translateY(16px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.screen.active { opacity: 1; pointer-events: all; transform: translateY(0); }
+::-webkit-scrollbar { width: 0; }
+
+/* ── SPLASH ── */
+#splash {
+  background: var(--grad);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 40px;
+  z-index: 300;
+  transition: opacity 0.6s ease;
+}
+#splash.hide { opacity: 0; pointer-events: none; }
+.splash-logo {
+  width: 90px; height: 90px;
+  background: transparent;
+  border-radius: 0;
+  display: flex; align-items: center; justify-content: center;
+  animation: floatLogo 3s ease-in-out infinite;
+}
+.splash-title { font-size: 36px; font-weight: 800; color: white; letter-spacing: -0.03em; }
+.splash-sub { font-size: 14px; color: rgba(255,255,255,0.75); }
+.splash-btn {
+  margin-top: 24px;
+  padding: 16px 48px;
+  background: white;
+  color: var(--g2);
+  border: none;
+  border-radius: 100px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+  transition: transform 0.15s;
+}
+.splash-btn:active { transform: scale(0.96); }
+@keyframes floatLogo {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* ── TOP BAR ── */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0 16px;
+  z-index: 10;
+}
+.topbar-logo { display: flex; align-items: center; gap: 8px; }
+.topbar-logo-icon {
+  width: 60px; height: 60px;
+  background: transparent;
+  border-radius: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.topbar-logo-name { font-size: 18px; font-weight: 800; color: var(--text); letter-spacing: -0.02em; }
+.topbar-logo-name span { color: var(--g1); }
+.topbar-action {
+  width: 36px; height: 36px;
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+/* ── HERO CARD (Home) ── */
+.hero-card {
+  background: var(--grad);
+  border-radius: var(--r);
+  padding: 24px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-lg);
+}
+.hero-card::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 160px; height: 160px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 50%;
+}
+.hero-card::after {
+  content: '';
+  position: absolute;
+  bottom: -60px; right: 20px;
+  width: 120px; height: 120px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 50%;
+}
+.hero-greeting { font-size: 12px; opacity: 0.8; margin-bottom: 4px; letter-spacing: 0.04em; }
+.hero-headline { font-size: 26px; font-weight: 800; line-height: 1.15; letter-spacing: -0.02em; }
+.hero-sub { font-size: 13px; opacity: 0.75; margin-top: 6px; }
+.hero-streak {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 100px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 14px;
+}
+.hero-checkin-btn {
+  margin-top: 18px;
+  width: 100%;
+  padding: 14px;
+  background: white;
+  color: var(--g2);
+  border: none;
+  border-radius: var(--r-sm);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.hero-checkin-btn:active { transform: scale(0.97); }
+
+/* ── STATS ROW ── */
+.stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.stat-card {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 16px;
+  box-shadow: var(--shadow);
+  display: flex; align-items: center; gap: 12px;
+}
+.stat-icon-wrap {
+  width: 40px; height: 40px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.stat-icon-wrap.green { background: var(--grad-light); }
+.stat-icon-wrap.soft { background: #fff3e0; }
+.stat-text .val { font-size: 22px; font-weight: 800; color: var(--text); }
+.stat-text .lbl { font-size: 10px; color: var(--muted); font-weight: 500; margin-top: 1px; }
+
+/* ── LAST MOOD CARD ── */
+.last-card {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 16px;
+  box-shadow: var(--shadow);
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 16px;
+}
+.last-card-emoji { font-size: 38px; line-height: 1; }
+.last-card-info { flex: 1; }
+.last-card-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; }
+.last-card-name { font-size: 17px; font-weight: 700; }
+.last-card-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.last-card-causes { font-size: 11px; color: var(--text2); margin-top: 3px; }
+
+/* ── SECTION LABEL ── */
+.section-label { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 10px; }
+
+/* ── CHECK-IN SCREEN ── */
+#checkin { gap: 20px; }
+.checkin-header { display: flex; flex-direction: column; gap: 6px; }
+.checkin-title { font-size: 24px; font-weight: 800; letter-spacing: -0.02em; }
+.step-bar { display: flex; gap: 5px; }
+.step-seg {
+  flex: 1; height: 4px; border-radius: 100px;
+  background: var(--border);
+  transition: background 0.3s;
+}
+.step-seg.done { background: var(--g1); }
+.step-seg.active { background: var(--g3); opacity: 0.6; }
+
+.step-panel { display: none; flex-direction: column; gap: 14px; animation: fadeUp 0.3s ease; }
+.step-panel.active { display: flex; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+
+.step-question { font-size: 16px; font-weight: 700; }
+.step-hint { font-size: 12px; color: var(--muted); margin-top: -8px; }
+
+/* Mood Grid */
+.mood-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.mood-opt {
+  background: var(--white);
+  border: 2px solid var(--border);
+  border-radius: 18px;
+  padding: 12px 6px;
+  cursor: pointer;
+  text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  transition: all 0.18s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.mood-opt .me { font-size: 26px; }
+.mood-opt .ml { font-size: 9px; color: var(--muted); font-weight: 600; }
+.mood-opt.selected { border-color: var(--g1); background: var(--grad-light); }
+.mood-opt.selected .ml { color: var(--g2); }
+
+/* Cause Grid */
+.cause-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.cause-opt {
+  background: var(--white);
+  border: 2px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 12px 14px;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 10px;
+  transition: all 0.18s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.cause-opt .co-icon {
+  width: 32px; height: 32px;
+  border-radius: 10px;
+  background: var(--grad-light);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.cause-opt .co-name { font-size: 12px; font-weight: 600; color: var(--text2); }
+.cause-opt.selected { border-color: var(--g1); background: var(--grad-light); }
+.cause-opt.selected .co-icon { background: rgba(29,185,84,0.2); }
+
+/* Intensity */
+.intensity-row { display: flex; gap: 8px; }
+.int-btn {
+  flex: 1;
+  padding: 14px 6px;
+  background: var(--white);
+  border: 2px solid var(--border);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text2);
+  text-align: center;
+  transition: all 0.18s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+}
+.int-btn .int-icon { width: 28px; height: 28px; }
+.int-btn.selected { border-color: var(--g1); background: var(--grad-light); color: var(--g2); }
+
+/* CTA Button */
+.cta-btn {
+  width: 100%; padding: 16px;
+  background: var(--grad);
+  color: white;
+  border: none;
+  border-radius: var(--r-sm);
+  font-family: inherit;
+  font-size: 15px; font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 4px 20px rgba(13,140,62,0.3);
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.cta-btn:active { transform: scale(0.97); }
+.cta-btn:disabled { opacity: 0.35; cursor: not-allowed; box-shadow: none; }
+.cta-btn.outline {
+  background: transparent;
+  color: var(--g2);
+  border: 2px solid var(--border);
+  box-shadow: none;
+}
+
+/* ── INSIGHT SCREEN ── */
+#insight { gap: 16px; }
+.insight-headline { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0; }
+.insight-sub { font-size: 12px; color: var(--muted); }
+
+/* Chart Card */
+.chart-card {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r);
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+.chart-card-title { font-size: 13px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 6px; }
+.chart-bars-wrap { display: flex; align-items: flex-end; gap: 6px; height: 90px; }
+.cbar-col {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  height: 100%; justify-content: flex-end;
+}
+.cbar-emoji { font-size: 13px; line-height: 1; }
+.cbar {
+  width: 100%; border-radius: 6px 6px 3px 3px;
+  transition: height 0.7s cubic-bezier(.34,1.56,.64,1);
+  min-height: 3px;
+}
+.cbar-day { font-size: 9px; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+
+/* Insight Pills */
+.insight-pill-card {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r);
+  padding: 18px;
+  box-shadow: var(--shadow);
+}
+.pill-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px 3px 6px;
+  border-radius: 100px;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.04em;
+  margin-bottom: 10px;
+}
+.badge-green { background: rgba(29,185,84,0.1); color: var(--g2); }
+.badge-amber { background: #fff3e0; color: #e65100; }
+.badge-blue { background: #e3f2fd; color: #1565c0; }
+.pill-text { font-size: 13px; line-height: 1.65; color: var(--text2); }
+
+.causes-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+.cause-chip {
+  padding: 5px 11px;
+  background: var(--grad-light);
+  border-radius: 100px;
+  font-size: 11px; font-weight: 600;
+  color: var(--g2);
+  display: flex; align-items: center; gap: 5px;
+}
+.cause-chip .cpct { font-size: 10px; opacity: 0.7; }
+
+/* ── KALENDER MOOD BULANAN (diperbaiki) ── */
+.calendar-card {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r);
+  padding: 14px;
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+}
+.calendar-title { font-size:13px; font-weight:700; margin-bottom:10px; }
+.calendar-weekdays { display:grid; grid-template-columns: repeat(7,1fr); gap:8px; margin-bottom:6px; }
+.calendar-weekdays div { font-size:11px; color:var(--muted); text-align:center; }
+.calendar-grid { display:grid; grid-template-columns: repeat(7,1fr); gap:8px; }
+.cal-day {
+  background: var(--white);
+  border:1px solid var(--border);
+  padding:8px 4px;
+  text-align:center;
+  border-radius:10px;
+  font-size:13px;
+  color:var(--text2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.2;
+}
+.cal-day.checked {
+  background: var(--grad-light);
+  border-color: rgba(29,185,84,0.5);
+  color:var(--g2);
+  font-weight:600;
+}
+.cal-day .cal-emoji {
+  font-size: 16px;
+  margin-top: 2px;
+}
+
+/* ── BERITA SCREEN ── */
+#news { gap: 16px; }
+.news-title { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
+.news-refresh-btn {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 30px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--g2);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+.news-refresh-btn:active { background: var(--grad-light); }
+.news-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.news-card {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 16px;
+  box-shadow: var(--shadow);
+  display: flex;
+  gap: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.news-card:active { background: var(--grad-light); }
+.news-img {
+  width: 70px; height: 70px;
+  border-radius: 12px;
+  background: var(--grad-light);
+  flex-shrink: 0;
+  object-fit: cover;
+}
+.news-content { flex: 1; }
+.news-source {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 3px;
+}
+.news-headline {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+  margin-bottom: 4px;
+  color: var(--text);
+}
+.news-snippet {
+  font-size: 11px;
+  color: var(--text2);
+  opacity: 0.8;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.news-empty {
+  text-align: center;
+  padding: 40px 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* ── MODAL NAMA (diperbaiki) ── */
+#name-modal {
+  position: fixed; inset: 0; display:flex; align-items:center; justify-content:center; z-index:500; background: rgba(0,0,0,0.4); visibility: hidden; opacity: 0; transition: opacity 0.2s;
+}
+#name-modal.show { visibility: visible; opacity: 1; }
+.name-card { background: var(--white); border-radius: 14px; padding: 18px; width: 320px; box-shadow: var(--shadow); text-align:center; }
+.name-card h3 { margin-bottom:8px; font-size:18px; }
+.name-card input { width:100%; padding:10px 12px; border-radius:10px; border:1.5px solid var(--border); margin-bottom:10px; font-size:14px }
+.name-card button { padding:10px 14px; border-radius:10px; border:none; background:var(--g1); color:white; font-weight:700; cursor:pointer }
+
+/* ── BOTTOM NAV ── */
+#nav {
+  position: fixed;
+  bottom: max(env(safe-area-inset-bottom), 16px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 100px;
+  padding: 6px;
+  z-index: 100;
+  box-shadow: 0 8px 32px rgba(13,140,62,0.14);
+  gap: 4px;
+}
+.nav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 8px 20px;
+  border-radius: 100px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.nav-item.active { background: var(--grad); }
+.nav-item svg { width: 20px; height: 20px; }
+.nav-item svg path, .nav-item svg circle, .nav-item svg rect { transition: stroke 0.2s, fill 0.2s; }
+.nav-item .nav-lbl { font-size: 9px; font-weight: 700; color: var(--muted); transition: color 0.2s; }
+.nav-item.active .nav-lbl { color: white; }
+.nav-item.active svg path,
+.nav-item.active svg circle,
+.nav-item.active svg rect { stroke: white; }
+
+/* ── SUCCESS OVERLAY ── */
+#success {
+  position: fixed; inset: 0;
+  background: linear-gradient(160deg, #f4faf7 0%, #d4f5e3 100%);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 400;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.35s;
+  gap: 12px;
+}
+#success.show { opacity: 1; pointer-events: all; }
+.success-ring {
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  background: var(--grad);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 52px;
+  box-shadow: 0 12px 40px rgba(13,140,62,0.3);
+  animation: popIn 0.5s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes popIn {
+  from { transform: scale(0.3); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.success-title { font-size: 26px; font-weight: 800; color: var(--text); }
+.success-sub { font-size: 14px; color: var(--muted); text-align: center; max-width: 220px; }
+
+/* SVG ICON colors */
+.icon-green { color: var(--g1); }
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- SPLASH -->
+<div id="splash" class="screen active">
+  <div class="splash-logo">
+    <!-- Logo PNG -->
+    <img src="img/moodly.png" alt="Moodly" style="width:100%; height:100%; object-fit: contain; border-radius: 0;">
+  </div>
+  <div class="splash-title">moodly</div>
+  <div class="splash-sub">check-in emosi 30 detik sehari ✨</div>
+  <button class="splash-btn" onclick="enterApp()">Mulai Sekarang →</button>
+</div>
+
+<!-- HOME -->
+<div id="home" class="screen">
+  <div class="topbar">
+    <div class="topbar-logo">
+      <div class="topbar-logo-icon">
+        <div class="topbar-logo-name">mood<span>ly</span></div>
+        <!-- <img src="img/moodly.png" alt="Moodly" style="width:100%; height:100%; object-fit: contain; border-radius: 0;"> -->
+      </div>
+    </div>
+    <div class="topbar-action" onclick="showNotifInfo()">
+      <!-- Bell SVG -->
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" stroke="#8aab97" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="hero-card">
+    <div class="hero-greeting" id="hero-greeting">Selamat pagi ☀️</div>
+    <div class="hero-headline" id="hero-headline">Hari ini<br>gimana perasaanmu?</div>
+    <div class="hero-sub">Jujur aja, ga ada yang ngejudge 🤝</div>
+    <div class="hero-streak">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M12 2C7 7 5 11 7 15C8.5 18 11 19.5 12 22C13 19.5 15.5 18 17 15C19 11 17 7 12 2Z" fill="rgba(255,255,255,0.9)"/></svg>
+      <span id="streak-count">0</span> hari streak
+    </div>
+    <button class="hero-checkin-btn" onclick="startCheckin()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#1db954" stroke-width="2"/><path d="M12 8v8M8 12h8" stroke="#1db954" stroke-width="2" stroke-linecap="round"/></svg>
+      Check-in sekarang
+    </button>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-icon-wrap green">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M9 11l3 3L22 4" stroke="#1db954" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" stroke="#1db954" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="stat-text">
+        <div class="val" id="stat-total">0</div>
+        <div class="lbl">Total Check-in</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon-wrap soft">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z" stroke="#f57c00" stroke-width="1.8" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="stat-text">
+        <div class="val" id="stat-avg">—</div>
+        <div class="lbl">Rata-rata Mood</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">Terakhir Check-in</div>
+  <div id="last-section"></div>
+</div>
+
+<!-- CHECK-IN -->
+<div id="checkin" class="screen">
+  <div class="checkin-header">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div style="font-size:12px;color:var(--muted);font-weight:600">CHECK-IN HARIAN</div>
+      <div style="font-size:12px;color:var(--g1);font-weight:700" id="step-label">Langkah 1 / 3</div>
+    </div>
+    <div class="checkin-title" id="step-title">Mood kamu?</div>
+    <div class="step-bar">
+      <div class="step-seg active" id="seg1"></div>
+      <div class="step-seg" id="seg2"></div>
+      <div class="step-seg" id="seg3"></div>
+    </div>
+  </div>
+
+  <!-- Step 1: Mood -->
+  <div class="step-panel active" id="sp1">
+    <div class="step-hint">Pilih yang paling deket sama perasaanmu sekarang</div>
+    <div class="mood-grid" id="mood-grid"></div>
+    <button class="cta-btn" id="btn1" disabled onclick="goStep(2)">
+      Lanjut
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5l7 7-7 7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+
+  <!-- Step 2: Causes -->
+  <div class="step-panel" id="sp2">
+    <div class="step-hint">Bisa pilih lebih dari satu</div>
+    <div class="cause-grid" id="cause-grid"></div>
+    <button class="cta-btn" onclick="goStep(3)">
+      Lanjut
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5l7 7-7 7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+
+  <!-- Step 3: Intensity -->
+  <div class="step-panel" id="sp3">
+    <div class="step-hint">Seberapa besar dampaknya hari ini?</div>
+    <div class="intensity-row" id="int-row"></div>
+    <button class="cta-btn" id="btn3" disabled onclick="submitCheckin()">
+      Selesai ✓
+    </button>
+    <button class="cta-btn outline" onclick="goStep(2)" style="margin-top:-6px">← Kembali</button>
+  </div>
+</div>
+
+<!-- INSIGHT (dengan kalender bulanan) -->
+<div id="insight" class="screen">
+  <div class="topbar">
+    <div>
+      <div style="font-size:12px;color:var(--muted);font-weight:600">7 HARI TERAKHIR</div>
+      <div class="insight-headline">Weekly<br>Insights</div>
+    </div>
+    <div class="topbar-action" onclick="exportPDF()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="#8aab97" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-card-title">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M18 20V10M12 20V4M6 20v-6" stroke="#1db954" stroke-width="2.5" stroke-linecap="round"/></svg>
+      Grafik Mood Mingguan
+    </div>
+    <div class="chart-bars-wrap" id="chart-bars"></div>
+  </div>
+
+  <!-- KALENDER MOOD BULANAN -->
+  <div class="calendar-card">
+    <div class="calendar-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="#1db954" stroke-width="2"/><path d="M3 10h18M8 2v4M16 2v4" stroke="#1db954" stroke-width="2"/></svg>
+      Kalender Mood Bulan Ini
+    </div>
+    <div class="calendar-weekdays">
+      <div>Min</div><div>Sen</div><div>Sel</div><div>Rab</div><div>Kam</div><div>Jum</div><div>Sab</div>
+    </div>
+    <div class="calendar-grid" id="monthCalendar"></div>
+  </div>
+
+  <div class="insight-pill-card">
+    <div class="pill-badge badge-green">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zM12 16v-4M12 8h.01" stroke="#1db954" stroke-width="2.5" stroke-linecap="round"/></svg>
+      Analisis Mingguan
+    </div>
+    <div class="pill-text" id="insight-main-text">Belum cukup data. Check-in dulu yuk!</div>
+  </div>
+
+  <div class="insight-pill-card">
+    <div class="pill-badge badge-amber">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M3 3h18M3 9h18M3 15h18M3 21h18" stroke="#e65100" stroke-width="2" stroke-linecap="round"/></svg>
+      Penyebab Terbanyak
+    </div>
+    <div class="pill-text" style="margin-bottom:6px">Apa yang paling sering muncul minggu ini:</div>
+    <div class="causes-row" id="causes-row">
+      <span style="font-size:12px;color:var(--muted)">Belum ada data</span>
+    </div>
+  </div>
+
+  <button class="cta-btn outline" onclick="exportPDF()" style="display:flex;gap:8px">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8L14 2zM14 2v6h6" stroke="#1db954" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Export PDF buat Konseling
+  </button>
+</div>
+
+<!-- BERITA -->
+<div id="news" class="screen">
+  <div class="topbar">
+    <div>
+      <div style="font-size:12px;color:var(--muted);font-weight:600">BERITA & ARTIKEL</div>
+      <div class="news-title">Mood<br>Around the Web 🌐</div>
+    </div>
+    <div class="news-refresh-btn" onclick="loadNews(true)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+        <path d="M23 12c0 6.1-4.9 11-11 11S1 18.1 1 12 5.9 1 12 1c4.5 0 8.3 2.7 10 6.5" stroke="#1db954" stroke-width="2" stroke-linecap="round"/>
+        <path d="M23 1v6h-6" stroke="#1db954" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Refresh
+    </div>
+  </div>
+  <div class="news-grid" id="newsGrid">
+    <div class="news-empty">Memuat berita terkait mood...</div>
+  </div>
+</div>
+</div><!-- /app -->
+
+<!-- NAV -->
+<nav id="nav">
+  <button class="nav-item active" id="nav-home" onclick="showScreen('home')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/>
+      <path d="M9 21V12h6v9"/>
+    </svg>
+    <span class="nav-lbl">Home</span>
+  </button>
+  <button class="nav-item" id="nav-checkin" onclick="startCheckin()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#8aab97" stroke-width="2" stroke-linecap="round">
+      <circle cx="12" cy="12" r="9"/>
+      <path d="M12 8v8M8 12h8"/>
+    </svg>
+    <span class="nav-lbl">Check-in</span>
+  </button>
+  <button class="nav-item" id="nav-news" onclick="showScreen('news')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#8aab97" stroke-width="2" stroke-linecap="round">
+      <path d="M4 22h16a2 2 0 002-2V4a2 2 0 00-2-2H8a2 2 0 00-2 2v16a2 2 0 01-2 2zm0 0a2 2 0 01-2-2V8"/>
+      <path d="M10 10h6M10 14h6M10 18h4"/>
+    </svg>
+    <span class="nav-lbl">Berita</span>
+  </button>
+  <button class="nav-item" id="nav-insight" onclick="showScreen('insight')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#8aab97" stroke-width="2" stroke-linecap="round">
+      <path d="M18 20V10M12 20V4M6 20v-6"/>
+    </svg>
+    <span class="nav-lbl">Insight</span>
+  </button>
+</nav>
+
+<!-- SUCCESS -->
+<div id="success">
+  <div class="success-ring" id="success-emoji">🎉</div>
+  <div class="success-title">Check-in selesai!</div>
+  <div class="success-sub" id="success-msg">Proud of you buat check-in hari ini 🫂</div>
+</div>
+
+<!-- MODAL NAMA PENGGUNA -->
+<div id="name-modal">
+  <div class="name-card">
+    <h3>Halo! Siapa namamu?</h3>
+    <input type="text" id="userNameInput" placeholder="Contoh: Budi" maxlength="20" value="">
+    <button onclick="saveUserName()">Simpan</button>
+  </div>
+</div>
+
+<script>
+/* ============ DATA ============ */
+const MOODS = [
+  { e:'😄', l:'Happy',    s:5, c:'#22c55e' },
+  { e:'😊', l:'Oke',      s:4, c:'#4ade80' },
+  { e:'😐', l:'Biasa',    s:3, c:'#fbbf24' },
+  { e:'😔', l:'Sedih',    s:2, c:'#fb923c' },
+  { e:'😰', l:'Anxious',  s:2, c:'#f472b6' },
+  { e:'😤', l:'Frustrasi',s:1, c:'#f87171' },
+  { e:'😴', l:'Exhausted',s:1, c:'#a78bfa' },
+  { e:'🫠', l:'Burnout',  s:1, c:'#60a5fa' },
+];
+const CAUSES = [
+  { svg:'<path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2zM16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16" stroke="#1db954" stroke-width="1.8" stroke-linecap="round"/>', n:'Kerjaan' },
+  { svg:'<path d="M22 10v6M2 10l10-5 10 5-10 5-10-5z" stroke="#1db954" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 12v5c3 3 9 3 12 0v-5" stroke="#1db954" stroke-width="1.8" stroke-linecap="round"/>', n:'Kuliah' },
+  { svg:'<circle cx="12" cy="12" r="10" stroke="#1db954" stroke-width="1.8"/><path d="M12 6v6l4 2" stroke="#1db954" stroke-width="1.8" stroke-linecap="round"/>', n:'Finansial' },
+  { svg:'<path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" stroke="#1db954" stroke-width="1.8" stroke-linejoin="round"/>', n:'Relationship' },
+  { svg:'<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke="#1db954" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 22V12h6v10" stroke="#1db954" stroke-width="1.8" stroke-linecap="round"/>', n:'Keluarga' },
+  { svg:'<path d="M17 7l-1.41-1.41L12 9.17l-3.59-3.58L7 7l5 5 5-5zM12 21c-4.97 0-9-4.03-9-9s4.03-9 9-9 9 4.03 9 9-4.03 9-9 9z" stroke="#1db954" stroke-width="1.5"/>', n:'Kurang tidur' },
+  { svg:'<path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#1db954" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>', n:'Kesehatan' },
+  { svg:'<circle cx="12" cy="12" r="10" stroke="#1db954" stroke-width="1.8"/><path d="M12 16v-4M12 8h.01" stroke="#1db954" stroke-width="2" stroke-linecap="round"/>', n:'Ga tau' },
+];
+const INTENSITIES = [
+  { label:'Ringan', svg:'<path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke="#1db954" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="4" stroke="#1db954" stroke-width="2"/>' },
+  { label:'Lumayan', svg:'<circle cx="12" cy="12" r="10" stroke="#f57c00" stroke-width="2"/><path d="M8 15s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01" stroke="#f57c00" stroke-width="2" stroke-linecap="round"/>' },
+  { label:'Berat', svg:'<circle cx="12" cy="12" r="10" stroke="#e53935" stroke-width="2"/><path d="M16 16s-1.5-2-4-2-4 2-4 2M9 9h.01M15 9h.01" stroke="#e53935" stroke-width="2" stroke-linecap="round"/>' },
+];
+
+let entries = [];
+try { entries = JSON.parse(localStorage.getItem('moodly2') || '[]'); } catch(e){}
+let cur = { mood: null, causes: [], intensity: null };
+let userName = localStorage.getItem('moodly_user') || ''; // jika kosong, nanti modal muncul
+
+function save() { try { localStorage.setItem('moodly2', JSON.stringify(entries)); } catch(e){} }
+
+/* ============ SPLASH & NAMA ============ */
+function enterApp() {
+  const splash = document.getElementById('splash');
+  splash.classList.add('hide');
+
+  // Setelah splash hilang, cek nama
+  setTimeout(() => {
+    splash.remove();
+    if (!localStorage.getItem('moodly_user')) {
+      document.getElementById('name-modal').classList.add('show');
+    } else {
+      userName = localStorage.getItem('moodly_user');
+      updateGreeting();
+    }
+    showScreen('home');
+  }, 600);
+}
+
+function saveUserName() {
+  const input = document.getElementById('userNameInput').value.trim();
+  if (input) {
+    userName = input;
+    localStorage.setItem('moodly_user', userName);
+    document.getElementById('name-modal').classList.remove('show');
+    updateGreeting();
+  } else {
+    alert('Nama tidak boleh kosong!');
+  }
+}
+
+/* ============ INIT ============ */
+function init() {
+  // Mood grid
+  const mg = document.getElementById('mood-grid');
+  MOODS.forEach((m,i) => {
+    const el = document.createElement('div');
+    el.className = 'mood-opt';
+    el.id = `mo${i}`;
+    el.innerHTML = `<span class="me">${m.e}</span><span class="ml">${m.l}</span>`;
+    el.onclick = () => {
+      document.querySelectorAll('.mood-opt').forEach(x => x.classList.remove('selected'));
+      el.classList.add('selected');
+      cur.mood = m;
+      document.getElementById('btn1').disabled = false;
+    };
+    mg.appendChild(el);
+  });
+  // Cause grid
+  const cg = document.getElementById('cause-grid');
+  CAUSES.forEach((c,i) => {
+    const el = document.createElement('div');
+    el.className = 'cause-opt';
+    el.innerHTML = `<div class="co-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none">${c.svg}</svg></div><span class="co-name">${c.n}</span>`;
+    el.onclick = () => {
+      el.classList.toggle('selected');
+      if(el.classList.contains('selected')) cur.causes.push(c.n);
+      else cur.causes = cur.causes.filter(x => x !== c.n);
+    };
+    cg.appendChild(el);
+  });
+  // Intensity
+  const ir = document.getElementById('int-row');
+  INTENSITIES.forEach((t,i) => {
+    const el = document.createElement('button');
+    el.className = 'int-btn';
+    el.innerHTML = `<svg class="int-icon" viewBox="0 0 24 24" fill="none">${t.svg}</svg>${t.label}`;
+    el.onclick = () => {
+      document.querySelectorAll('.int-btn').forEach(x => x.classList.remove('selected'));
+      el.classList.add('selected');
+      cur.intensity = t.label;
+      document.getElementById('btn3').disabled = false;
+    };
+    ir.appendChild(el);
+  });
+
+  // Jika userName sudah ada (dari localStorage) saat inisialisasi
+  if (userName) updateGreeting();
+  updateHome();
+  updateInsight();
+  loadNews(false);
+}
+
+function updateGreeting() {
+  const h = new Date().getHours();
+  const timeGreet = h<12 ? 'Selamat pagi' : h<17 ? 'Selamat siang' : 'Selamat malam';
+  document.getElementById('hero-greeting').textContent = `${timeGreet} ${userName} ☀️`;
+  document.getElementById('hero-headline').innerHTML = `Hari ini<br>gimana perasaanmu, ${userName}?`;
+}
+
+/* ============ NAV ============ */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => {
+    b.classList.remove('active');
+    b.querySelector('svg').setAttribute('stroke','#8aab97');
+  });
+  document.getElementById(id).classList.add('active');
+  const navEl = document.getElementById(`nav-${id}`);
+  if(navEl) {
+    navEl.classList.add('active');
+    navEl.querySelector('svg').setAttribute('stroke','white');
+  }
+  if(id==='home') updateHome();
+  if(id==='insight') updateInsight();
+  if (id === 'news') loadNews(false);
+}
+
+function startCheckin() {
+  cur = { mood: null, causes: [], intensity: null };
+  document.querySelectorAll('.mood-opt').forEach(x => x.classList.remove('selected'));
+  document.querySelectorAll('.cause-opt').forEach(x => x.classList.remove('selected'));
+  document.querySelectorAll('.int-btn').forEach(x => x.classList.remove('selected'));
+  document.getElementById('btn1').disabled = true;
+  document.getElementById('btn3').disabled = true;
+  goStep(1);
+  showScreen('checkin');
+}
+
+/* ============ STEPS ============ */
+const STEP_TITLES = ['', 'Mood kamu sekarang?', 'Apa yang paling ngaruh?', 'Seberapa intens?'];
+function goStep(n) {
+  [1,2,3].forEach(i => {
+    document.getElementById(`sp${i}`).classList.toggle('active', i===n);
+    const seg = document.getElementById(`seg${i}`);
+    seg.className = 'step-seg';
+    if(i < n) seg.classList.add('done');
+    else if(i === n) seg.classList.add('active');
+  });
+  document.getElementById('step-label').textContent = `Langkah ${n} / 3`;
+  document.getElementById('step-title').textContent = STEP_TITLES[n];
+}
+
+function submitCheckin() {
+  entries.push({ ts: new Date().toISOString(), mood: cur.mood, causes: [...cur.causes], intensity: cur.intensity });
+  save();
+
+  const msgs = ['Proud of you buat check-in hari ini 🫂','Udah jujur sama diri sendiri, itu keren! ✨','Satu langkah kecil yang berarti besar 🌱','You doing great, keep going! 💚'];
+  document.getElementById('success-emoji').textContent = cur.mood.e;
+  document.getElementById('success-msg').textContent = msgs[Math.floor(Math.random()*4)];
+  const s = document.getElementById('success');
+  s.classList.add('show');
+  setTimeout(() => { s.classList.remove('show'); showScreen('home'); }, 2200);
+}
+
+/* ============ HOME UPDATE ============ */
+function updateHome() {
+  document.getElementById('stat-total').textContent = entries.length;
+
+  // Streak
+  let streak = 0;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const daySet = new Set(entries.map(e => { const d=new Date(e.ts); d.setHours(0,0,0,0); return d.getTime(); }));
+  for(let i=0;i<60;i++) {
+    const d = new Date(today); d.setDate(today.getDate()-i);
+    if(daySet.has(d.getTime())) streak++;
+    else if(i>0) break;
+  }
+  document.getElementById('streak-count').textContent = streak;
+
+  // Avg
+  if(entries.length) {
+    const avg = entries.reduce((s,e)=>s+(e.mood?.s||3),0)/entries.length;
+    const m = MOODS.find(x=>x.s===Math.round(avg)) || MOODS[2];
+    document.getElementById('stat-avg').textContent = m.e;
+  }
+
+  // Last
+  const sec = document.getElementById('last-section');
+  if(entries.length) {
+    const last = entries[entries.length-1];
+    const d = new Date(last.ts);
+    const t = d.toLocaleDateString('id-ID',{weekday:'short',hour:'2-digit',minute:'2-digit'});
+    sec.innerHTML = `<div class="last-card">
+      <div class="last-card-emoji">${last.mood?.e||'😐'}</div>
+      <div class="last-card-info">
+        <div class="last-card-label">Terakhir Check-in</div>
+        <div class="last-card-name">${last.mood?.l||'—'}</div>
+        <div class="last-card-meta">${t} · ${last.intensity||''}</div>
+        ${last.causes.length?`<div class="last-card-causes">${last.causes.join(' · ')}</div>`:''}
+      </div>
+    </div>`;
+  } else {
+    sec.innerHTML = `<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px">Belum ada check-in hari ini 👋<br><span style="font-size:11px">Tap tombol di atas untuk mulai</span></div>`;
+  }
+}
+
+/* ============ INSIGHT UPDATE ============ */
+function updateInsight() {
+  // Grafik mingguan
+  const bars = document.getElementById('chart-bars');
+  bars.innerHTML = '';
+  const days = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+  const today = new Date();
+
+  for(let i=6;i>=0;i--) {
+    const d = new Date(today); d.setDate(today.getDate()-i); d.setHours(0,0,0,0);
+    const de = entries.filter(e=>{ const ed=new Date(e.ts); ed.setHours(0,0,0,0); return ed.getTime()===d.getTime(); });
+    const avg = de.length ? de.reduce((s,e)=>s+(e.mood?.s||3),0)/de.length : 0;
+    const h = avg>0 ? (avg/5)*70+10 : 0;
+    const last = de.length ? de[de.length-1].mood : null;
+    const color = last ? last.c : '#e0f0e8';
+    const wrap = document.createElement('div');
+    wrap.className = 'cbar-col';
+    wrap.innerHTML = `${last?`<div class="cbar-emoji">${last.e}</div>`:'<div class="cbar-emoji" style="opacity:0">·</div>'}
+      <div class="cbar" style="height:${h}px;background:${color};opacity:${de.length?1:0.3}"></div>
+      <div class="cbar-day">${days[d.getDay()]}</div>`;
+    bars.appendChild(wrap);
+  }
+
+  // Kalender bulanan (diperbaiki)
+  updateMonthlyCalendar();
+
+  const week = entries.filter(e=>(today-new Date(e.ts))<7*86400000);
+  if(week.length>=3) {
+    const avg = week.reduce((s,e)=>s+(e.mood?.s||3),0)/week.length;
+    let msg = avg>=4 ? '🌟 Seminggu ini mood kamu positif banget! Maintain energy ini ya.'
+      : avg>=3 ? '⚖️ Mood kamu cukup stabil. Ada ups and downs, tapi kamu handle dengan baik.'
+      : '💙 Minggu ini berat ya. Ingat, minta bantuan itu kuat, bukan lemah.';
+    document.getElementById('insight-main-text').textContent = msg;
+  } else if(week.length>0) {
+    document.getElementById('insight-main-text').textContent = `📈 Kamu udah ${week.length}x check-in! Terusin biar insight-nya makin akurat.`;
+  }
+
+  const cc = {};
+  week.forEach(e=>e.causes.forEach(c=>{cc[c]=(cc[c]||0)+1;}));
+  const total = Object.values(cc).reduce((a,b)=>a+b,0);
+  const row = document.getElementById('causes-row');
+  if(total>0) {
+    row.innerHTML = Object.entries(cc).sort((a,b)=>b[1]-a[1]).map(([n,cnt])=>{
+      const pct = Math.round(cnt/total*100);
+      return `<div class="cause-chip">${n} <span class="cpct">${pct}%</span></div>`;
+    }).join('');
+  } else {
+    row.innerHTML = '<span style="font-size:12px;color:var(--muted)">Belum ada data minggu ini</span>';
+  }
+}
+
+function updateMonthlyCalendar() {
+  const calendarEl = document.getElementById('monthCalendar');
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const firstDay = new Date(year, month, 1).getDay(); // 0 = Minggu
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  // Kumpulkan mood per tanggal bulan ini
+  const moodByDate = {};
+  entries.forEach(e => {
+    const d = new Date(e.ts);
+    if (d.getFullYear() === year && d.getMonth() === month) {
+      moodByDate[d.getDate()] = e.mood;
+    }
+  });
+
+  let html = '';
+  // Tambahkan sel kosong sebelum tanggal 1
+  for (let i = 0; i < firstDay; i++) {
+    html += `<div class="cal-day"></div>`;
+  }
+
+  for (let date = 1; date <= daysInMonth; date++) {
+    const mood = moodByDate[date];
+    const extraClass = mood ? 'checked' : '';
+    const emoji = mood ? `<span class="cal-emoji">${mood.e}</span>` : '';
+    html += `<div class="cal-day ${extraClass}">${date} ${emoji}</div>`;
+  }
+
+  calendarEl.innerHTML = html;
+}
+
+/* ============ EXPORT PDF ============ */
+function exportPDF() {
+  if(!entries.length) { alert('Coba check-in dulu ya!'); return; }
+  const week = entries.filter(e=>(new Date()-new Date(e.ts))<7*86400000);
+  const cc = {}; week.forEach(e=>e.causes.forEach(c=>{cc[c]=(cc[c]||0)+1;}));
+  const top = Object.entries(cc).sort((a,b)=>b[1]-a[1])[0];
+  const win = window.open('','_blank');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Moodly Report</title>
+  <style>body{font-family:'Helvetica Neue',sans-serif;max-width:600px;margin:40px auto;padding:20px;color:#1a1a1a}
+  h1{font-size:28px;font-weight:900;color:#0d8c3e}
+  .meta{color:#999;font-size:13px;margin-bottom:24px}
+  .sec{background:#f4faf7;border-radius:12px;padding:20px;margin-bottom:14px}
+  .sec h2{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#8aab97;margin-bottom:12px}
+  .entry{border-bottom:1px solid #e0f0e8;padding:10px 0;display:flex;align-items:center;gap:12px}
+  .entry:last-child{border-bottom:none}
+  .em{font-size:24px}.info{flex:1}
+  .mn{font-weight:700;font-size:14px}.mt{font-size:12px;color:#999}.mc{font-size:11px;color:#666;margin-top:2px}
+  .badge{display:inline-block;background:#e8faf0;border-radius:8px;padding:8px 14px;margin:4px}
+  .bv{font-size:20px;font-weight:900;color:#0d8c3e}.bl{font-size:10px;color:#999}
+  .notice{font-size:11px;color:#999;padding:10px;background:#fff3cd;border-radius:8px;margin-bottom:16px}
+  @media print{body{margin:0}}</style></head><body>
+  <h1>🌱 Mood Report — Moodly</h1>
+  <div class="meta">${new Date().toLocaleDateString('id-ID',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</div>
+  <div class="notice">📎 Untuk keperluan refleksi pribadi atau konseling. Bukan diagnosis medis.</div>
+  <div class="sec"><h2>Ringkasan 7 Hari</h2>
+    <div class="badge"><div class="bv">${week.length}</div><div class="bl">Check-in</div></div>
+    ${week.length?`<div class="badge"><div class="bv">${(week.reduce((s,e)=>s+(e.mood?.s||3),0)/week.length).toFixed(1)}/5</div><div class="bl">Rata-rata Mood</div></div>`:''}
+    ${top?`<div class="badge"><div class="bv">${top[0]}</div><div class="bl">Penyebab Utama</div></div>`:''}
+  </div>
+  <div class="sec"><h2>Riwayat (${entries.length} total)</h2>
+  ${entries.slice(-20).reverse().map(e=>`<div class="entry">
+    <div class="em">${e.mood?.e||'😐'}</div>
+    <div class="info">
+      <div class="mn">${e.mood?.l||'—'} · ${e.intensity||''}</div>
+      <div class="mt">${new Date(e.ts).toLocaleDateString('id-ID',{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</div>
+      ${e.causes.length?`<div class="mc">${e.causes.join(' · ')}</div>`:''}
+    </div></div>`).join('')}
+  </div>
+  <div style="font-size:10px;color:#ccc;text-align:center;margin-top:20px">Generated by Moodly</div>
+  <script>window.print();<\/script></body></html>`);
+  win.document.close();
+}
+
+function showNotifInfo() {
+  alert('🔔 Reminder lembut aktif!\nMoodly akan mengingatkanmu check-in tiap hari dengan gentle notification — no toxic vibes!');
+}
+
+// Kumpulan berita dummy
+const NEWS_ITEMS = [
+  { source: 'Kompas Health', title: '5 Cara Sederhana Meningkatkan Mood di Pagi Hari', snippet: 'Paparan sinar matahari dan minum air putih hangat bisa membantu meningkatkan suasana hati.', image: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=200&h=200&fit=crop', url: '#' },
+  { source: 'CNN Indonesia', title: 'Hubungan antara Olahraga dan Kesehatan Mental', snippet: 'Studi terbaru menunjukkan bahwa olahraga rutin dapat mengurangi gejala depresi ringan.', image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=200&h=200&fit=crop', url: '#' },
+  { source: 'Healthline', title: 'Makanan yang Membantu Menstabilkan Mood', snippet: 'Asam lemak omega-3 dan probiotik berperan penting dalam produksi hormon bahagia.', image: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=200&h=200&fit=crop', url: '#' },
+  { source: 'Alodokter', title: 'Kenali Tanda Burnout dan Cara Mengatasinya', snippet: 'Burnout bukan hanya lelah fisik, tapi juga emosional. Kenali gejalanya sejak dini.', image: 'https://images.unsplash.com/photo-1522198623011-e1f56d0d5a27?w=200&h=200&fit=crop', url: '#' },
+  { source: 'Tempo Lifestyle', title: 'Meditasi 5 Menit untuk Pikiran Lebih Tenang', snippet: 'Meditasi singkat dapat mengurangi stres dan meningkatkan fokus sepanjang hari.', image: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=200&h=200&fit=crop', url: '#' },
+  { source: 'BBC News', title: 'Bagaimana Cuaca Mempengaruhi Mood?', snippet: 'Penelitian mengungkap hubungan antara sinar matahari dan produksi serotonin.', image: 'https://images.unsplash.com/photo-1501630834273-4b5604d2ee31?w=200&h=200&fit=crop', url: '#' },
+  { source: 'National Geographic', title: 'Hutan Kota dan Kesehatan Mental', snippet: 'Menghabiskan waktu di ruang hijau dapat menurunkan tingkat stres hingga 20%.', image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=200&h=200&fit=crop', url: '#' },
+  { source: 'Psychology Today', title: 'Teknik Pernapasan untuk Mengatasi Kecemasan', snippet: 'Latihan pernapasan sederhana yang bisa dilakukan di mana saja.', image: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=200&h=200&fit=crop', url: '#' },
+  { source: 'The Guardian', title: 'Dampak Media Sosial terhadap Mood Remaja', snippet: 'Studi longitudinal menemukan korelasi antara penggunaan media sosial dan kecemasan.', image: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=200&h=200&fit=crop', url: '#' },
+  { source: 'Wired', title: 'Aplikasi Kesehatan Mental yang Efektif', snippet: 'Rekomendasi aplikasi untuk meditasi, terapi, dan pelacakan mood.', image: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=200&h=200&fit=crop', url: '#' }
+];
+
+// Fungsi untuk memilih berita berdasarkan tanggal (forecast harian)
+function getDailyNews() {
+  const today = new Date();
+  const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 86400000);
+  const shuffled = [...NEWS_ITEMS];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = (dayOfYear + i) % (i + 1);
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled.slice(0, 5);
+}
+
+function renderNews(newsArray) {
+  const grid = document.getElementById('newsGrid');
+  grid.innerHTML = '';
+  newsArray.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'news-card';
+    card.onclick = () => window.open(item.url, '_blank');
+    card.innerHTML = `
+      <img class="news-img" src="${item.image}" alt="news" onerror="this.src='img/moodly.png'">
+      <div class="news-content">
+        <div class="news-source">${item.source}</div>
+        <div class="news-headline">${item.title}</div>
+        <div class="news-snippet">${item.snippet}</div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function loadNews(showRefreshFeedback = false) {
+  const grid = document.getElementById('newsGrid');
+  if (showRefreshFeedback) {
+    grid.innerHTML = '<div class="news-empty">Memperbarui berita...</div>';
+    setTimeout(() => {
+      const dailyNews = getDailyNews();
+      renderNews(dailyNews);
+    }, 600);
+  } else {
+    const dailyNews = getDailyNews();
+    renderNews(dailyNews);
+  }
+}
+
+// Register Service Worker untuk PWA (widget layar utama)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed:', err));
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  init(); 
+  
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('splash').classList.add('active');
+});
+
+</script>
+
+<!-- Service Worker fallback (inline) -->
+<script>
+  if ('serviceWorker' in navigator && !navigator.serviceWorker.controller) {
+    const swCode = `
+      self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
+      self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+      self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));
+    `;
+    const blob = new Blob([swCode], { type: 'application/javascript' });
+    const url = URL.createObjectURL(blob);
+    navigator.serviceWorker.register(url).catch(() => {});
+  }
+</script>
+</body>
+</html>

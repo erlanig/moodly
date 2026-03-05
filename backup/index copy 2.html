@@ -1,0 +1,1606 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f4faf7">
+<meta name="apple-mobile-web-app-title" content="Moodly">
+<title>Moodly</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ─── TOKENS ─── */
+:root{
+  --g1:#1db954;--g2:#0a9e3f;
+  --grad:linear-gradient(135deg,#1db954,#0d8c3e);
+  --gl:linear-gradient(135deg,#e8faf0,#d0f5e3);
+  --white:#fff;--bg:#f4faf7;--text:#0f2419;--text2:#3a5c46;
+  --muted:#8aab97;--border:#e0f0e8;
+  --sh:0 2px 16px rgba(13,140,62,.09);--shl:0 6px 32px rgba(13,140,62,.16);
+  --r:20px;--rs:14px;
+  /* cycle colors */
+  --mens:#ff6b8a;--mens-bg:#fff0f3;--mens-border:#ffc0cc;
+  --foll:#f59e0b;--foll-bg:#fffbeb;--foll-border:#fde68a;
+  --ovul:#8b5cf6;--ovul-bg:#f5f3ff;--ovul-border:#c4b5fd;
+  --lute:#3b82f6;--lute-bg:#eff6ff;--lute-border:#bfdbfe;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;width:100%;background:var(--bg);color:var(--text);
+  font-family:'Plus Jakarta Sans',sans-serif;overflow:hidden;
+  -webkit-tap-highlight-color:transparent;user-select:none}
+::-webkit-scrollbar{display:none}
+
+/* ─── APP SHELL ─── */
+#app{height:100dvh;width:100%;max-width:430px;margin:0 auto;position:relative;overflow:hidden;background:var(--bg)}
+
+/* ─── SCREENS ─── */
+.screen{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  padding:max(env(safe-area-inset-top),18px) 18px max(env(safe-area-inset-bottom),82px);
+  opacity:0;pointer-events:none;transition:opacity .28s,transform .28s;
+  transform:translateY(14px);overflow-y:auto;overflow-x:hidden;gap:11px;
+}
+.screen.active{opacity:1;pointer-events:all;transform:none}
+
+/* ─── SPLASH ─── */
+#splash{background:var(--grad);align-items:center;justify-content:center;gap:12px;z-index:300;transition:opacity .5s,transform .5s}
+#splash.hide{opacity:0;pointer-events:none;transform:scale(1.04)}
+.sp-orb{width:88px;height:88px;border-radius:24px;background:rgba(255,255,255,.18);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;font-size:44px;box-shadow:0 10px 36px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,255,255,.35);animation:bob 3s ease-in-out infinite;margin-bottom:4px}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.sp-title{font-size:36px;font-weight:800;color:#fff;letter-spacing:-.04em}
+.sp-sub{font-size:13px;color:rgba(255,255,255,.75);text-align:center;max-width:210px;line-height:1.55}
+.sp-btn{margin-top:18px;padding:15px 48px;background:#fff;color:var(--g2);border:none;border-radius:100px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 6px 24px rgba(0,0,0,.14);transition:transform .15s}
+.sp-btn:active{transform:scale(.96)}
+
+/* ─── TOP BAR ─── */
+.tb{display:flex;align-items:center;justify-content:space-between;padding:2px 0 4px;flex-shrink:0}
+.tb-logo{display:flex;align-items:center;gap:8px}
+.tb-dot{width:34px;height:34px;border-radius:10px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:0 3px 10px rgba(13,140,62,.24)}
+.tb-name{font-size:19px;font-weight:800;color:var(--text);letter-spacing:-.02em}
+.tb-name b{color:var(--g1);font-weight:800}
+.tb-pill{height:32px;background:var(--white);border:1.5px solid var(--border);border-radius:100px;padding:0 12px;display:flex;align-items:center;gap:5px;cursor:pointer;font-size:12px;font-weight:600;color:var(--text2);box-shadow:var(--sh)}
+.tb-pill:active,.tb-icon:active{background:var(--gl)}
+.tb-icon{width:32px;height:32px;background:var(--white);border:1.5px solid var(--border);border-radius:100px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--sh)}
+
+/* ─── HERO ─── */
+.hero{background:var(--grad);border-radius:var(--r);padding:18px 20px;color:#fff;position:relative;overflow:hidden;box-shadow:var(--shl);flex-shrink:0}
+.hero::before{content:'';position:absolute;top:-44px;right:-44px;width:160px;height:160px;background:rgba(255,255,255,.07);border-radius:50%}
+.hero::after{content:'';position:absolute;bottom:-60px;right:8px;width:130px;height:130px;background:rgba(0,0,0,.055);border-radius:50%}
+.hero-tag{font-size:10px;opacity:.78;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
+.hero-h{font-size:22px;font-weight:800;line-height:1.18;letter-spacing:-.02em;position:relative;z-index:1}
+.hero-sub{font-size:12px;opacity:.72;margin-top:5px}
+.hero-foot{display:flex;align-items:center;justify-content:space-between;margin-top:13px;position:relative;z-index:1}
+.hero-streak{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.2);border-radius:100px;padding:4px 11px;font-size:12px;font-weight:600}
+.hero-cta{background:#fff;color:var(--g2);border:none;border-radius:100px;padding:9px 16px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;box-shadow:0 3px 14px rgba(0,0,0,.13);transition:transform .15s}
+.hero-cta:active{transform:scale(.96)}
+
+/* ─── STAT CARDS ─── */
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;flex-shrink:0}
+.scard{background:var(--white);border:1.5px solid var(--border);border-radius:var(--rs);padding:13px;box-shadow:var(--sh);display:flex;align-items:center;gap:10px}
+.scard-ic{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.scard-ic.g{background:var(--gl)}.scard-ic.o{background:#fff3e0}.scard-ic.p{background:#fff0f3}
+.scard-val{font-size:21px;font-weight:800;color:var(--text)}
+.scard-lbl{font-size:10px;color:var(--muted);font-weight:500;margin-top:1px}
+
+/* ─── SEC LABEL ─── */
+.slbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;flex-shrink:0}
+
+/* ─── LAST CARD ─── */
+.lcard{background:var(--white);border:1.5px solid var(--border);border-radius:var(--rs);padding:13px;box-shadow:var(--sh);display:flex;align-items:center;gap:11px}
+.lcard-em{font-size:34px;line-height:1;flex-shrink:0}
+.lcard-tag{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px}
+.lcard-name{font-size:15px;font-weight:700}
+.lcard-meta{font-size:11px;color:var(--muted);margin-top:1px}
+.lcard-chips{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px}
+.lchip{font-size:10px;background:var(--gl);color:var(--g2);padding:2px 8px;border-radius:100px;font-weight:600}
+
+/* ─── HOME PREVIEW ─── */
+.prev-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--rs);padding:11px 13px;display:flex;align-items:center;gap:10px;cursor:pointer;box-shadow:var(--sh);transition:background .15s}
+.prev-card:active{background:var(--gl)}
+.prev-em{font-size:26px;flex-shrink:0;line-height:1}
+.prev-src{font-size:9px;font-weight:700;color:var(--g2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
+.prev-title{font-size:12px;font-weight:700;color:var(--text);line-height:1.4}
+
+/* ─── CHECK-IN ─── */
+#checkin{gap:10px;padding-top:max(env(safe-area-inset-top),18px)}
+.ci-hd{background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);padding:16px;flex-shrink:0;box-shadow:var(--sh);position:sticky;top:0;z-index:5}
+.ci-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.ci-tag{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.ci-num{font-size:10px;font-weight:700;color:var(--g1)}
+.ci-title{font-size:21px;font-weight:800;letter-spacing:-.02em;margin-bottom:11px;color:var(--text)}
+.progress{display:flex;gap:5px}
+.prog-seg{flex:1;height:4px;border-radius:100px;background:var(--border);transition:background .3s}
+.prog-seg.done{background:var(--g1)}.prog-seg.on{background:var(--g1);opacity:.5}
+.step{display:none;flex-direction:column;gap:10px}
+.step.on{display:flex}
+.step-hint{font-size:12px;color:var(--muted)}
+.mood-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.mood-btn{background:var(--white);border:2px solid var(--border);border-radius:16px;padding:11px 5px;cursor:pointer;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;transition:all .16s}
+.mood-btn .em{font-size:24px}
+.mood-btn .lb{font-size:9px;color:var(--muted);font-weight:600}
+.mood-btn.sel{border-color:var(--g1);background:var(--gl)}
+.mood-btn.sel .lb{color:var(--g2)}
+.mood-btn:active{transform:scale(.92)}
+.cause-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.cause-btn{background:var(--white);border:2px solid var(--border);border-radius:var(--rs);padding:10px 11px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .16s}
+.cause-ic{width:28px;height:28px;border-radius:8px;background:var(--gl);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cause-nm{font-size:12px;font-weight:600;color:var(--text2)}
+.cause-btn.sel{border-color:var(--g1);background:var(--gl)}
+.cause-btn:active{transform:scale(.97)}
+.int-row{display:flex;gap:7px}
+.int-btn{flex:1;padding:13px 5px;background:var(--white);border:2px solid var(--border);border-radius:var(--rs);cursor:pointer;font-family:inherit;font-size:11px;font-weight:700;color:var(--text2);display:flex;flex-direction:column;align-items:center;gap:5px;transition:all .16s}
+.int-btn svg{width:26px;height:26px}
+.int-btn.sel{border-color:var(--g1);background:var(--gl);color:var(--g2)}
+.int-btn:active{transform:scale(.96)}
+.cta{width:100%;padding:14px;background:var(--grad);color:#fff;border:none;border-radius:var(--rs);font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 18px rgba(13,140,62,.28);display:flex;align-items:center;justify-content:center;gap:7px;transition:transform .15s,opacity .2s;flex-shrink:0}
+.cta:active{transform:scale(.97)}.cta:disabled{opacity:.32;cursor:not-allowed;box-shadow:none}
+.cta.out{background:transparent;color:var(--g2);border:1.5px solid var(--border);box-shadow:none}
+.cta.pink{background:linear-gradient(135deg,#ff6b8a,#e0405e)}
+
+/* ─── INSIGHT ─── */
+#insight{gap:11px;padding-top:max(env(safe-area-inset-top),18px)}
+.ins-h{font-size:25px;font-weight:800;letter-spacing:-.02em;line-height:1.1}
+.chart-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);padding:16px;box-shadow:var(--sh)}
+.card-ttl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px;display:flex;align-items:center;gap:5px}
+.bars-wrap{display:flex;align-items:flex-end;gap:5px;height:86px}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end}
+.bar-em{font-size:12px;line-height:1}
+.bar{width:100%;border-radius:5px 5px 2px 2px;transition:height .65s cubic-bezier(.34,1.56,.64,1);min-height:3px}
+.bar-d{font-size:9px;color:var(--muted);font-weight:600}
+.cal-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);padding:14px;box-shadow:var(--sh)}
+.cal-wdays{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:5px}
+.cal-wdays div{font-size:9px;color:var(--muted);font-weight:700;text-align:center}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-day{aspect-ratio:1;border-radius:7px;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:9px;font-weight:600;color:var(--muted)}
+.cal-day.filled{background:var(--gl);color:var(--g2);border:1px solid rgba(29,185,84,.25)}
+.cal-day.today{outline:1.5px solid var(--g1)}
+.cal-em{font-size:10px;line-height:1}
+.pill{background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);padding:14px;box-shadow:var(--sh)}
+.pill-hd{display:inline-flex;align-items:center;gap:5px;padding:3px 10px 3px 6px;border-radius:100px;font-size:10px;font-weight:700;letter-spacing:.04em;margin-bottom:9px}
+.ph-g{background:rgba(29,185,84,.1);color:var(--g2)}.ph-a{background:#fff3e0;color:#e65100}.ph-p{background:#fff0f3;color:#cc2255}
+.pill-txt{font-size:13px;line-height:1.65;color:var(--text2);word-break:break-word}
+.chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+.chip{padding:3px 9px;background:var(--gl);border-radius:100px;font-size:11px;font-weight:600;color:var(--g2)}
+.chip-pct{opacity:.6}
+.jrow{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--border)}
+.jrow:last-child{border-bottom:none}
+
+/* ─── NEWS ─── */
+#news{gap:0;padding-bottom:max(env(safe-area-inset-bottom),82px);padding-top:max(env(safe-area-inset-top),18px)}
+.news-hd{display:flex;align-items:flex-start;justify-content:space-between;padding:2px 0 8px;flex-shrink:0}
+.news-lbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
+.news-title{font-size:25px;font-weight:800;letter-spacing:-.02em;line-height:1.1}
+.news-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;margin-top:2px}
+.date-pill{background:var(--gl);border:1px solid rgba(29,185,84,.22);border-radius:100px;padding:5px 11px;font-size:10px;font-weight:600;color:var(--g2);white-space:nowrap;display:flex;align-items:center;gap:4px}
+.rf-btn{height:28px;background:var(--white);border:1.5px solid var(--border);border-radius:100px;padding:0 11px;display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;font-weight:600;color:var(--text2);box-shadow:var(--sh)}
+.rf-btn:active{background:var(--gl)}
+.ftabs{display:flex;gap:5px;overflow-x:auto;padding-bottom:2px;flex-shrink:0;margin:2px 0 10px}
+.ftabs::-webkit-scrollbar{display:none}
+.ftab{padding:5px 13px;border-radius:100px;flex-shrink:0;background:var(--white);border:1.5px solid var(--border);font-family:inherit;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;white-space:nowrap;transition:all .18s}
+.ftab.on{background:var(--grad);color:#fff;border-color:transparent;box-shadow:0 3px 10px rgba(13,140,62,.22)}
+.ftab:not(.on):active{background:var(--gl)}
+.ldwrap{display:flex;flex-direction:column;align-items:center;gap:12px;padding:48px 0;flex-shrink:0}
+.dots{display:flex;gap:6px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--g1);animation:dp 1.2s ease-in-out infinite}
+.dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
+@keyframes dp{0%,100%{transform:scale(.55);opacity:.28}50%{transform:scale(1);opacity:1}}
+.ld-txt{font-size:13px;color:var(--muted);font-weight:500}
+.nlist{display:flex;flex-direction:column;gap:10px;flex-shrink:0}
+.ncard{background:var(--white);border:1.5px solid var(--border);border-radius:var(--rs);overflow:hidden;box-shadow:var(--sh);cursor:pointer;transition:transform .16s}
+.ncard:active{transform:scale(.985)}
+.ncard-top{display:flex;gap:11px;padding:13px}
+.ncard-thumb{width:64px;height:64px;border-radius:11px;background:var(--gl);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:30px}
+.ncard-body{flex:1;min-width:0;overflow:hidden}
+.ncard-src-row{display:flex;align-items:center;gap:4px;margin-bottom:2px}
+.ncard-dot{width:4px;height:4px;border-radius:50%;background:var(--g1);flex-shrink:0}
+.ncard-src{font-size:9px;font-weight:700;color:var(--g2);text-transform:uppercase;letter-spacing:.05em}
+.ncard-title{font-size:13px;font-weight:700;line-height:1.38;color:var(--text);margin-bottom:3px}
+.ncard-snip{font-size:11px;color:var(--text2);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ncard-bot{display:flex;align-items:center;justify-content:space-between;padding:8px 13px 11px;border-top:1px solid var(--border)}
+.ncard-read{font-size:10px;font-weight:700;color:var(--g1);display:flex;align-items:center;gap:3px}
+.ncard-tags{display:flex;gap:3px}
+.ntag{font-size:9px;background:var(--gl);color:var(--g2);padding:2px 7px;border-radius:100px;font-weight:600}
+
+/* ═══════════════════════════════════
+   ─── CYCLE SCREEN ───
+═══════════════════════════════════ */
+#cycle{gap:11px;padding-top:max(env(safe-area-inset-top),18px)}
+
+/* Phase ring card */
+.phase-card{
+  border-radius:var(--r);padding:20px;
+  display:flex;flex-direction:column;align-items:center;
+  text-align:center;position:relative;overflow:hidden;
+  box-shadow:var(--shl);flex-shrink:0;
+}
+.phase-card.mens{background:linear-gradient(135deg,#ff6b8a,#e0405e);color:#fff}
+.phase-card.foll{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff}
+.phase-card.ovul{background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:#fff}
+.phase-card.lute{background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff}
+.phase-card.none{background:var(--white);border:1.5px solid var(--border);color:var(--text)}
+.phase-ring{
+  width:96px;height:96px;border-radius:50%;
+  background:rgba(255,255,255,.2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:44px;margin-bottom:10px;
+  box-shadow:0 4px 20px rgba(0,0,0,.15);
+}
+.phase-name{font-size:11px;opacity:.8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+.phase-title{font-size:22px;font-weight:800;letter-spacing:-.02em;margin-bottom:4px}
+.phase-day{font-size:13px;opacity:.75}
+.phase-card::before{content:'';position:absolute;top:-40px;right:-40px;width:130px;height:130px;background:rgba(255,255,255,.07);border-radius:50%}
+
+/* Cycle day strip */
+.cycle-strip{
+  background:var(--white);border:1.5px solid var(--border);
+  border-radius:var(--r);padding:14px;box-shadow:var(--sh);
+}
+.cycle-days{display:flex;gap:4px;overflow-x:auto;padding-bottom:4px}
+.cycle-days::-webkit-scrollbar{display:none}
+.cd{
+  flex-shrink:0;width:38px;height:50px;border-radius:10px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2px;font-size:10px;font-weight:700;cursor:pointer;
+  border:1.5px solid transparent;transition:all .18s;
+  background:var(--bg);color:var(--muted);
+}
+.cd .cd-n{font-size:14px;font-weight:800}
+.cd .cd-dot{width:5px;height:5px;border-radius:50%;background:transparent}
+.cd.mens-d{background:#fff0f3;color:#cc2255;border-color:#ffc0cc}
+.cd.foll-d{background:#fffbeb;color:#b45309;border-color:#fde68a}
+.cd.ovul-d{background:#f5f3ff;color:#6d28d9;border-color:#c4b5fd}
+.cd.lute-d{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe}
+.cd.today-d{outline:2px solid var(--g1);outline-offset:1px}
+.cd-dot-m{background:#ff6b8a!important}
+.cd-dot-f{background:#f59e0b!important}
+.cd-dot-o{background:#8b5cf6!important}
+.cd-dot-l{background:#3b82f6!important}
+
+/* Phase info cards row */
+.phase-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ph-mini{
+  border-radius:var(--rs);padding:11px;
+  display:flex;flex-direction:column;gap:3px;
+  border:1.5px solid transparent;
+}
+.ph-mini.mens{background:var(--mens-bg);border-color:var(--mens-border)}
+.ph-mini.foll{background:var(--foll-bg);border-color:var(--foll-border)}
+.ph-mini.ovul{background:var(--ovul-bg);border-color:var(--ovul-border)}
+.ph-mini.lute{background:var(--lute-bg);border-color:var(--lute-border)}
+.ph-mini-ico{font-size:20px;margin-bottom:2px}
+.ph-mini-name{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.ph-mini-name.mens{color:var(--mens)}.ph-mini-name.foll{color:var(--foll)}.ph-mini-name.ovul{color:var(--ovul)}.ph-mini-name.lute{color:var(--lute)}
+.ph-mini-day{font-size:11px;color:var(--muted)}
+.ph-mini-tip{font-size:10px;color:var(--text2);line-height:1.4;margin-top:3px}
+
+/* Log period / settings card */
+.cycle-set{background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);padding:16px;box-shadow:var(--sh)}
+.cs-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.cs-lbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.input-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.input-row label{font-size:12px;font-weight:600;color:var(--text2);flex:1}
+.num-in{width:70px;padding:7px 10px;border-radius:9px;border:1.5px solid var(--border);font-family:inherit;font-size:14px;font-weight:700;color:var(--text);text-align:center;background:var(--bg);outline:none}
+.num-in:focus{border-color:var(--g1)}
+.date-in{flex:1;padding:7px 10px;border-radius:9px;border:1.5px solid var(--border);font-family:inherit;font-size:13px;font-weight:600;color:var(--text);background:var(--bg);outline:none}
+.date-in:focus{border-color:var(--mens)}
+
+/* Symptom log */
+.sym-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.sym-btn{
+  background:var(--bg);border:1.5px solid var(--border);
+  border-radius:11px;padding:9px 5px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  transition:all .15s;
+}
+.sym-btn .sym-e{font-size:20px}
+.sym-btn .sym-l{font-size:9px;font-weight:600;color:var(--muted);text-align:center}
+.sym-btn.sel{border-color:var(--mens);background:var(--mens-bg)}
+.sym-btn.sel .sym-l{color:var(--mens)}
+.sym-btn:active{transform:scale(.93)}
+
+/* Flow selector */
+.flow-row{display:flex;gap:6px;margin-bottom:2px}
+.flow-btn{
+  flex:1;padding:9px 5px;border-radius:10px;cursor:pointer;
+  border:1.5px solid var(--border);background:var(--bg);
+  font-family:inherit;font-size:11px;font-weight:700;color:var(--muted);
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  transition:all .15s;
+}
+.flow-btn.sel{border-color:var(--mens);background:var(--mens-bg);color:var(--mens)}
+.flow-btn:active{transform:scale(.96)}
+.flow-dot-row{display:flex;gap:2px;justify-content:center}
+.fd{width:5px;height:5px;border-radius:50%;background:var(--border)}
+.flow-btn.sel .fd{background:var(--mens)}
+
+/* Prediction card */
+.pred-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);padding:14px;box-shadow:var(--sh)}
+.pred-list{display:flex;flex-direction:column;gap:6px}
+.pred-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)}
+.pred-row:last-child{border-bottom:none}
+.pred-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.pred-lbl{font-size:12px;font-weight:600;color:var(--text);flex:1}
+.pred-date{font-size:11px;color:var(--muted)}
+
+/* Mood-phase correlation */
+.corr-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--r);padding:14px;box-shadow:var(--sh)}
+.corr-row{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid var(--border)}
+.corr-row:last-child{border-bottom:none}
+.corr-phase{display:flex;align-items:center;gap:5px;width:90px;flex-shrink:0}
+.corr-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.corr-name{font-size:10px;font-weight:700;color:var(--text2)}
+.corr-bar-bg{flex:1;height:7px;border-radius:100px;background:var(--border);overflow:hidden}
+.corr-bar-fill{height:100%;border-radius:100px;transition:width .6s cubic-bezier(.34,1.56,.64,1)}
+.corr-val{font-size:10px;font-weight:700;color:var(--muted);width:26px;text-align:right}
+
+/* Home cycle banner */
+.cycle-banner{
+  border-radius:var(--rs);padding:13px 15px;
+  display:flex;align-items:center;gap:12px;
+  cursor:pointer;transition:opacity .15s;flex-shrink:0;
+}
+.cycle-banner:active{opacity:.8}
+.cycle-banner.mens{background:linear-gradient(135deg,#ffecf0,#ffd6de);border:1.5px solid var(--mens-border)}
+.cycle-banner.foll{background:linear-gradient(135deg,#fffbeb,#fef3c7);border:1.5px solid var(--foll-border)}
+.cycle-banner.ovul{background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:1.5px solid var(--ovul-border)}
+.cycle-banner.lute{background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1.5px solid var(--lute-border)}
+.cycle-banner.none{background:var(--white);border:1.5px solid var(--border)}
+.cb-ico{font-size:28px;flex-shrink:0}
+.cb-body{flex:1}
+.cb-tag{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px}
+.cb-tag.mens{color:var(--mens)}.cb-tag.foll{color:var(--foll)}.cb-tag.ovul{color:var(--ovul)}.cb-tag.lute{color:var(--lute)}.cb-tag.none{color:var(--muted)}
+.cb-title{font-size:13px;font-weight:700;color:var(--text);line-height:1.3}
+.cb-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.cb-arr{color:var(--muted)}
+
+/* ─── ARTICLE OVERLAY ─── */
+#art-ov{position:fixed;inset:0;z-index:800;background:var(--bg);display:none;flex-direction:column;transform:translateY(100%);transition:transform .32s cubic-bezier(.4,0,.2,1);overflow:hidden}
+#art-ov.open{transform:translateY(0)}
+.art-topbar{position:sticky;top:0;z-index:10;background:rgba(244,250,247,.94);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;padding:max(env(safe-area-inset-top),13px) 16px 11px;flex-shrink:0}
+.art-back{width:32px;height:32px;border-radius:10px;background:var(--white);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.art-back:active{background:var(--gl)}
+.art-tb-info{flex:1;min-width:0}
+.art-tb-src{font-size:9px;font-weight:700;color:var(--g2);text-transform:uppercase;letter-spacing:.06em}
+.art-tb-ttl{font-size:11px;font-weight:600;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.art-scroll{overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch}
+.art-body{padding:18px 18px 52px;max-width:430px;width:100%;margin:0 auto}
+.art-cat{display:inline-flex;align-items:center;background:var(--gl);color:var(--g2);border-radius:100px;padding:3px 11px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:11px}
+.art-title{font-size:24px;font-weight:800;line-height:1.2;letter-spacing:-.02em;color:var(--text);margin-bottom:11px}
+.art-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.art-src{background:var(--gl);color:var(--g2);border-radius:100px;padding:3px 11px;font-size:10px;font-weight:600}
+.art-date{font-size:10px;color:var(--muted)}
+.art-rt{background:#fff3e0;color:#e65100;border-radius:100px;padding:2px 8px;font-size:9px;font-weight:600}
+.art-hero{width:100%;height:164px;border-radius:var(--r);background:var(--gl);margin-bottom:18px;display:flex;align-items:center;justify-content:center;font-size:68px;box-shadow:var(--sh)}
+.art-content{font-size:15px;line-height:1.82;color:var(--text2);word-break:break-word}
+.art-content p{margin-bottom:15px}
+.art-content h3{font-size:16px;font-weight:800;color:var(--text);margin:20px 0 9px;letter-spacing:-.01em}
+.art-content blockquote{border-left:3px solid var(--g1);padding:11px 15px;background:var(--gl);border-radius:0 11px 11px 0;margin:15px 0;font-style:italic;color:var(--text)}
+.art-content ul{padding-left:18px;margin-bottom:15px}
+.art-content li{margin-bottom:7px}
+.art-content strong{color:var(--text);font-weight:700}
+.art-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:18px;padding-top:14px;border-top:1px solid var(--border)}
+.art-tag{background:var(--gl);color:var(--g2);border-radius:100px;padding:3px 11px;font-size:10px;font-weight:600}
+
+/* ─── BOTTOM NAV ─── */
+#nav{position:fixed;bottom:max(env(safe-area-inset-bottom),12px);left:50%;transform:translateX(-50%);display:flex;background:var(--white);border:1.5px solid var(--border);border-radius:100px;padding:5px;z-index:100;box-shadow:0 6px 28px rgba(13,140,62,.13);gap:2px}
+.ni{display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 13px;border-radius:100px;cursor:pointer;border:none;background:none;transition:all .2s;font-family:inherit}
+.ni.on{background:var(--grad)}
+.ni.on-pink{background:linear-gradient(135deg,#ff6b8a,#e0405e)}
+.ni svg{width:19px;height:19px}
+.ni-lbl{font-size:9px;font-weight:700;color:var(--muted)}
+.ni.on .ni-lbl,.ni.on-pink .ni-lbl{color:#fff}
+
+/* ─── NAME MODAL ─── */
+#name-modal{position:fixed;inset:0;display:flex;align-items:flex-end;justify-content:center;z-index:500;background:rgba(0,0,0,.38);backdrop-filter:blur(6px);visibility:hidden;opacity:0;transition:opacity .22s,visibility .22s}
+#name-modal.show{visibility:visible;opacity:1}
+.nm-sheet{background:var(--white);border-radius:26px 26px 0 0;padding:18px 18px max(env(safe-area-inset-bottom),30px);width:100%;max-width:430px;transform:translateY(100%);transition:transform .32s cubic-bezier(.4,0,.2,1);box-shadow:0 -6px 32px rgba(0,0,0,.11)}
+#name-modal.show .nm-sheet{transform:none}
+.sh-handle{width:34px;height:4px;border-radius:2px;background:var(--border);margin:0 auto 16px}
+.sh-title{font-size:21px;font-weight:800;letter-spacing:-.02em;margin-bottom:4px}
+.sh-sub{font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.5}
+.txt-in{width:100%;padding:12px 15px;border-radius:12px;border:1.5px solid var(--border);margin-bottom:11px;font-family:inherit;font-size:16px;color:var(--text);outline:none;transition:border-color .2s;background:var(--bg)}
+.txt-in:focus{border-color:var(--g1)}
+
+/* ─── PROFILE MODAL ─── */
+#prof-modal{position:fixed;inset:0;display:flex;align-items:flex-end;justify-content:center;z-index:500;background:rgba(0,0,0,.38);backdrop-filter:blur(6px);visibility:hidden;opacity:0;transition:opacity .22s,visibility .22s}
+#prof-modal.show{visibility:visible;opacity:1}
+.pm-sheet{background:var(--white);border-radius:26px 26px 0 0;padding:18px 18px max(env(safe-area-inset-bottom),30px);width:100%;max-width:430px;transform:translateY(100%);transition:transform .32s cubic-bezier(.4,0,.2,1);box-shadow:0 -6px 32px rgba(0,0,0,.11)}
+#prof-modal.show .pm-sheet{transform:none}
+.pm-av{width:60px;height:60px;border-radius:20px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 11px;box-shadow:var(--shl)}
+.pm-name{font-size:22px;font-weight:800;text-align:center;letter-spacing:-.02em;margin-bottom:14px}
+.pm-stats{display:flex;gap:7px;margin-bottom:16px}
+.pmst{flex:1;background:var(--bg);border:1.5px solid var(--border);border-radius:12px;padding:11px 7px;text-align:center}
+.pmst-v{font-size:20px;font-weight:800;color:var(--g1)}
+.pmst-l{font-size:9px;color:var(--muted);font-weight:600;margin-top:1px}
+.pm-lbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px}
+.dng-btn{width:100%;padding:12px;background:#fff5f5;border:1.5px solid #ffd5d5;border-radius:12px;color:#e53935;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;margin-top:9px}
+.dng-btn:active{background:#ffe5e5}
+
+/* ─── SUCCESS ─── */
+#success{position:fixed;inset:0;background:linear-gradient(160deg,#f4faf7,#d4f5e3);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:400;opacity:0;pointer-events:none;transition:opacity .3s;gap:11px}
+#success.show{opacity:1;pointer-events:all}
+.suc-ring{width:104px;height:104px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:48px;box-shadow:var(--shl);animation:pop .45s cubic-bezier(.34,1.56,.64,1)}
+@keyframes pop{from{transform:scale(.2);opacity:0}to{transform:scale(1);opacity:1}}
+.suc-t{font-size:24px;font-weight:800;color:var(--text)}
+.suc-s{font-size:13px;color:var(--muted);text-align:center;max-width:210px}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- SPLASH -->
+<div id="splash" class="screen active">
+  <div class="sp-orb">🌱</div>
+  <div class="sp-title">moodly</div>
+  <div class="sp-sub">check-in emosi harian + artikel kesehatan mental + tracker siklus ✨</div>
+  <button class="sp-btn" onclick="enterApp()">Mulai Sekarang →</button>
+</div>
+
+<!-- HOME -->
+<div id="home" class="screen">
+  <div class="tb">
+    <div class="tb-logo">
+      <div class="tb-dot">🌱</div>
+      <div class="tb-name">mood<b>ly</b></div>
+    </div>
+    <div class="tb-pill" onclick="showProf()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="#3a5c46" stroke-width="2"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#3a5c46" stroke-width="2" stroke-linecap="round"/></svg>
+      <span id="tb-uname">Profil</span>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="hero-tag" id="hero-tag">Selamat pagi ☀️</div>
+    <div class="hero-h" id="hero-h">Hari ini<br>gimana perasaanmu?</div>
+    <div class="hero-sub">Jujur aja, ga ada yang ngejudge 🤝</div>
+    <div class="hero-foot">
+      <div class="hero-streak">🔥 <span id="streak">0</span> hari</div>
+      <button class="hero-cta" onclick="startCheckin()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#0a9e3f" stroke-width="2"/><path d="M12 8v8M8 12h8" stroke="#0a9e3f" stroke-width="2" stroke-linecap="round"/></svg>
+        Check-in
+      </button>
+    </div>
+  </div>
+
+  <!-- Cycle banner on home -->
+  <div id="home-cycle-banner" onclick="showScreen('cycle')"></div>
+
+  <div class="stats">
+    <div class="scard">
+      <div class="scard-ic g">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M9 11l3 3L22 4" stroke="#1db954" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" stroke="#1db954" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+      <div><div class="scard-val" id="s-total">0</div><div class="scard-lbl">Total Check-in</div></div>
+    </div>
+    <div class="scard">
+      <div class="scard-ic o">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z" stroke="#f57c00" stroke-width="1.8" stroke-linejoin="round"/></svg>
+      </div>
+      <div><div class="scard-val" id="s-avg">—</div><div class="scard-lbl">Rata-rata Mood</div></div>
+    </div>
+  </div>
+
+  <div class="slbl">Terakhir Check-in</div>
+  <div id="last-wrap"></div>
+  <div class="slbl">Artikel Hari Ini</div>
+  <div id="home-prev"></div>
+</div>
+
+<!-- CHECK-IN -->
+<div id="checkin" class="screen">
+  <div class="ci-hd">
+    <div class="ci-row">
+      <span class="ci-tag">Check-in Harian</span>
+      <span class="ci-num" id="ci-num">1 / 3</span>
+    </div>
+    <div class="ci-title" id="ci-title">Mood kamu?</div>
+    <div class="progress">
+      <div class="prog-seg on" id="seg1"></div>
+      <div class="prog-seg" id="seg2"></div>
+      <div class="prog-seg" id="seg3"></div>
+    </div>
+  </div>
+  <div class="step on" id="st1">
+    <div class="step-hint">Pilih yang paling deket sama perasaanmu sekarang</div>
+    <div class="mood-grid" id="mood-grid"></div>
+    <button class="cta" id="btn1" disabled onclick="goStep(2)">Lanjut →</button>
+  </div>
+  <div class="step" id="st2">
+    <div class="step-hint">Bisa pilih lebih dari satu</div>
+    <div class="cause-grid" id="cause-grid"></div>
+    <button class="cta" onclick="goStep(3)">Lanjut →</button>
+    <button class="cta out" onclick="goStep(1)">← Kembali</button>
+  </div>
+  <div class="step" id="st3">
+    <div class="step-hint">Seberapa besar dampaknya hari ini?</div>
+    <div class="int-row" id="int-row"></div>
+    <button class="cta" id="btn3" disabled onclick="submitCheckin()">Selesai ✓</button>
+    <button class="cta out" onclick="goStep(2)">← Kembali</button>
+  </div>
+</div>
+
+<!-- INSIGHT -->
+<div id="insight" class="screen">
+  <div class="tb">
+    <div>
+      <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em">7 Hari Terakhir</div>
+      <div class="ins-h">Weekly<br>Insights ✨</div>
+    </div>
+    <div class="tb-icon" onclick="exportPDF()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="#3a5c46" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+  <div class="chart-card">
+    <div class="card-ttl">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M18 20V10M12 20V4M6 20v-6" stroke="#1db954" stroke-width="2.5" stroke-linecap="round"/></svg>
+      Grafik Mood Mingguan
+    </div>
+    <div class="bars-wrap" id="chart-bars"></div>
+  </div>
+  <div class="cal-card">
+    <div class="card-ttl">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="#1db954" stroke-width="2"/><path d="M3 10h18M8 2v4M16 2v4" stroke="#1db954" stroke-width="2"/></svg>
+      Kalender Bulan Ini
+    </div>
+    <div class="cal-wdays"><div>Min</div><div>Sen</div><div>Sel</div><div>Rab</div><div>Kam</div><div>Jum</div><div>Sab</div></div>
+    <div class="cal-grid" id="cal-grid"></div>
+  </div>
+  <div class="pill">
+    <div class="pill-hd ph-g">
+      <svg width="9" height="9" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#0a9e3f" stroke-width="2.5"/><path d="M12 16v-4M12 8h.01" stroke="#0a9e3f" stroke-width="2.5" stroke-linecap="round"/></svg>
+      Analisis Mingguan
+    </div>
+    <div class="pill-txt" id="ins-txt">Belum cukup data. Check-in dulu yuk!</div>
+  </div>
+  <div class="pill">
+    <div class="pill-hd ph-a">
+      <svg width="9" height="9" viewBox="0 0 24 24" fill="none"><path d="M3 3h18M3 9h18M3 15h18M3 21h18" stroke="#e65100" stroke-width="2" stroke-linecap="round"/></svg>
+      Penyebab Terbanyak
+    </div>
+    <div class="pill-txt" style="margin-bottom:5px">Yang paling sering muncul:</div>
+    <div class="chips" id="cause-chips"><span style="font-size:12px;color:var(--muted)">Belum ada data</span></div>
+  </div>
+  <div class="pill">
+    <div class="pill-hd ph-g">📔 Jurnal Terkini</div>
+    <div id="journal"></div>
+  </div>
+</div>
+
+<!-- NEWS -->
+<div id="news" class="screen">
+  <div class="news-hd">
+    <div>
+      <div class="news-lbl">Artikel & Tips</div>
+      <div class="news-title">Mental<br>Health Hub 🧠</div>
+    </div>
+    <div class="news-right">
+      <div class="date-pill" id="date-pill">
+        <svg width="9" height="9" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="#0a9e3f" stroke-width="2"/><path d="M3 10h18M8 2v4M16 2v4" stroke="#0a9e3f" stroke-width="2"/></svg>
+        Hari ini
+      </div>
+      <div class="rf-btn" onclick="forceRefresh()">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" id="rf-ic"><path d="M23 4v6h-6M1 20v-6h6" stroke="#3a5c46" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15" stroke="#3a5c46" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Refresh
+      </div>
+    </div>
+  </div>
+  <div class="ftabs" id="ftabs">
+    <button class="ftab on" onclick="filterNews('semua',this)">Semua</button>
+    <button class="ftab" onclick="filterNews('mood',this)">Mood</button>
+    <button class="ftab" onclick="filterNews('stres',this)">Stres & Cemas</button>
+    <button class="ftab" onclick="filterNews('tidur',this)">Tidur</button>
+    <button class="ftab" onclick="filterNews('self-care',this)">Self-Care</button>
+    <button class="ftab" onclick="filterNews('motivasi',this)">Motivasi</button>
+  </div>
+  <div id="news-wrap">
+    <div class="ldwrap">
+      <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+      <div class="ld-txt">Menyiapkan artikel hari ini…</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     CYCLE SCREEN
+═══════════════════════════════ -->
+<div id="cycle" class="screen">
+  <div class="tb">
+    <div>
+      <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em">Siklus Menstruasi</div>
+      <div class="ins-h">Cycle<br>Tracker 🌸</div>
+    </div>
+    <div class="tb-icon" onclick="showCycleSetup()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="#3a5c46" stroke-width="2"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14" stroke="#3a5c46" stroke-width="2" stroke-linecap="round"/></svg>
+    </div>
+  </div>
+
+  <!-- Current phase card -->
+  <div id="phase-card-wrap"></div>
+
+  <!-- 28-day strip -->
+  <div class="cycle-strip">
+    <div class="card-ttl" style="margin-bottom:8px">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#1db954" stroke-width="2"/><path d="M12 6v6l4 2" stroke="#1db954" stroke-width="2" stroke-linecap="round"/></svg>
+      Siklus Bulan Ini
+    </div>
+    <div class="cycle-days" id="cycle-days"></div>
+  </div>
+
+  <!-- Phase mini cards -->
+  <div class="phase-row" id="phase-row"></div>
+
+  <!-- Log period today -->
+  <div class="cycle-set" id="cycle-log-card">
+    <div class="cs-row">
+      <div class="cs-lbl">🩸 Catat Menstruasi Hari Ini</div>
+    </div>
+    <!-- Flow selector -->
+    <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:6px">Seberapa deras?</div>
+    <div class="flow-row" id="flow-row"></div>
+    <!-- Symptoms -->
+    <div style="font-size:11px;font-weight:600;color:var(--text2);margin:10px 0 6px">Gejala hari ini</div>
+    <div class="sym-grid" id="sym-grid"></div>
+    <button class="cta pink" style="margin-top:12px" onclick="logPeriodToday()">Simpan Log Hari Ini 🌸</button>
+  </div>
+
+  <!-- Predictions -->
+  <div class="pred-card">
+    <div class="card-ttl">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z" stroke="#1db954" stroke-width="1.8"/></svg>
+      Prediksi Berikutnya
+    </div>
+    <div class="pred-list" id="pred-list"></div>
+  </div>
+
+  <!-- Mood-Phase Correlation -->
+  <div class="corr-card">
+    <div class="card-ttl">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#1db954" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Mood per Fase Siklus
+    </div>
+    <div id="corr-rows"></div>
+  </div>
+
+  <!-- Cycle tips -->
+  <div class="pill">
+    <div class="pill-hd ph-p">🌸 Tips Fase Ini</div>
+    <div class="pill-txt" id="cycle-tip">Atur siklus dulu untuk mendapatkan tips yang personal.</div>
+  </div>
+</div>
+
+</div><!-- /app -->
+
+<!-- NAV -->
+<nav id="nav">
+  <button class="ni on" id="ni-home" onclick="showScreen('home')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
+    <span class="ni-lbl" style="color:white">Home</span>
+  </button>
+  <button class="ni" id="ni-checkin" onclick="startCheckin()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#8aab97" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
+    <span class="ni-lbl">Check</span>
+  </button>
+  <button class="ni" id="ni-cycle" onclick="showScreen('cycle')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#8aab97" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l3 3"/></svg>
+    <span class="ni-lbl">Siklus</span>
+  </button>
+  <button class="ni" id="ni-insight" onclick="showScreen('insight')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#8aab97" stroke-width="2" stroke-linecap="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+    <span class="ni-lbl">Insight</span>
+  </button>
+  <button class="ni" id="ni-news" onclick="showScreen('news')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#8aab97" stroke-width="2" stroke-linecap="round"><path d="M4 22h16a2 2 0 002-2V4a2 2 0 00-2-2H8a2 2 0 00-2 2v16a2 2 0 01-2 2zm0 0a2 2 0 01-2-2V8"/><path d="M10 10h6M10 14h6M10 18h4"/></svg>
+    <span class="ni-lbl">Artikel</span>
+  </button>
+</nav>
+
+<!-- CYCLE SETUP MODAL -->
+<div id="cycle-modal" style="position:fixed;inset:0;display:flex;align-items:flex-end;justify-content:center;z-index:500;background:rgba(0,0,0,.38);backdrop-filter:blur(6px);visibility:hidden;opacity:0;transition:opacity .22s,visibility .22s">
+  <div style="background:var(--white);border-radius:26px 26px 0 0;padding:18px 18px max(env(safe-area-inset-bottom),30px);width:100%;max-width:430px;transform:translateY(100%);transition:transform .32s cubic-bezier(.4,0,.2,1);box-shadow:0 -6px 32px rgba(0,0,0,.11)" id="cycle-modal-sheet">
+    <div class="sh-handle"></div>
+    <div class="sh-title">⚙️ Pengaturan Siklus</div>
+    <div class="sh-sub">Atur info siklus kamu agar prediksi lebih akurat.</div>
+    <div class="input-row">
+      <label>Panjang siklus (hari)</label>
+      <input class="num-in" type="number" id="cyc-len" min="21" max="45" value="28">
+    </div>
+    <div class="input-row">
+      <label>Durasi menstruasi (hari)</label>
+      <input class="num-in" type="number" id="cyc-dur" min="2" max="10" value="5">
+    </div>
+    <div class="input-row" style="flex-direction:column;align-items:flex-start;gap:5px">
+      <label>Hari pertama menstruasi terakhir</label>
+      <input class="date-in" type="date" id="cyc-lmp">
+    </div>
+    <button class="cta pink" style="margin-top:8px" onclick="saveCycleSetup()">Simpan Pengaturan 🌸</button>
+    <button class="cta out" style="margin-top:8px" onclick="closeCycleModal()">Batal</button>
+  </div>
+</div>
+
+<!-- NAME MODAL -->
+<div id="name-modal">
+  <div class="nm-sheet">
+    <div class="sh-handle"></div>
+    <div class="sh-title">Halo! Siapa namamu? 👋</div>
+    <div class="sh-sub">Biar Moodly bisa nyapa kamu setiap hari.</div>
+    <input class="txt-in" type="text" id="name-in" placeholder="Masukkan namamu..." maxlength="20" autocomplete="off">
+    <button class="cta" onclick="saveName()">Simpan & Mulai →</button>
+  </div>
+</div>
+
+<!-- PROFILE MODAL -->
+<div id="prof-modal" onclick="if(event.target===this)closeProf()">
+  <div class="pm-sheet">
+    <div class="sh-handle"></div>
+    <div class="pm-av">🌱</div>
+    <div class="pm-name" id="pm-name">—</div>
+    <div class="pm-stats">
+      <div class="pmst"><div class="pmst-v" id="pm-ci">0</div><div class="pmst-l">Check-in</div></div>
+      <div class="pmst"><div class="pmst-v" id="pm-st">0</div><div class="pmst-l">Streak 🔥</div></div>
+      <div class="pmst"><div class="pmst-v" id="pm-av">—</div><div class="pmst-l">Avg Mood</div></div>
+    </div>
+    <div class="pm-lbl">Ubah Nama</div>
+    <input class="txt-in" type="text" id="pm-in" placeholder="Nama baru..." maxlength="20" autocomplete="off" style="margin-bottom:10px">
+    <button class="cta" style="margin-bottom:9px" onclick="updateName()">Simpan Nama</button>
+    <button class="dng-btn" onclick="clearData()">🗑 Hapus Semua Data</button>
+  </div>
+</div>
+
+<!-- ARTICLE OVERLAY -->
+<div id="art-ov">
+  <div class="art-topbar">
+    <div class="art-back" onclick="closeArt()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M12 19l-7-7 7-7" stroke="#3a5c46" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="art-tb-info">
+      <div class="art-tb-src" id="art-tb-src">—</div>
+      <div class="art-tb-ttl" id="art-tb-ttl">—</div>
+    </div>
+  </div>
+  <div class="art-scroll"><div class="art-body" id="art-body"></div></div>
+</div>
+
+<!-- SUCCESS -->
+<div id="success">
+  <div class="suc-ring" id="suc-em">🎉</div>
+  <div class="suc-t">Check-in selesai!</div>
+  <div class="suc-s" id="suc-s">Proud of you buat check-in hari ini 🫂</div>
+</div>
+
+<script>
+/* ══ MOOD & CHECK-IN DATA ══ */
+const MOODS=[
+  {e:'😄',l:'Happy',s:5,c:'#22c55e'},{e:'😊',l:'Oke',s:4,c:'#4ade80'},
+  {e:'😐',l:'Biasa',s:3,c:'#fbbf24'},{e:'😔',l:'Sedih',s:2,c:'#fb923c'},
+  {e:'😰',l:'Anxious',s:2,c:'#f472b6'},{e:'😤',l:'Frustrasi',s:1,c:'#f87171'},
+  {e:'😴',l:'Exhausted',s:1,c:'#a78bfa'},{e:'🫠',l:'Burnout',s:1,c:'#60a5fa'},
+];
+const CAUSES=[
+  {svg:'<path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2zM16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16" stroke="#1db954" stroke-width="1.8" stroke-linecap="round"/>',n:'Kerjaan'},
+  {svg:'<path d="M22 10v6M2 10l10-5 10 5-10 5-10-5z" stroke="#1db954" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 12v5c3 3 9 3 12 0v-5" stroke="#1db954" stroke-width="1.8" stroke-linecap="round"/>',n:'Kuliah'},
+  {svg:'<circle cx="12" cy="12" r="10" stroke="#1db954" stroke-width="1.8"/><path d="M12 6v6l4 2" stroke="#1db954" stroke-width="1.8" stroke-linecap="round"/>',n:'Finansial'},
+  {svg:'<path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" stroke="#1db954" stroke-width="1.8" stroke-linejoin="round"/>',n:'Relationship'},
+  {svg:'<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke="#1db954" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 22V12h6v10" stroke="#1db954" stroke-width="1.8" stroke-linecap="round"/>',n:'Keluarga'},
+  {svg:'<path d="M17 7l-1.41-1.41L12 9.17l-3.59-3.58L7 7l5 5 5-5zM12 21c-4.97 0-9-4.03-9-9s4.03-9 9-9 9 4.03 9 9-4.03 9-9 9z" stroke="#1db954" stroke-width="1.5"/>',n:'Kurang tidur'},
+  {svg:'<path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#1db954" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',n:'Kesehatan'},
+  {svg:'<circle cx="12" cy="12" r="10" stroke="#1db954" stroke-width="1.8"/><path d="M12 16v-4M12 8h.01" stroke="#1db954" stroke-width="2" stroke-linecap="round"/>',n:'Ga tau'},
+];
+const INTENSITIES=[
+  {l:'Ringan',svg:'<path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke="#1db954" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="4" stroke="#1db954" stroke-width="2"/>'},
+  {l:'Lumayan',svg:'<circle cx="12" cy="12" r="10" stroke="#f57c00" stroke-width="2"/><path d="M8 15s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01" stroke="#f57c00" stroke-width="2" stroke-linecap="round"/>'},
+  {l:'Berat',svg:'<circle cx="12" cy="12" r="10" stroke="#e53935" stroke-width="2"/><path d="M16 16s-1.5-2-4-2-4 2-4 2M9 9h.01M15 9h.01" stroke="#e53935" stroke-width="2" stroke-linecap="round"/>'},
+];
+
+/* ══ CYCLE DATA ══ */
+const PHASES=[
+  {id:'mens',name:'Menstruasi',emoji:'🩸',color:'#ff6b8a',tip:'Istirahat lebih banyak, minum air hangat, kompres perut. Mood mungkin lebih sensitif — itu wajar. Self-compassion dulu ya! 💗'},
+  {id:'foll',name:'Folikular',emoji:'🌱',color:'#f59e0b',tip:'Energi mulai naik! Ini waktu bagus untuk mulai proyek baru, olahraga, atau belajar hal baru. Kamu sedang di momentum terbaik. ✨'},
+  {id:'ovul',name:'Ovulasi',emoji:'⭐',color:'#8b5cf6',tip:'Puncak energi dan kepercayaan diri! Waktu terbaik untuk presentasi, bersosialisasi, dan aktivitas high-intensity. Manfaatkan momen ini! 🌟'},
+  {id:'lute',name:'Luteal',emoji:'🌙',color:'#3b82f6',tip:'Energi mulai turun, mungkin muncul PMS. Prioritaskan self-care, kurangi stimulan, dan jangan terlalu keras pada dirimu sendiri. 🫂'},
+];
+const SYMPTOMS=[
+  {e:'😣',l:'Kram'},
+  {e:'🤕',l:'Sakit kepala'},
+  {e:'😪',l:'Lelah'},
+  {e:'🤢',l:'Mual'},
+  {e:'😤',l:'Mood swing'},
+  {e:'🫃',l:'Kembung'},
+  {e:'😴',l:'Ngantuk'},
+  {e:'🍫',l:'Ngidam'},
+  {e:'😢',l:'Emosional'},
+];
+const FLOWS=[
+  {l:'Sedikit',dots:1},{l:'Sedang',dots:2},{l:'Deras',dots:3},{l:'Sangat deras',dots:4}
+];
+
+/* ══ STATE ══ */
+let entries=[];try{entries=JSON.parse(localStorage.getItem('moodly2')||'[]')}catch(e){}
+let cycleData={lmp:'',len:28,dur:5};try{const c=localStorage.getItem('moodly_cycle');if(c)cycleData=JSON.parse(c)}catch(e){}
+let cycleLogs=[];try{cycleLogs=JSON.parse(localStorage.getItem('moodly_clogs')||'[]')}catch(e){}
+let cur={mood:null,causes:[],intensity:null};
+let uname=localStorage.getItem('moodly_user')||'';
+let cache={key:'',arts:[]};try{const c=localStorage.getItem('moodly_nc');if(c)cache=JSON.parse(c)}catch(e){}
+let artStore=[];
+let curFilter='semua';
+let curFlow=null;
+let curSymptoms=[];
+
+const save=()=>{try{localStorage.setItem('moodly2',JSON.stringify(entries))}catch(e){}};
+const saveCycle=()=>{try{localStorage.setItem('moodly_cycle',JSON.stringify(cycleData))}catch(e){}};
+const saveClogs=()=>{try{localStorage.setItem('moodly_clogs',JSON.stringify(cycleLogs))}catch(e){}};
+const saveCache=()=>{try{localStorage.setItem('moodly_nc',JSON.stringify(cache))}catch(e){}};
+
+/* ══ DATE HELPERS ══ */
+const todayKey=()=>{const d=new Date();return`${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`};
+const todayLabel=()=>new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long'});
+const dateKey=(d)=>`${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+const addDays=(d,n)=>{const r=new Date(d);r.setDate(r.getDate()+n);return r};
+const diffDays=(a,b)=>Math.round((b-a)/86400000);
+
+/* ══ CYCLE ENGINE ══ */
+function getCyclePhase(dayOfCycle){
+  const {len,dur}=cycleData;
+  if(!cycleData.lmp)return null;
+  const foll_end=dur+Math.round((len-dur)*0.35);
+  const ovul_end=foll_end+3;
+  if(dayOfCycle<=dur)return 'mens';
+  if(dayOfCycle<=foll_end)return 'foll';
+  if(dayOfCycle<=ovul_end)return 'ovul';
+  return 'lute';
+}
+
+function getCurrentCycleInfo(){
+  if(!cycleData.lmp)return null;
+  const lmp=new Date(cycleData.lmp);
+  lmp.setHours(0,0,0,0);
+  const today=new Date();today.setHours(0,0,0,0);
+  const daysSince=diffDays(lmp,today);
+  const dayOfCycle=((daysSince%cycleData.len)+cycleData.len)%cycleData.len+1;
+  const phase=getCyclePhase(dayOfCycle);
+  return{dayOfCycle,phase,lmp};
+}
+
+function getPredictions(){
+  if(!cycleData.lmp)return[];
+  const lmp=new Date(cycleData.lmp);lmp.setHours(0,0,0,0);
+  const today=new Date();today.setHours(0,0,0,0);
+  const daysSince=diffDays(lmp,today);
+  const cyclesPassed=Math.floor(daysSince/cycleData.len);
+
+  // next period
+  const nextPeriod=addDays(lmp,(cyclesPassed+1)*cycleData.len);
+  // ovulation day = len - 14 days from next period
+  const nextOvul=addDays(nextPeriod,-14);
+  // fertile window: 5 days before ovulation
+  const fertileStart=addDays(nextOvul,-5);
+  const fertileEnd=addDays(nextOvul,1);
+
+  const fmt=(d)=>d.toLocaleDateString('id-ID',{day:'numeric',month:'short'});
+  const daysUntil=(d)=>diffDays(today,d);
+  return[
+    {label:'Menstruasi berikutnya',date:fmt(nextPeriod),daysUntil:daysUntil(nextPeriod),color:'#ff6b8a'},
+    {label:'Ovulasi berikutnya',date:fmt(nextOvul),daysUntil:daysUntil(nextOvul),color:'#8b5cf6'},
+    {label:'Fertile window',date:`${fmt(fertileStart)} – ${fmt(fertileEnd)}`,daysUntil:daysUntil(fertileStart),color:'#f59e0b'},
+  ];
+}
+
+/* ══ CYCLE UI ══ */
+function renderCycleScreen(){
+  const info=getCurrentCycleInfo();
+
+  // Phase card
+  const phaseCardWrap=document.getElementById('phase-card-wrap');
+  if(!info){
+    phaseCardWrap.innerHTML=`<div class="phase-card none">
+      <div class="phase-ring" style="background:var(--gl)">🌸</div>
+      <div class="phase-name" style="color:var(--muted)">Belum diatur</div>
+      <div class="phase-title" style="color:var(--text);font-size:18px">Atur siklus dulu yuk</div>
+      <div class="phase-day" style="color:var(--muted)">Tap ⚙️ di kanan atas</div>
+    </div>`;
+  } else {
+    const phase=PHASES.find(p=>p.id===info.phase)||PHASES[3];
+    const {len,dur}=cycleData;
+    const daysLeft=len-info.dayOfCycle+1;
+    phaseCardWrap.innerHTML=`<div class="phase-card ${info.phase}">
+      <div class="phase-ring">${phase.emoji}</div>
+      <div class="phase-name">Fase ${phase.name}</div>
+      <div class="phase-title">Hari ke-${info.dayOfCycle}</div>
+      <div class="phase-day">dari siklus ${len} hari · ${daysLeft} hari lagi ke fase baru</div>
+    </div>`;
+  }
+
+  // 28-day strip
+  renderCycleStrip(info);
+
+  // Phase mini cards
+  const pr=document.getElementById('phase-row');
+  pr.innerHTML=PHASES.map(p=>{
+    const active=info&&info.phase===p.id;
+    const {len,dur}=cycleData;
+    let dayRange='—';
+    if(cycleData.lmp){
+      const foll_end=dur+Math.round((len-dur)*0.35);
+      const ovul_end=foll_end+3;
+      if(p.id==='mens')dayRange=`H1–${dur}`;
+      else if(p.id==='foll')dayRange=`H${dur+1}–${foll_end}`;
+      else if(p.id==='ovul')dayRange=`H${foll_end+1}–${ovul_end}`;
+      else dayRange=`H${ovul_end+1}–${len}`;
+    }
+    return`<div class="ph-mini ${p.id}" style="${active?'box-shadow:0 3px 12px rgba(0,0,0,.12)':''}">
+      <div class="ph-mini-ico">${p.emoji}</div>
+      <div class="ph-mini-name ${p.id}">${p.name}</div>
+      <div class="ph-mini-day">${dayRange}</div>
+      ${active?`<div class="ph-mini-tip" style="color:var(--${p.id})">← Kamu di sini</div>`:''}
+    </div>`;
+  }).join('');
+
+  // Predictions
+  const preds=getPredictions();
+  const pl=document.getElementById('pred-list');
+  if(!preds.length){
+    pl.innerHTML='<div style="font-size:13px;color:var(--muted);padding:8px 0">Atur siklus untuk melihat prediksi.</div>';
+  } else {
+    pl.innerHTML=preds.map(p=>`<div class="pred-row">
+      <div class="pred-dot" style="background:${p.color}"></div>
+      <div class="pred-lbl">${p.label}</div>
+      <div class="pred-date">${p.date}${p.daysUntil>=0?` · <b style="color:${p.color}">${p.daysUntil===0?'Hari ini!':p.daysUntil+' hari lagi'}</b>`:' · sudah lewat'}</div>
+    </div>`).join('');
+  }
+
+  // Mood-phase correlation
+  renderMoodPhaseCorr();
+
+  // Tips
+  const tipEl=document.getElementById('cycle-tip');
+  if(info){
+    const phase=PHASES.find(p=>p.id===info.phase)||PHASES[3];
+    tipEl.textContent=phase.tip;
+  }
+
+  // Home banner
+  renderHomeCycleBanner(info);
+}
+
+function renderCycleStrip(info){
+  const strip=document.getElementById('cycle-days');
+  const {len,dur}=cycleData;
+  const today=new Date();today.setHours(0,0,0,0);
+  let html='';
+
+  for(let d=1;d<=len;d++){
+    const phase=getCyclePhase(d);
+    const isToday=info&&info.dayOfCycle===d;
+    // dot color
+    const dotClass=phase==='mens'?'cd-dot-m':phase==='foll'?'cd-dot-f':phase==='ovul'?'cd-dot-o':'cd-dot-l';
+    html+=`<div class="cd ${phase}-d${isToday?' today-d':''}">
+      <div class="cd-n">${d}</div>
+      <div class="cd-dot ${dotClass}"></div>
+    </div>`;
+  }
+  strip.innerHTML=html;
+  // scroll today into view
+  if(info){
+    setTimeout(()=>{
+      const todayEl=strip.querySelector('.today-d');
+      if(todayEl)todayEl.scrollIntoView({inline:'center',behavior:'smooth',block:'nearest'});
+    },100);
+  }
+}
+
+function renderMoodPhaseCorr(){
+  const container=document.getElementById('corr-rows');
+  const phaseColors={'mens':'#ff6b8a','foll':'#f59e0b','ovul':'#8b5cf6','lute':'#3b82f6'};
+  const phaseAvg={mens:[],foll:[],ovul:[],lute:[]};
+
+  // Map entries to cycle phases using timestamp
+  if(cycleData.lmp){
+    const lmp=new Date(cycleData.lmp);lmp.setHours(0,0,0,0);
+    entries.forEach(e=>{
+      const d=new Date(e.ts);d.setHours(0,0,0,0);
+      const daysSince=diffDays(lmp,d);
+      const dayOfCycle=((daysSince%cycleData.len)+cycleData.len)%cycleData.len+1;
+      const phase=getCyclePhase(dayOfCycle);
+      if(phase&&e.mood)phaseAvg[phase].push(e.mood.s);
+    });
+  }
+
+  const hasData=Object.values(phaseAvg).some(a=>a.length>0);
+  if(!hasData){
+    container.innerHTML='<div style="font-size:13px;color:var(--muted);padding:8px 0">Data akan muncul setelah kamu check-in & atur siklus.</div>';
+    return;
+  }
+
+  container.innerHTML=PHASES.map(p=>{
+    const arr=phaseAvg[p.id];
+    if(!arr.length)return`<div class="corr-row">
+      <div class="corr-phase"><div class="corr-dot" style="background:${phaseColors[p.id]}"></div><div class="corr-name">${p.name}</div></div>
+      <div style="flex:1;font-size:11px;color:var(--muted)">Belum ada data</div>
+    </div>`;
+    const avg=arr.reduce((a,b)=>a+b,0)/arr.length;
+    const pct=Math.round((avg/5)*100);
+    return`<div class="corr-row">
+      <div class="corr-phase"><div class="corr-dot" style="background:${phaseColors[p.id]}"></div><div class="corr-name">${p.name}</div></div>
+      <div class="corr-bar-bg"><div class="corr-bar-fill" style="width:${pct}%;background:${phaseColors[p.id]}"></div></div>
+      <div class="corr-val">${avg.toFixed(1)}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderHomeCycleBanner(info){
+  const el=document.getElementById('home-cycle-banner');
+  if(!info){
+    el.className='cycle-banner none';
+    el.innerHTML=`<div class="cb-ico">🌸</div>
+      <div class="cb-body">
+        <div class="cb-tag none">Cycle Tracker</div>
+        <div class="cb-title">Mulai tracking siklus menstruasimu</div>
+        <div class="cb-sub">Pahami hubungan mood & siklus →</div>
+      </div>
+      <div class="cb-arr">›</div>`;
+    return;
+  }
+  const phase=PHASES.find(p=>p.id===info.phase)||PHASES[3];
+  el.className=`cycle-banner ${info.phase}`;
+  el.innerHTML=`<div class="cb-ico">${phase.emoji}</div>
+    <div class="cb-body">
+      <div class="cb-tag ${info.phase}">Fase ${phase.name} · H${info.dayOfCycle}</div>
+      <div class="cb-title">${getCycleBannerTitle(info.phase)}</div>
+      <div class="cb-sub">Lihat detail siklus →</div>
+    </div>
+    <div class="cb-arr" style="color:${phase.color}">›</div>`;
+}
+
+function getCycleBannerTitle(phase){
+  const titles={
+    mens:'Hari menstruasi, jaga dirimu 💗',
+    foll:'Energi mulai naik, saatnya mulai sesuatu! 🌱',
+    ovul:'Puncak energi! Manfaatkan momen ini ⭐',
+    lute:'Fase luteal, self-care dulu ya 🌙',
+  };
+  return titles[phase]||'Lihat siklus lengkapmu';
+}
+
+/* ══ CYCLE SETUP MODAL ══ */
+function showCycleSetup(){
+  const m=document.getElementById('cycle-modal');
+  const sheet=document.getElementById('cycle-modal-sheet');
+  // pre-fill
+  document.getElementById('cyc-len').value=cycleData.len;
+  document.getElementById('cyc-dur').value=cycleData.dur;
+  if(cycleData.lmp){
+    document.getElementById('cyc-lmp').value=cycleData.lmp;
+  } else {
+    // default to today
+    const today=new Date();
+    const y=today.getFullYear(),mo=String(today.getMonth()+1).padStart(2,'0'),d=String(today.getDate()).padStart(2,'0');
+    document.getElementById('cyc-lmp').value=`${y}-${mo}-${d}`;
+  }
+  m.style.visibility='visible';m.style.opacity='1';
+  setTimeout(()=>sheet.style.transform='none',10);
+}
+
+function closeCycleModal(){
+  const m=document.getElementById('cycle-modal');
+  const sheet=document.getElementById('cycle-modal-sheet');
+  sheet.style.transform='translateY(100%)';
+  setTimeout(()=>{m.style.visibility='hidden';m.style.opacity='0'},320);
+}
+
+function saveCycleSetup(){
+  const len=parseInt(document.getElementById('cyc-len').value)||28;
+  const dur=parseInt(document.getElementById('cyc-dur').value)||5;
+  const lmp=document.getElementById('cyc-lmp').value;
+  cycleData={len:Math.min(45,Math.max(21,len)),dur:Math.min(10,Math.max(2,dur)),lmp};
+  saveCycle();
+  closeCycleModal();
+  renderCycleScreen();
+}
+
+/* ══ PERIOD LOG ══ */
+function buildLogCard(){
+  // Flow buttons
+  const fr=document.getElementById('flow-row');
+  fr.innerHTML=FLOWS.map((f,i)=>`<div class="flow-btn${curFlow===i?' sel':''}" onclick="selectFlow(${i})">
+    <div class="flow-dot-row">${Array(f.dots).fill('<div class="fd"></div>').join('')}</div>
+    ${f.l}
+  </div>`).join('');
+
+  // Symptom buttons
+  const sg=document.getElementById('sym-grid');
+  sg.innerHTML=SYMPTOMS.map((s,i)=>`<div class="sym-btn${curSymptoms.includes(i)?' sel':''}" onclick="toggleSym(${i})">
+    <span class="sym-e">${s.e}</span>
+    <span class="sym-l">${s.l}</span>
+  </div>`).join('');
+}
+
+function selectFlow(i){
+  curFlow=i;
+  buildLogCard();
+}
+
+function toggleSym(i){
+  const idx=curSymptoms.indexOf(i);
+  if(idx>=0)curSymptoms.splice(idx,1);
+  else curSymptoms.push(i);
+  buildLogCard();
+}
+
+function logPeriodToday(){
+  const today=dateKey(new Date());
+  // remove existing log for today
+  cycleLogs=cycleLogs.filter(l=>l.date!==today);
+  cycleLogs.push({
+    date:today,
+    flow:curFlow!==null?FLOWS[curFlow].l:null,
+    symptoms:curSymptoms.map(i=>SYMPTOMS[i].l),
+  });
+  saveClogs();
+
+  // Also update LMP if this is the first day logged recently
+  if(!cycleData.lmp||(cycleData.lmp && diffDays(new Date(cycleData.lmp),new Date())>7)){
+    cycleData.lmp=today;
+    saveCycle();
+  }
+
+  curFlow=null;curSymptoms=[];
+  buildLogCard();
+  renderCycleScreen();
+
+  // brief flash
+  const btn=document.querySelector('#cycle-log-card .cta.pink');
+  const orig=btn.textContent;
+  btn.textContent='✓ Tersimpan!';
+  setTimeout(()=>btn.textContent=orig,1600);
+}
+
+/* ══ SPLASH ══ */
+function enterApp(){
+  const s=document.getElementById('splash');
+  s.classList.add('hide');
+  setTimeout(()=>{
+    s.style.display='none';
+    if(!localStorage.getItem('moodly_user')){
+      document.getElementById('name-modal').classList.add('show');
+    } else {
+      uname=localStorage.getItem('moodly_user');
+      greet();
+    }
+    showScreen('home');
+  },520);
+}
+function saveName(){
+  const v=document.getElementById('name-in').value.trim();
+  if(!v){document.getElementById('name-in').style.borderColor='#e53935';return}
+  uname=v;localStorage.setItem('moodly_user',v);
+  document.getElementById('name-modal').classList.remove('show');
+  greet();updateHome();
+}
+
+/* ══ PROFILE ══ */
+function showProf(){
+  document.getElementById('pm-name').textContent=uname||'User';
+  document.getElementById('pm-in').value=uname;
+  document.getElementById('pm-ci').textContent=entries.length;
+  document.getElementById('pm-st').textContent=streak();
+  if(entries.length){
+    const avg=entries.reduce((s,e)=>s+(e.mood?.s||3),0)/entries.length;
+    const m=MOODS.find(x=>x.s===Math.round(avg))||MOODS[2];
+    document.getElementById('pm-av').textContent=m.e;
+  }
+  document.getElementById('prof-modal').classList.add('show');
+}
+function closeProf(){document.getElementById('prof-modal').classList.remove('show')}
+function updateName(){
+  const v=document.getElementById('pm-in').value.trim();if(!v)return;
+  uname=v;localStorage.setItem('moodly_user',v);
+  closeProf();greet();updateHome();
+}
+function clearData(){
+  if(!confirm('Hapus semua data? Tidak bisa dibatalkan.'))return;
+  entries=[];save();cycleLogs=[];saveClogs();
+  cycleData={lmp:'',len:28,dur:5};saveCycle();
+  closeProf();updateHome();updateInsight();renderCycleScreen();
+}
+function streak(){
+  const t=new Date();t.setHours(0,0,0,0);
+  const s=new Set(entries.map(e=>{const d=new Date(e.ts);d.setHours(0,0,0,0);return d.getTime()}));
+  let n=0;
+  for(let i=0;i<90;i++){const d=new Date(t);d.setDate(t.getDate()-i);if(s.has(d.getTime()))n++;else if(i>0)break}
+  return n;
+}
+
+/* ══ GREETING ══ */
+function greet(){
+  const h=new Date().getHours();
+  const t=h<5?'Tengah malam':h<12?'Pagi':h<15?'Siang':h<18?'Sore':'Malam';
+  const ico=h<5?'🌙':h<12?'☀️':h<18?'🌤️':'🌙';
+  const n=uname||'kamu';
+  document.getElementById('hero-tag').textContent=`Selamat ${t}, ${n} ${ico}`;
+  document.getElementById('tb-uname').textContent=uname||'Profil';
+}
+
+/* ══ SCREENS ══ */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(b=>{
+    b.classList.remove('on','on-pink');
+    b.querySelector('svg').setAttribute('stroke','#8aab97');
+    b.querySelector('.ni-lbl').style.color='';
+  });
+  document.getElementById(id).classList.add('active');
+  const nb=document.getElementById(`ni-${id}`);
+  if(nb){
+    const isCycle=id==='cycle';
+    nb.classList.add(isCycle?'on-pink':'on');
+    nb.querySelector('svg').setAttribute('stroke','white');
+    nb.querySelector('.ni-lbl').style.color='white';
+  }
+  if(id==='home')updateHome();
+  if(id==='insight')updateInsight();
+  if(id==='news')initNews();
+  if(id==='cycle'){renderCycleScreen();buildLogCard();}
+}
+
+/* ══ CHECK-IN ══ */
+function startCheckin(){
+  cur={mood:null,causes:[],intensity:null};
+  document.querySelectorAll('.mood-btn,.cause-btn,.int-btn').forEach(x=>x.classList.remove('sel'));
+  document.getElementById('btn1').disabled=true;
+  document.getElementById('btn3').disabled=true;
+  goStep(1);showScreen('checkin');
+}
+const CI_TITLES=['','Mood kamu sekarang?','Apa yang paling ngaruh?','Seberapa intens?'];
+function goStep(n){
+  [1,2,3].forEach(i=>{
+    document.getElementById(`st${i}`).classList.toggle('on',i===n);
+    const seg=document.getElementById(`seg${i}`);
+    seg.className='prog-seg';
+    if(i<n)seg.classList.add('done');
+    else if(i===n)seg.classList.add('on');
+  });
+  document.getElementById('ci-num').textContent=`${n} / 3`;
+  document.getElementById('ci-title').textContent=CI_TITLES[n];
+}
+function submitCheckin(){
+  entries.push({ts:new Date().toISOString(),mood:cur.mood,causes:[...cur.causes],intensity:cur.intensity});
+  save();
+  const msgs=['Proud of you buat check-in hari ini 🫂','Udah jujur sama diri sendiri, keren! ✨','Satu langkah kecil yang berarti besar 🌱','You doing great, keep going! 💚','Tiap check-in itu bentuk self-love 💚'];
+  document.getElementById('suc-em').textContent=cur.mood.e;
+  document.getElementById('suc-s').textContent=msgs[Math.floor(Math.random()*5)];
+  const s=document.getElementById('success');s.classList.add('show');
+  setTimeout(()=>{s.classList.remove('show');showScreen('home')},2100);
+}
+
+/* ══ HOME ══ */
+function updateHome(){
+  greet();
+  document.getElementById('s-total').textContent=entries.length;
+  document.getElementById('streak').textContent=streak();
+  if(entries.length){
+    const avg=entries.reduce((s,e)=>s+(e.mood?.s||3),0)/entries.length;
+    const m=MOODS.find(x=>x.s===Math.round(avg))||MOODS[2];
+    document.getElementById('s-avg').textContent=m.e;
+  }
+  const el=document.getElementById('last-wrap');
+  if(entries.length){
+    const last=entries[entries.length-1];
+    const d=new Date(last.ts);
+    const t=d.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+    el.innerHTML=`<div class="lcard">
+      <div class="lcard-em">${last.mood?.e||'😐'}</div>
+      <div>
+        <div class="lcard-tag">Terakhir Check-in</div>
+        <div class="lcard-name">${last.mood?.l||'—'}${last.intensity?' · '+last.intensity:''}</div>
+        <div class="lcard-meta">${t}</div>
+        ${last.causes.length?`<div class="lcard-chips">${last.causes.map(c=>`<span class="lchip">${c}</span>`).join('')}</div>`:''}
+      </div>
+    </div>`;
+  } else {
+    el.innerHTML=`<div style="text-align:center;padding:18px;color:var(--muted);font-size:13px">Belum ada check-in 👋<br><small>Tap tombol Check-in di atas</small></div>`;
+  }
+  // cycle banner
+  const info=getCurrentCycleInfo();
+  renderHomeCycleBanner(info);
+  buildHomePreview();
+}
+
+function buildHomePreview(){
+  const el=document.getElementById('home-prev');
+  if(!artStore.length){
+    el.innerHTML=`<div class="prev-card" onclick="showScreen('news')">
+      <div class="prev-em">📰</div>
+      <div><div class="prev-src">Artikel Harian</div><div class="prev-title">Tips kesehatan mental berganti setiap hari →</div></div>
+    </div>`;
+    return;
+  }
+  el.innerHTML=artStore.slice(0,2).map((a,i)=>`
+    <div class="prev-card" onclick="openArt(${i})" style="margin-bottom:7px">
+      <div class="prev-em">${a.emoji}</div>
+      <div>
+        <div class="prev-src">${a.source}</div>
+        <div class="prev-title">${a.title}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ══ INSIGHT ══ */
+function updateInsight(){
+  const bw=document.getElementById('chart-bars');bw.innerHTML='';
+  const days=['Min','Sen','Sel','Rab','Kam','Jum','Sab'],today=new Date();
+  for(let i=6;i>=0;i--){
+    const d=new Date(today);d.setDate(today.getDate()-i);d.setHours(0,0,0,0);
+    const de=entries.filter(e=>{const ed=new Date(e.ts);ed.setHours(0,0,0,0);return ed.getTime()===d.getTime()});
+    const avg=de.length?de.reduce((s,e)=>s+(e.mood?.s||3),0)/de.length:0;
+    const h=avg?(avg/5)*70+8:0;
+    const last=de.length?de[de.length-1].mood:null;
+    const col=last?last.c:'#e0f0e8';
+    const w=document.createElement('div');w.className='bar-col';
+    w.innerHTML=`${last?`<div class="bar-em">${last.e}</div>`:'<div class="bar-em" style="opacity:0">·</div>'}
+      <div class="bar" style="height:${h}px;background:${col};opacity:${de.length?1:.3}"></div>
+      <div class="bar-d">${days[d.getDay()]}</div>`;
+    bw.appendChild(w);
+  }
+
+  const cg=document.getElementById('cal-grid');
+  const now=new Date(),yr=now.getFullYear(),mo=now.getMonth();
+  const fd=new Date(yr,mo,1).getDay(),dim=new Date(yr,mo+1,0).getDate(),tod=now.getDate();
+  const mbd={};entries.forEach(e=>{const d=new Date(e.ts);if(d.getFullYear()===yr&&d.getMonth()===mo)mbd[d.getDate()]=e.mood});
+  let html='';for(let i=0;i<fd;i++)html+=`<div class="cal-day"></div>`;
+  for(let dt=1;dt<=dim;dt++){
+    const mood=mbd[dt];
+    html+=`<div class="cal-day${mood?' filled':''}${dt===tod?' today':''}">
+      <span>${dt}</span>${mood?`<span class="cal-em">${mood.e}</span>`:''}
+    </div>`;
+  }
+  cg.innerHTML=html;
+
+  const week=entries.filter(e=>(today-new Date(e.ts))<7*86400000);
+  const itxt=document.getElementById('ins-txt');
+  if(week.length>=3){
+    const avg=week.reduce((s,e)=>s+(e.mood?.s||3),0)/week.length;
+    itxt.textContent=avg>=4?'🌟 Seminggu ini mood kamu positif banget! Maintain energy ini ya.':avg>=3?'⚖️ Mood kamu cukup stabil. Ada ups and downs, tapi kamu handle dengan baik.':'💙 Minggu ini berat ya. Ingat, minta bantuan itu kuat, bukan lemah.';
+  } else if(week.length){
+    itxt.textContent=`📈 Kamu udah ${week.length}x check-in! Terusin biar makin akurat.`;
+  }
+
+  const cc={};week.forEach(e=>e.causes.forEach(c=>{cc[c]=(cc[c]||0)+1}));
+  const tot=Object.values(cc).reduce((a,b)=>a+b,0);
+  document.getElementById('cause-chips').innerHTML=tot?
+    Object.entries(cc).sort((a,b)=>b[1]-a[1]).map(([n,cnt])=>`<div class="chip">${n} <span class="chip-pct">${Math.round(cnt/tot*100)}%</span></div>`).join(''):
+    '<span style="font-size:12px;color:var(--muted)">Belum ada data</span>';
+
+  const jl=document.getElementById('journal');
+  const rec=entries.slice(-5).reverse();
+  jl.innerHTML=rec.length?rec.map(e=>{
+    const d=new Date(e.ts);
+    const t=d.toLocaleDateString('id-ID',{weekday:'short',day:'numeric',month:'short'});
+    return`<div class="jrow">
+      <span style="font-size:21px">${e.mood?.e||'😐'}</span>
+      <div>
+        <div style="font-size:12px;font-weight:700;color:var(--text)">${e.mood?.l||'—'} · ${e.intensity||'—'}</div>
+        <div style="font-size:11px;color:var(--muted)">${t}${e.causes.length?' · '+e.causes.slice(0,2).join(', '):''}</div>
+      </div>
+    </div>`;
+  }).join(''):'<div style="font-size:13px;color:var(--muted);padding:7px 0">Belum ada riwayat</div>';
+}
+
+function exportPDF(){
+  if(!entries.length){alert('Coba check-in dulu ya!');return}
+  const week=entries.filter(e=>(new Date()-new Date(e.ts))<7*86400000);
+  const cc={};week.forEach(e=>e.causes.forEach(c=>{cc[c]=(cc[c]||0)+1}));
+  const top=Object.entries(cc).sort((a,b)=>b[1]-a[1])[0];
+  const info=getCurrentCycleInfo();
+  const win=window.open('','_blank');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Moodly Report</title>
+  <style>body{font-family:sans-serif;max-width:600px;margin:40px auto;padding:20px}h1{color:#0d8c3e}.sec{background:#f4faf7;border-radius:12px;padding:18px;margin-bottom:12px}.sec h2{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#8aab97;margin-bottom:10px}.entry{border-bottom:1px solid #e0f0e8;padding:9px 0;display:flex;align-items:center;gap:10px}.entry:last-child{border-bottom:none}.em{font-size:22px}.badge{display:inline-block;background:#e8faf0;border-radius:8px;padding:7px 12px;margin:3px}.bv{font-size:18px;font-weight:900;color:#0d8c3e}.bl{font-size:10px;color:#999}.cycle-badge{background:#fff0f3;}.cycle-bv{color:#ff6b8a}@media print{body{margin:0}}</style>
+  </head><body><h1>🌱 Mood Report</h1>
+  <p style="color:#999;font-size:13px;margin-bottom:18px">${new Date().toLocaleDateString('id-ID',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</p>
+  <div class="sec"><h2>Ringkasan 7 Hari</h2>
+  <div class="badge"><div class="bv">${week.length}</div><div class="bl">Check-in</div></div>
+  ${week.length?`<div class="badge"><div class="bv">${(week.reduce((s,e)=>s+(e.mood?.s||3),0)/week.length).toFixed(1)}/5</div><div class="bl">Rata-rata</div></div>`:''}
+  ${top?`<div class="badge"><div class="bv">${top[0]}</div><div class="bl">Penyebab Utama</div></div>`:''}
+  ${info?`<div class="badge cycle-badge"><div class="bv cycle-bv">${PHASES.find(p=>p.id===info.phase)?.name||'—'}</div><div class="bl">Fase Siklus</div></div>`:''}
+  </div><div class="sec"><h2>Riwayat (${entries.length})</h2>
+  ${entries.slice(-20).reverse().map(e=>`<div class="entry"><div class="em">${e.mood?.e||'😐'}</div><div><div style="font-weight:700;font-size:13px">${e.mood?.l||'—'} · ${e.intensity||''}</div><div style="font-size:11px;color:#999">${new Date(e.ts).toLocaleDateString('id-ID',{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</div>${e.causes.length?`<div style="font-size:10px;color:#666">${e.causes.join(' · ')}</div>`:''}</div></div>`).join('')}
+  </div><script>window.print();<\/script></body></html>`);
+  win.document.close();
+}
+
+/* ══ NEWS ══ */
+const TOPICS=[
+  ['meningkatkan mood pagi hari alami','teknik grounding kecemasan panik','sleep hygiene tidur berkualitas','self-care realistis sehari-hari','bangkit setelah hari berat','makanan pengaruhi mood'],
+  ['journaling manfaat kesehatan mental','olahraga dan kesehatan jiwa','mengelola stres pekerjaan','dopamin kebiasaan positif','meditasi mindfulness pemula','hubungan sosial kebahagiaan'],
+  ['mengatasi overthinking cara efektif','sindrom impostor cara mengatasinya','screen time kesehatan mental','gratitude dan kebahagiaan ilmiah','burnout tanda dan cara pulih','kecemasan sosial tips'],
+  ['self-compassion pentingnya','cara menenangkan diri saat panik','kebiasaan pagi mood positif','digital detox manfaat mental','nutrisi otak dan emosi','melepaskan perfeksionisme'],
+  ['terapi CBT manfaat cara kerja','mindful eating hubungan makanan','inner child healing pengantar','afirmasi positif cara kerja','peer support kesehatan mental','rutinitas malam tidur berkualitas'],
+];
+const CATMAP=['mood','stres','tidur','self-care','motivasi','mood'];
+
+function initNews(){
+  document.getElementById('date-pill').innerHTML=`
+    <svg width="9" height="9" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="#0a9e3f" stroke-width="2"/><path d="M3 10h18M8 2v4M16 2v4" stroke="#0a9e3f" stroke-width="2"/></svg>
+    ${todayLabel()}`;
+  const key=todayKey();
+  if(cache.key===key&&cache.arts.length){
+    artStore=cache.arts;renderNews(artStore,curFilter);buildHomePreview();
+  } else {
+    loadArticles();
+  }
+}
+
+async function loadArticles(){
+  document.getElementById('news-wrap').innerHTML=`<div class="ldwrap"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><div class="ld-txt">Menyiapkan artikel hari ini…</div></div>`;
+  const today=new Date();
+  const doy=Math.floor((today-new Date(today.getFullYear(),0,0))/86400000);
+  const topics=TOPICS[doy%TOPICS.length];
+  const cats=topics.map((_,i)=>CATMAP[i]||'mood');
+  const prompt=`Kamu penulis kesehatan mental Indonesia yang hangat dan berbasis bukti ilmiah.
+Tanggal hari ini: ${today.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}.
+Tulis tepat 6 artikel lengkap dan unik. Topik (sesuai urutan, satu artikel per topik):
+${topics.map((t,i)=>`${i+1}. ${t}`).join('\n')}
+Kembalikan HANYA JSON array valid, tanpa markdown, tanpa teks di luar JSON:
+[{"id":1,"cat":"${cats[0]}","emoji":"<emoji>","source":"<Halodoc|Alodokter|Klikdokter|SehatQ|Kompas Health|Hellosehat|Riliv Blog>","title":"<max 12 kata>","preview":"<2 kalimat menarik>","tags":["<tag1>","<tag2>","<tag3>"],"readTime":"<X menit>","content":"<HTML artikel min 450 kata: pakai p h3 blockquote ul li strong, bahasa hangat relatable, ada tips praktis, akhiri motivasi>"},...]
+Kategori tiap artikel: ${cats.join(', ')}`;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:6000,messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();
+    const raw=data.content.map(c=>c.text||'').join('');
+    const arts=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    artStore=arts;cache={key:todayKey(),arts};saveCache();
+    renderNews(arts,curFilter);buildHomePreview();
+  }catch(e){
+    artStore=fallback();cache={key:todayKey(),arts:artStore};saveCache();
+    renderNews(artStore,curFilter);buildHomePreview();
+  }
+}
+
+function filterNews(cat,btn){
+  curFilter=cat;
+  document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');
+  if(artStore.length)renderNews(artStore,cat);
+}
+
+function renderNews(arts,filter){
+  const list=filter==='semua'?arts:arts.filter(a=>a.cat===filter);
+  const wrap=document.getElementById('news-wrap');
+  if(!list.length){wrap.innerHTML=`<div style="text-align:center;padding:40px 0;color:var(--muted);font-size:14px">Tidak ada artikel untuk kategori ini</div>`;return}
+  wrap.innerHTML=`<div class="nlist">${list.map((a)=>{
+    const idx=artStore.indexOf(a);
+    return`<div class="ncard" onclick="openArt(${idx})">
+      <div class="ncard-top">
+        <div class="ncard-thumb">${a.emoji}</div>
+        <div class="ncard-body">
+          <div class="ncard-src-row"><div class="ncard-dot"></div><div class="ncard-src">${a.source}</div></div>
+          <div class="ncard-title">${a.title}</div>
+          <div class="ncard-snip">${a.preview}</div>
+        </div>
+      </div>
+      <div class="ncard-bot">
+        <div class="ncard-read">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5l7 7-7 7" stroke="#1db954" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Baca · ${a.readTime}
+        </div>
+        <div class="ncard-tags">${(a.tags||[]).slice(0,2).map(t=>`<span class="ntag">${t}</span>`).join('')}</div>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+async function forceRefresh(){
+  const ic=document.getElementById('rf-ic');
+  ic.style.transition='transform .45s';ic.style.transform='rotate(360deg)';
+  setTimeout(()=>{ic.style.transition='';ic.style.transform=''},460);
+  cache={key:'',arts:[]};saveCache();artStore=[];
+  await loadArticles();
+}
+
+function openArt(idx){
+  const a=artStore[idx];if(!a)return;
+  document.getElementById('art-tb-src').textContent=a.source;
+  document.getElementById('art-tb-ttl').textContent=a.title;
+  const cats={mood:'Mood & Emosi',stres:'Stres & Kecemasan',tidur:'Kualitas Tidur','self-care':'Self-Care',motivasi:'Motivasi & Resiliensi'};
+  const dateStr=new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('art-body').innerHTML=`
+    <div class="art-cat">${cats[a.cat]||'Kesehatan Mental'}</div>
+    <div class="art-title">${a.title}</div>
+    <div class="art-meta">
+      <span class="art-src">${a.source}</span>
+      <span class="art-date">📅 ${dateStr}</span>
+      <span class="art-rt">⏱ ${a.readTime}</span>
+    </div>
+    <div class="art-hero">${a.emoji}</div>
+    <div class="art-content">${a.content}</div>
+    <div class="art-tags">${(a.tags||[]).map(t=>`<span class="art-tag">${t}</span>`).join('')}</div>
+  `;
+  const ov=document.getElementById('art-ov');
+  const sc=document.querySelector('.art-scroll');
+  ov.style.display='flex';sc.scrollTop=0;
+  ov.getBoundingClientRect();ov.classList.add('open');
+  history.pushState({art:true},'');
+}
+
+function closeArt(){
+  const ov=document.getElementById('art-ov');
+  ov.classList.remove('open');
+  setTimeout(()=>ov.style.display='',320);
+}
+
+window.addEventListener('popstate',()=>{
+  const ov=document.getElementById('art-ov');
+  if(ov.classList.contains('open'))closeArt();
+});
+
+/* ══ FALLBACK ARTICLES ══ */
+function fallback(){
+  return[
+    {id:1,cat:'mood',emoji:'😊',source:'Halodoc',title:'5 Cara Alami Boost Mood di Pagi Hari',preview:'Pagi hari menentukan tone suasana hatimu seharian. Yuk kenali cara sederhana yang terbukti efektif.',tags:['mood','pagi hari','tips'],readTime:'4 menit',content:'<p>Pernah bangun pagi tapi mood udah di lantai duluan? Kamu nggak sendirian. Suasana hati pagi dipengaruhi banyak faktor — kualitas tidur, apa yang kamu lakukan pertama kali, paparan cahaya.</p><h3>1. Buka Tirai, Sambut Sinar Matahari</h3><p>Paparan sinar matahari adalah sinyal alami bagi otak untuk memproduksi <strong>serotonin</strong>. Hanya 10–15 menit sudah cukup mengubah mood pagi hari.</p><blockquote>Penelitian dari Journal of Affective Disorders membuktikan terapi cahaya meningkatkan mood secara konsisten.</blockquote><h3>2. Tunda Buka HP 20 Menit</h3><p>Notifikasi pagi membuat otak langsung masuk mode reaktif dan stres. Gunakan 20 menit pertama untuk stretching, minum air putih, atau menulis 3 hal yang kamu syukuri.</p><h3>3. Sarapan Bergizi</h3><p>Sarapan tinggi protein dan serat kompleks menstabilkan gula darah dan mood sepanjang hari.</p><h3>4. Gerakan Ringan</h3><p>Jalan kaki 10 menit atau stretching memicu pelepasan <strong>endorfin</strong> alami — efeknya bisa bertahan hingga beberapa jam.</p><h3>5. Satu Niat Harian</h3><p>Tetapkan satu hal yang ingin kamu selesaikan hari ini. Mulai kecil, tapi mulai hari ini. 💚</p>'},
+    {id:2,cat:'stres',emoji:'😰',source:'Alodokter',title:'Teknik 5-4-3-2-1 Grounding untuk Redakan Panik',preview:'Kecemasan mendadak bisa diredakan hanya dalam 5 menit dengan teknik grounding sederhana ini.',tags:['kecemasan','grounding','panik'],readTime:'5 menit',content:'<p>Serangan kecemasan bisa datang kapan saja. Teknik <strong>5-4-3-2-1 Grounding</strong> mengalihkan fokus dari pikiran yang berputar ke pengalaman inderawi saat ini.</p><h3>Cara Melakukannya</h3><ul><li><strong>5 hal yang bisa kamu LIHAT</strong></li><li><strong>4 hal yang bisa kamu RASAKAN</strong></li><li><strong>3 hal yang bisa kamu DENGAR</strong></li><li><strong>2 hal yang bisa kamu CIUM</strong></li><li><strong>1 hal yang bisa kamu RASAKAN di mulut</strong></li></ul><blockquote>Grounding bukan tentang menghilangkan kecemasan — ini tentang membantumu melewatinya dengan lebih sadar.</blockquote><p>Latih saat tenang agar saat cemas kamu sudah otomatis. Kamu bisa melewati ini. 💙</p>'},
+    {id:3,cat:'tidur',emoji:'😴',source:'Klikdokter',title:'Kenapa 7–9 Jam Tidur Bisa Mengubah Segalanya',preview:'Kurang tidur bukan hanya soal ngantuk. Ada alasan neurologis mengapa tidur berkualitas adalah fondasi kesehatan mental.',tags:['tidur','sleep hygiene','otak'],readTime:'5 menit',content:'<p>Selama tidur, otak menjalankan proses krusial: membersihkan limbah metabolik, mengkonsolidasi memori emosional, dan meregulasi hormon stres.</p><blockquote>Satu malam kurang tidur meningkatkan reaktivitas amigdala hingga 60%.</blockquote><h3>Sleep Hygiene yang Benar-Benar Bekerja</h3><ul><li><strong>Konsistensi waktu</strong> — tidur dan bangun di jam yang sama</li><li><strong>Stop layar 60 menit sebelum tidur</strong></li><li><strong>Suhu kamar 18–20°C</strong></li><li><strong>Rutinitas winding down</strong></li></ul><p>Investasi konsisten dalam sleep hygiene adalah salah satu hal terbaik untuk kesehatan mentalmu. 🌙</p>'},
+    {id:4,cat:'self-care',emoji:'🛁',source:'SehatQ',title:'Self-Care Realistis untuk Kamu yang Sibuk',preview:'Self-care sejati bukan spa mahal. Ini tentang kebiasaan kecil yang kamu lakukan secara konsisten.',tags:['self-care','kebiasaan','well-being'],readTime:'5 menit',content:'<p>Self-care adalah tindakan <strong>sadar</strong> dan <strong>konsisten</strong> untuk memelihara kesehatan fisik, emosional, dan mental.</p><h3>Micro Self-Care: 5 Menit yang Mengubah Hari</h3><ul><li><strong>Hidrasi sadar</strong></li><li><strong>Pause 2 menit</strong> di antara task</li><li><strong>Stretching micro</strong> setiap jam</li><li><strong>Check-in internal</strong> — tanya ke dirimu: aku butuh apa sekarang?</li></ul><blockquote>Kamu tidak bisa menuangkan dari gelas yang kosong.</blockquote><p>Mulai dengan SATU kebiasaan self-care minggu ini. Kamu layak mendapat perhatian itu. 🌱</p>'},
+    {id:5,cat:'motivasi',emoji:'💪',source:'Hellosehat',title:'Cara Bangkit Setelah Hari Paling Berat',preview:'Ada perbedaan besar antara move on paksa dan benar-benar pulih. Ini cara yang lebih sehat.',tags:['resiliensi','self-compassion','bangkit'],readTime:'5 menit',content:'<p>Menolak atau menekan emosi negatif justru membuat kita makin stuck. <strong>Emosi bukan musuh — melainkan informasi yang perlu didengar.</strong></p><h3>Langkah 1: Izinkan Dirimu Merasa</h3><p>Hari ini berat. Itu nyata. Mengakuinya bukan tanda kelemahan.</p><h3>Langkah 2: Dekompresi Dulu</h3><ul><li>Jalan kaki tanpa earphone</li><li>Tulis semua yang bikin frustrasi</li><li>Hubungi satu orang yang kamu percaya</li></ul><blockquote>Resiliensi bukan tentang tidak pernah jatuh. Ini tentang cara kita bangkit.</blockquote><p>Besok adalah halaman baru. Dan kamu sudah selamat hari ini. Itu cukup. 💚</p>'},
+    {id:6,cat:'mood',emoji:'🥗',source:'Riliv Blog',title:'Makanan yang Diam-Diam Mengontrol Mood Kamu',preview:'Gut-brain connection bukan mitos. Apa yang kamu makan langsung berdampak pada perasaanmu.',tags:['nutrisi','gut-brain','mood'],readTime:'5 menit',content:'<p>Sekitar <strong>90–95% serotonin</strong> diproduksi di usus, bukan di otak.</p><h3>Makanan yang Mendukung Mood Positif</h3><ul><li><strong>Ikan berlemak</strong> — Omega-3 mengurangi peradangan otak</li><li><strong>Fermentasi (tempe, yogurt)</strong> — probiotik menjaga mikrobioma</li><li><strong>Dark chocolate 70%+</strong> — memicu pelepasan endorfin</li><li><strong>Pisang</strong> — mengandung tryptophan</li></ul><blockquote>Tambahkan satu makanan baik per minggu daripada mengeliminasi semua yang buruk sekaligus.</blockquote><p>Mulai kecil, konsisten, dan jadikan makanan sebagai cara merawat dirimu. 🌿</p>'},
+  ];
+}
+
+/* ══ INIT ══ */
+function init(){
+  /* mood grid */
+  const mg=document.getElementById('mood-grid');
+  MOODS.forEach(m=>{
+    const el=document.createElement('div');el.className='mood-btn';
+    el.innerHTML=`<span class="em">${m.e}</span><span class="lb">${m.l}</span>`;
+    el.onclick=()=>{
+      document.querySelectorAll('.mood-btn').forEach(x=>x.classList.remove('sel'));
+      el.classList.add('sel');cur.mood=m;
+      document.getElementById('btn1').disabled=false;
+    };
+    mg.appendChild(el);
+  });
+
+  /* cause grid */
+  const cg=document.getElementById('cause-grid');
+  CAUSES.forEach(c=>{
+    const el=document.createElement('div');el.className='cause-btn';
+    el.innerHTML=`<div class="cause-ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none">${c.svg}</svg></div><span class="cause-nm">${c.n}</span>`;
+    el.onclick=()=>{
+      el.classList.toggle('sel');
+      if(el.classList.contains('sel'))cur.causes.push(c.n);
+      else cur.causes=cur.causes.filter(x=>x!==c.n);
+    };
+    cg.appendChild(el);
+  });
+
+  /* intensity row */
+  const ir=document.getElementById('int-row');
+  INTENSITIES.forEach(t=>{
+    const el=document.createElement('button');el.className='int-btn';
+    el.innerHTML=`<svg viewBox="0 0 24 24" fill="none">${t.svg}</svg>${t.l}`;
+    el.onclick=()=>{
+      document.querySelectorAll('.int-btn').forEach(x=>x.classList.remove('sel'));
+      el.classList.add('sel');cur.intensity=t.l;
+      document.getElementById('btn3').disabled=false;
+    };
+    ir.appendChild(el);
+  });
+
+  /* cycle modal transition */
+  const ms=document.getElementById('cycle-modal-sheet');
+  ms.style.transform='translateY(100%)';
+  ms.style.transition='transform .32s cubic-bezier(.4,0,.2,1)';
+
+  if(uname)greet();
+  updateHome();
+  updateInsight();
+  renderCycleScreen();
+}
+
+if('serviceWorker' in navigator)
+  window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+
+document.addEventListener('DOMContentLoaded',()=>{showScreen('home');init()});
+</script>
+</body>
+</html>
