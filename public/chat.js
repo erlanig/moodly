@@ -1,58 +1,93 @@
 /* ═══════════════════════════════════════
    MOODLY — chat.js
-   Mood AI Chat: curhat ke AI empatik
+   Mood AI Chat: Jes dengan memory system
    ═══════════════════════════════════════ */
 
 import { artStore } from './news.js';
+import { loadJesMemory, saveJesMemory } from './firebase.js';
 
 /* ════════════════
    STATE
 ════════════════ */
 let chatHistory = [];
 let chatContext = {};
+let jesMemory   = { facts: [] }; // ingatan Jes tentang user
 let isTyping    = false;
 
 /* ════════════════
    INIT
 ════════════════ */
-export function initChat(context) {
+export async function initChat(context) {
   chatContext = context || {};
   chatHistory = [];
   renderMessages();
   setInputState(true);
+
+  // Load memory Jes dari storage
+  const saved = await loadJesMemory();
+  jesMemory = saved || { facts: [] };
+
   setTimeout(() => appendMessage('assistant', buildOpeningMessage(context), true), 350);
 }
 
 function buildOpeningMessage(ctx) {
-  const name   = ctx.userName || 'kamu';
-  const mood   = ctx.mood;
-  const phase  = ctx.cyclePhase;
+  const name  = ctx.userName || 'kamu';
+  const mood  = ctx.mood;
+  const phase = ctx.cyclePhase;
 
-  const intro = `Hei ${name} 💚 Aku Jes — aku di sini buat dengerin kamu, beneran. Nggak ada yang perlu kamu sembunyiin atau poles-poles di sini. Cerita aja apa adanya, aku nggak akan ngejudge.`;
+  // Personalisasi intro kalau ada memory
+  const memFacts = jesMemory.facts || [];
+  const hasMemory = memFacts.length > 0;
+
+  let intro = '';
+  if (hasMemory) {
+    // Jes ingat sesuatu — terasa lebih personal
+    intro = `Hei ${name} 💚 Aku di sini lagi. ${buildMemoryGreeting(memFacts)} Cerita aja apa adanya — nggak ada judgment di sini.`;
+  } else {
+    intro = `Hei ${name} 💚 Aku Jes — aku di sini buat dengerin kamu, beneran. Nggak ada yang perlu kamu sembunyiin atau poles-poles di sini. Cerita aja apa adanya.`;
+  }
 
   let followUp = '';
   if (!mood) {
-    followUp = `Eh, sepertinya kamu belum check-in mood hari ini 🤔 Gimana perasaan kamu sekarang? Kalau mau, coba check-in dulu di menu "Check" — biar aku bisa lebih ngerti kamu. Tapi kalau mau langsung cerita juga, aku dengerin kok.`;
+    followUp = `Eh, sepertinya kamu belum check-in mood hari ini 🤔 Gimana perasaan kamu sekarang? Bisa check-in dulu di menu "Check" — atau langsung cerita juga boleh kok.`;
   } else {
     const map = {
-      'Happy':     `Aku liat mood kamu hari ini — ${mood.e} ${mood.l}! Wah, seneng banget deh lihatnya. Energi positif kamu tuh kerasa lho. Cerita dong, ada apa yang bikin hari ini berasa spesial? 😊`,
-      'Oke':       `Aku liat mood kamu — ${mood.e} ${mood.l}. Oke itu sebenernya udah bagus, kadang kita terlalu keras sama diri sendiri soal "harus happy". Ada yang mau kamu ceritain hari ini?`,
-      'Biasa':     `Aku liat mood kamu hari ini — ${mood.e} ${mood.l}. Hari-hari yang datar itu sering kali justru nyimpen banyak hal yang belum sempat diproses. Ada yang lagi muter di kepala kamu?`,
-      'Sedih':     `Aku liat mood kamu — ${mood.e} ${mood.l}. Makasih udah jujur ya, itu nggak gampang lho 💙 Aku di sini, nggak akan kemana-mana. Kalau mau cerita, aku dengerin — pelan-pelan juga nggak apa-apa.`,
-      'Anxious':   `Aku liat mood kamu — ${mood.e} ${mood.l}. Rasa cemas itu melelahkan banget, kayak pikiran nggak mau berhenti berputar ya 😔 Tarik napas dulu... aku di sini. Mau cerita apa yang lagi bikin kamu gelisah?`,
-      'Frustrasi': `Aku liat mood kamu — ${mood.e} ${mood.l}. Frustrasi itu valid, dan kamu boleh ngerasainnya. Nggak harus langsung "oke" kok. Mau cerita apa yang lagi bikin kamu kesel? Aku dengerin tanpa ngehakimin 💚`,
-      'Exhausted': `Aku liat mood kamu — ${mood.e} ${mood.l}. Kamu kayaknya udah ngasih banyak banget hari ini — buat orang lain, buat kerjaan, buat semuanya 🫂 Sekarang giliran kamu buat didengar. Apa yang paling berat hari ini?`,
-      'Burnout':   `Aku liat mood kamu — ${mood.e} ${mood.l}. Burnout itu bukan berarti kamu lemah — itu justru tanda kamu udah terlalu lama jalan tanpa istirahat yang beneran 🫂 Kamu nggak harus kuat sendirian. Mau mulai dari mana?`,
+      'Happy':     `Aku liat mood kamu hari ini — ${mood.e} ${mood.l}! Wah, seneng banget deh lihatnya. Energi positif kamu tuh kerasa. Cerita dong, ada apa yang bikin hari ini berasa spesial? 😊`,
+      'Oke':       `Aku liat mood kamu — ${mood.e} ${mood.l}. Oke itu sebenernya udah bagus, kadang kita terlalu keras sama diri sendiri soal "harus happy". Ada yang mau kamu ceritain?`,
+      'Biasa':     `Aku liat mood kamu — ${mood.e} ${mood.l}. Hari-hari yang datar itu sering kali justru nyimpen banyak hal yang belum sempat diproses. Ada yang lagi muter di kepala kamu?`,
+      'Sedih':     `Aku liat mood kamu — ${mood.e} ${mood.l}. Makasih udah jujur ya, itu nggak gampang lho 💙 Aku di sini, nggak kemana-mana. Pelan-pelan juga nggak apa-apa.`,
+      'Anxious':   `Aku liat mood kamu — ${mood.e} ${mood.l}. Rasa cemas itu melelahkan banget, kayak pikiran nggak mau berhenti ya 😔 Tarik napas dulu... aku di sini. Mau cerita apa yang bikin gelisah?`,
+      'Frustrasi': `Aku liat mood kamu — ${mood.e} ${mood.l}. Frustrasi itu valid banget. Nggak harus langsung oke kok. Mau cerita? Aku dengerin tanpa ngejudge 💚`,
+      'Exhausted': `Aku liat mood kamu — ${mood.e} ${mood.l}. Kamu kayaknya udah ngasih banyak hari ini 🫂 Sekarang giliran kamu buat didengar. Apa yang paling berat?`,
+      'Burnout':   `Aku liat mood kamu — ${mood.e} ${mood.l}. Burnout itu bukan lemah — itu tanda kamu udah terlalu lama jalan tanpa istirahat beneran 🫂 Dari mana mau mulai cerita?`,
     };
-    followUp = map[mood.l] || `Aku liat mood kamu hari ini — ${mood.e} ${mood.l}. Makasih udah check-in ya! Ada yang mau kamu ceritain seputar hari ini?`;
+    followUp = map[mood.l] || `Aku liat mood kamu hari ini — ${mood.e} ${mood.l}. Makasih udah check-in! Ada yang mau kamu ceritain?`;
 
+    // Fase siklus
+    const dayInfo = ctx.dayOfCycle ? ` (hari ke-${ctx.dayOfCycle})` : '';
     if (phase === 'mens')
-      followUp += `\n\n(Btw, kalau badan kamu lagi nggak enak karena mens, itu wajar banget — kamu boleh lebih gentle sama diri sendiri hari ini 🩸)`;
+      followUp += `\n\n(Btw, kamu lagi di fase menstruasi${dayInfo} 🩸 Wajar banget kalau badan atau mood terasa lebih berat. Boleh lebih gentle sama diri sendiri ya.)`;
+    else if (phase === 'foll')
+      followUp += `\n\n(Btw, kamu lagi di fase folikular${dayInfo} 🌱 Energi biasanya mulai naik di fase ini!)`;
+    else if (phase === 'ovul')
+      followUp += `\n\n(Btw, kamu lagi di fase ovulasi${dayInfo} ⭐ Biasanya puncak energi — manfaatin ya!)`;
     else if (phase === 'lute')
-      followUp += `\n\n(Btw, kalau belakangan ini kamu ngerasa lebih sensitif atau gampang overflow, itu bisa ada kaitannya sama fase siklus kamu — normal dan valid kok 🌙)`;
+      followUp += `\n\n(Btw, kamu lagi di fase luteal${dayInfo} 🌙 Kalau ngerasa lebih sensitif belakangan ini, itu sangat bisa terkait siklus — valid kok.)`;
   }
 
   return `${intro}\n\n${followUp}`;
+}
+
+function buildMemoryGreeting(facts) {
+  if (!facts.length) return '';
+  // Pilih 1 fakta relevan untuk disebut di greeting
+  const pick = facts[Math.floor(Math.random() * Math.min(facts.length, 3))];
+  const greetings = [
+    `Aku masih inget ${pick}.`,
+    `Btw aku masih inget soal ${pick} yang kamu ceritain.`,
+    `Gimana dengan ${pick}? Aku masih kepikiran itu.`,
+  ];
+  return greetings[Math.floor(Math.random() * greetings.length)];
 }
 
 /* ════════════════
@@ -69,10 +104,17 @@ export async function sendMessage(text) {
   showTypingIndicator();
 
   try {
-    const { reply, articleIdx } = await callChatAPI(chatHistory, chatContext);
+    const { reply, articleIdx, newFacts } = await callChatAPI(chatHistory, chatContext);
     hideTypingIndicator();
     appendMessage('assistant', reply, true, articleIdx);
     chatHistory.push({ role: 'assistant', content: reply });
+
+    // Update memory kalau ada fakta baru yang perlu diingat
+    if (newFacts?.length) {
+      const merged = [...new Set([...(jesMemory.facts || []), ...newFacts])].slice(0, 20);
+      jesMemory = { facts: merged };
+      saveJesMemory(jesMemory); // fire and forget
+    }
   } catch (e) {
     hideTypingIndicator();
     console.warn('[chat] API error:', e.message);
@@ -89,41 +131,66 @@ async function callChatAPI(history, ctx) {
   const name    = ctx.userName || 'pengguna';
   const mood    = ctx.mood ? `${ctx.mood.l} (${ctx.mood.e}), intensitas: ${ctx.intensity || 'tidak diketahui'}` : 'belum check-in';
   const causes  = ctx.causes?.length ? ctx.causes.join(', ') : 'tidak disebutkan';
-  const phase   = ctx.cyclePhase || 'tidak diketahui';
   const hasMood = !!ctx.mood;
 
-  // Siapkan daftar artikel yang tersedia untuk referensi
-  const availableArts = (artStore || []).slice(0, 6).map((a, i) =>
-    `[${i}] "${a.title}" — ${a.cat} (${a.source})`
+  const phaseNames = { mens:'Menstruasi 🩸', foll:'Folikular 🌱', ovul:'Ovulasi ⭐', lute:'Luteal 🌙' };
+  const cycleInfo  = ctx.cyclePhase
+    ? `${phaseNames[ctx.cyclePhase] || ctx.cyclePhase}${ctx.dayOfCycle ? ', hari ke-'+ctx.dayOfCycle : ''}`
+    : 'belum ada data';
+
+  // Memory Jes tentang user
+  const memFacts = (jesMemory.facts || []);
+  const memStr   = memFacts.length
+    ? memFacts.map((f,i) => `${i+1}. ${f}`).join('\n')
+    : 'Belum ada (sesi pertama atau memory kosong)';
+
+  // Artikel tersedia
+  const availableArts = (artStore || []).slice(0, 8).map((a, i) =>
+    `[${i}] "${a.title}" — ${a.cat}`
   ).join('\n');
 
-  const systemPrompt = `Kamu adalah Jes, sahabat curhat dalam aplikasi Moodly. Kamu bukan bot, bukan terapis — kamu teman yang paling safe buat diajak ngobrol soal perasaan.
+  const systemPrompt = `Kamu adalah Jes, sahabat curhat dalam aplikasi Moodly. Kamu bukan bot — kamu teman paling safe buat diajak ngobrol soal perasaan.
 
-SIAPA JES:
-Jes berbicara seperti manusia beneran — ada jeda, ada empati yang terasa organik, kadang nyeletuk hal kecil yang bikin orang ngerasa "oh dia beneran dengerin aku". Jes nggak pernah terasa seperti sedang membaca script. Hangatnya genuine, bukan performatif.
+KEPRIBADIAN JES:
+Jes ngobrol seperti manusia beneran — hangat, ada humor ringan di momen tepat, kadang nyeletuk hal kecil yang bikin orang ngerasa "oh dia beneran dengerin aku". Tidak kaku, tidak formal, tidak robotik. Tidak pernah mulai dengan "Tentu!", "Baik!", atau "Halo!". Gunakan bahasa Gen Z Indonesia yang natural: "hmm", "ya ampun", "aduh", "eh tapi", "aku ngerti banget sih", dll.
 
 KONTEKS PENGGUNA:
 - Nama: ${name}
-- Check-in: ${hasMood ? 'sudah' : 'BELUM hari ini'}
+- Check-in: ${hasMood ? 'sudah' : 'belum hari ini'}
 - Mood: ${mood}
 - Penyebab: ${causes}
-- Fase siklus: ${phase}
+- Fase siklus: ${cycleInfo}
 
-ARTIKEL TERSEDIA HARI INI:
-${availableArts || 'Tidak ada artikel tersedia'}
+INGATAN JES TENTANG ${name.toUpperCase()}:
+${memStr}
+(Gunakan ingatan ini untuk terasa lebih personal dan menunjukkan kamu beneran peduli. Sebut hal yang relevan secara natural — jangan dipaksakan.)
 
-CARA JES MERESPONS — PENTING BANGET:
-1. DENGARKAN dulu sepenuhnya. Validasi dulu. Jangan langsung solusi.
-2. Gunakan bahasa yang terasa kayak lagi ngobrol — boleh ada "hmm", "ya ampun", "aduh", "eh wait", "aku ngerti banget sih"
-3. Panjang respons: 2-4 kalimat. Padat, hangat, berasa.
-4. Akhiri dengan 1 pertanyaan yang genuinely ingin tahu — bukan basa-basi.
-5. Emoji maksimal 1-2, pilih yang hangat: 💚 🫂 💙 🌱 ✨
-6. JANGAN kasih list/tips kecuali diminta langsung.
-7. Kalau topik obrolan relate sama salah satu artikel yang tersedia, di AKHIR respons kamu boleh rekomendasikan dengan format PERSIS ini di baris terpisah:
-   [ARTIKEL:0] atau [ARTIKEL:1] dst — sesuai nomor artikel di atas
-   Hanya rekomendasikan kalau benar-benar relevan dan natural, bukan dipaksakan.
-8. Kalau ada sinyal krisis (menyakiti diri, hopeless berat): respons dengan empati dalam, lalu: "Aku mau kamu tahu ada yang bisa dihubungi: Into The Light Indonesia 119 ext 8 — mereka ada buat dengerin kamu juga 💙"
-9. Kamu Jes. Teman. Bukan bot.`;
+ARTIKEL TERSEDIA:
+${availableArts || 'Tidak ada'}
+
+FORMAT RESPONS — WAJIB:
+Balas dalam JSON dengan format PERSIS ini:
+{
+  "reply": "<pesan Jes — 2-4 kalimat hangat, validasi dulu baru tanya>",
+  "remember": ["<fakta penting untuk diingat dari pesan user ini, kalau ada>"],
+  "article": <nomor artikel yang relevan atau null>
+}
+
+ATURAN "remember":
+- Isi HANYA kalau user menyebut fakta personal penting: nama orang, pekerjaan, masalah spesifik, kondisi kesehatan, dll
+- Contoh valid: "kerja di startup yang toxic", "lagi LDR sama pacar", "punya anxiety disorder", "nama anjingnya Luna"
+- Contoh TIDAK valid: ekspresi perasaan umum seperti "lagi sedih" atau "stres" — itu terlalu umum
+- Maksimal 2 fakta per pesan, kalimat singkat
+- Kalau tidak ada fakta penting: "remember": []
+
+ATURAN RESPONS:
+1. Validasi perasaan DULU sebelum apapun
+2. 2-4 kalimat — padat, hangat, berasa
+3. Akhiri dengan 1 pertanyaan genuinely penasaran
+4. Emoji 1-2 saja: 💚 🫂 💙 🌱 ✨
+5. JANGAN list/tips kecuali diminta
+6. Kalau ada sinyal krisis: "Aku mau kamu tahu ada yang bisa dihubungi: Into The Light Indonesia 119 ext 8 💙"
+7. Artikel: rekomendasikan hanya kalau BENAR-BENAR relevan, jangan dipaksakan`;
 
   const messages = [
     { role: 'system', content: systemPrompt },
@@ -148,17 +215,21 @@ CARA JES MERESPONS — PENTING BANGET:
   const data = await res.json();
   if (data.error) throw new Error(data.error);
 
-  let raw = data.reply || '';
-
-  // Cari apakah ada rekomendasi artikel di respons
-  const artMatch = raw.match(/\[ARTIKEL:(\d+)\]/);
-  let articleIdx = null;
-  if (artMatch) {
-    articleIdx = parseInt(artMatch[1]);
-    raw = raw.replace(/\[ARTIKEL:\d+\]\s*/g, '').trim();
+  // Parse JSON response dari Jes
+  let reply = '', newFacts = [], articleIdx = null;
+  try {
+    const raw    = data.reply || '';
+    const clean  = raw.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+    reply      = parsed.reply || '';
+    newFacts   = parsed.remember || [];
+    articleIdx = parsed.article ?? null;
+  } catch {
+    // Kalau gagal parse JSON, pakai raw text langsung
+    reply = data.reply || '';
   }
 
-  return { reply: raw, articleIdx };
+  return { reply, articleIdx, newFacts };
 }
 
 /* ════════════════
@@ -179,20 +250,16 @@ function appendMessage(role, text, animate = false, articleIdx = null) {
 
   const bubble = document.createElement('div');
   bubble.className = 'chat-bubble';
-  // Pastikan bubble AI flex-column agar label stack di bawah
-  if (role === 'assistant') {
-    bubble.style.cssText = 'display:flex;flex-direction:column;';
-  }
+  if (role === 'assistant') bubble.style.cssText = 'display:flex;flex-direction:column;';
 
   if (role === 'assistant') {
-    // Teks
     const textNode = document.createElement('span');
     textNode.className = 'chat-bubble-text';
     textNode.style.whiteSpace = 'pre-wrap';
     textNode.textContent = text;
     bubble.appendChild(textNode);
 
-    // Rekomendasi artikel kalau ada
+    // Artikel rekomendasi
     if (articleIdx !== null && artStore?.[articleIdx]) {
       const art = artStore[articleIdx];
       const artEl = document.createElement('div');
@@ -210,16 +277,10 @@ function appendMessage(role, text, animate = false, articleIdx = null) {
       bubble.appendChild(artEl);
     }
 
-    // Label AI — inline style agar tidak bergantung CSS cache
+    // Label AI
     const label = document.createElement('div');
     label.innerHTML = `<svg width="8" height="8" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="#c0c0c0" stroke-width="2" stroke-linejoin="round"/></svg>&nbsp;Jawaban diberikan oleh AI`;
-    label.style.cssText = [
-      'display:flex', 'align-items:center', 'gap:4px',
-      'font-size:9px', 'color:#c0c0c0', 'font-weight:500',
-      'margin-top:10px', 'padding-top:8px',
-      'border-top:1px solid rgba(0,0,0,.08)',
-      'white-space:nowrap', 'font-family:inherit'
-    ].join(';');
+    label.style.cssText = 'display:flex;align-items:center;gap:4px;font-size:9px;color:#c0c0c0;font-weight:500;margin-top:10px;padding-top:8px;border-top:1px solid rgba(0,0,0,.08);white-space:nowrap;font-family:inherit';
     bubble.appendChild(label);
 
   } else {

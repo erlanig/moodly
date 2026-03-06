@@ -268,4 +268,42 @@ export async function clearAllData() {
   localStorage.removeItem('moodly_nc');
 }
 
+/* ════════════════════════════════
+   JES MEMORY SYSTEM
+   Simpan hal-hal penting yang diceritakan user
+════════════════════════════════ */
+const jesMemoryRef = () => doc(db, 'users', DEVICE_ID, 'cache', 'jes_memory');
+
+export async function loadJesMemory() {
+  // Cek localStorage dulu — instan
+  try {
+    const local = JSON.parse(localStorage.getItem('moodly_jes_mem') || 'null');
+    if (local) return local;
+  } catch {}
+  // Fallback Firestore
+  try {
+    const snap = await getDoc(jesMemoryRef());
+    if (snap.exists()) {
+      const data = snap.data();
+      localStorage.setItem('moodly_jes_mem', JSON.stringify(data));
+      return data;
+    }
+  } catch {}
+  return null;
+}
+
+export async function saveJesMemory(memory) {
+  // memory = { facts: [...string], updatedAt: ISO }
+  const data = { ...memory, updatedAt: new Date().toISOString() };
+  localStorage.setItem('moodly_jes_mem', JSON.stringify(data));
+  try {
+    setDoc(jesMemoryRef(), { ...data, updatedAt: serverTimestamp() }).catch(() => {});
+  } catch {}
+}
+
+export async function clearJesMemory() {
+  localStorage.removeItem('moodly_jes_mem');
+  try { await setDoc(jesMemoryRef(), { facts: [], updatedAt: serverTimestamp() }); } catch {}
+}
+
 export { db, DEVICE_ID };
