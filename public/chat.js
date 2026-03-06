@@ -27,7 +27,9 @@ export async function initChat(context) {
   const saved = await loadJesMemory();
   jesMemory = saved || { facts: [] };
 
-  setTimeout(() => appendMessage('assistant', buildOpeningMessage(context), true), 350);
+  const opening = buildOpeningMessage(context);
+  const openingCap = opening.charAt(0).toUpperCase() + opening.slice(1);
+  setTimeout(() => appendMessage('assistant', openingCap, true), 350);
 }
 
 function buildOpeningMessage(ctx) {
@@ -35,17 +37,8 @@ function buildOpeningMessage(ctx) {
   const mood  = ctx.mood;
   const phase = ctx.cyclePhase;
 
-  // Personalisasi intro kalau ada memory
-  const memFacts = jesMemory.facts || [];
-  const hasMemory = memFacts.length > 0;
-
-  let intro = '';
-  if (hasMemory) {
-    // Jes ingat sesuatu — terasa lebih personal
-    intro = `Hei ${name} 💚 Aku di sini lagi. ${buildMemoryGreeting(memFacts)} Cerita aja apa adanya — nggak ada judgment di sini.`;
-  } else {
-    intro = `Hei ${name} 💚 Aku Jes — aku di sini buat dengerin kamu, beneran. Nggak ada yang perlu kamu sembunyiin atau poles-poles di sini. Cerita aja apa adanya.`;
-  }
+// Intro selalu sama — memory dipakai oleh AI di dalam percakapan, bukan ditampilkan
+  const intro = `Hei ${name} 💚 Aku Jes — aku di sini buat dengerin kamu, beneran. Nggak ada yang perlu kamu sembunyiin atau poles-poles di sini. Cerita aja apa adanya.`;
 
   let followUp = '';
   if (!mood) {
@@ -76,18 +69,6 @@ function buildOpeningMessage(ctx) {
   }
 
   return `${intro}\n\n${followUp}`;
-}
-
-function buildMemoryGreeting(facts) {
-  if (!facts.length) return '';
-  // Pilih 1 fakta relevan untuk disebut di greeting
-  const pick = facts[Math.floor(Math.random() * Math.min(facts.length, 3))];
-  const greetings = [
-    `Aku masih inget ${pick}.`,
-    `Btw aku masih inget soal ${pick} yang kamu ceritain.`,
-    `Gimana dengan ${pick}? Aku masih kepikiran itu.`,
-  ];
-  return greetings[Math.floor(Math.random() * greetings.length)];
 }
 
 /* ════════════════
@@ -225,9 +206,10 @@ ATURAN RESPONS:
     newFacts   = parsed.remember || [];
     articleIdx = parsed.article ?? null;
   } catch {
-    // Kalau gagal parse JSON, pakai raw text langsung
     reply = data.reply || '';
   }
+  // Selalu kapital di awal
+  reply = reply.charAt(0).toUpperCase() + reply.slice(1);
 
   return { reply, articleIdx, newFacts };
 }
