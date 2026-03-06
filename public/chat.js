@@ -149,13 +149,12 @@ ${memStr}
 ARTIKEL TERSEDIA:
 ${availableArts || 'Tidak ada'}
 
-FORMAT RESPONS — WAJIB:
-Balas dalam JSON dengan format PERSIS ini:
-{
-  "reply": "<pesan Jes — 2-4 kalimat hangat, validasi dulu baru tanya>",
-  "remember": ["<fakta penting untuk diingat dari pesan user ini, kalau ada>"],
-  "article": <nomor artikel yang relevan atau null>
-}
+FORMAT RESPONS — SANGAT WAJIB:
+Kamu HARUS balas HANYA dengan JSON valid, tidak ada teks lain di luar JSON, tidak ada markdown, tidak ada penjelasan:
+{"reply":"<pesan Jes>","remember":[],"article":null}
+
+Contoh benar:
+{"reply":"Ya ampun, itu pasti capek banget ya dengerin semua itu sendirian 🫂 Udah berapa lama kamu nahan perasaan ini?","remember":[],"article":null}
 
 ATURAN "remember":
 - Isi HANYA kalau user menyebut fakta personal penting: nama orang, pekerjaan, masalah spesifik, kondisi kesehatan, dll
@@ -196,20 +195,38 @@ ATURAN RESPONS:
   const data = await res.json();
   if (data.error) throw new Error(data.error);
 
-  // Parse JSON response dari Jes
+  // Parse JSON response dari Jes — robust handler
   let reply = '', newFacts = [], articleIdx = null;
+  const raw = data.reply || '';
   try {
-    const raw    = data.reply || '';
+    // Coba parse JSON (Groq kadang wrap dengan ```json)
     const clean  = raw.replace(/```json|```/g, '').trim();
-    const parsed = JSON.parse(clean);
+    // Ambil JSON object dari dalam string kalau ada teks sebelumnya
+    const jsonMatch = clean.match(/\{[\s\S]*\}/);
+    const parsed = JSON.parse(jsonMatch ? jsonMatch[0] : clean);
     reply      = parsed.reply || '';
     newFacts   = parsed.remember || [];
-    articleIdx = parsed.article ?? null;
+    articleIdx = typeof parsed.article === 'number' ? parsed.article : null;
   } catch {
-    reply = data.reply || '';
+    // Kalau sama sekali tidak bisa parse, cek apakah raw mengandung "reply":
+    // Kalau iya, coba extract manual
+    const replyMatch = raw.match(/"reply"\s*:\s*"([\s\S]*?)(?:",\s*"remember"|"\s*\})/);
+    if (replyMatch) {
+      reply = replyMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"');
+    } else {
+      // Fallback: tampilkan raw tapi strip semua JSON artifacts
+      reply = raw
+        .replace(/```json|```/g, '')
+        .replace(/"reply"\s*:\s*"/g, '')
+        .replace(/"remember"\s*:\s*\[[\s\S]*?\]/g, '')
+        .replace(/"article"\s*:\s*[\d\w"null]+/g, '')
+        .replace(/[{}"]/g, '')
+        .replace(/,\s*$/gm, '')
+        .trim();
+    }
   }
   // Selalu kapital di awal
-  reply = reply.charAt(0).toUpperCase() + reply.slice(1);
+  if (reply) reply = reply.charAt(0).toUpperCase() + reply.slice(1);
 
   return { reply, articleIdx, newFacts };
 }
