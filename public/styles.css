@@ -872,3 +872,313 @@ html, body {
   flex: 1;
 }
 .chat-art-src  { font-size: 10px; color: var(--muted); margin-top: 2px; }
+/* ═══════════════════════════════════════
+   NEARBY — Layanan Kesehatan Mental Terdekat
+═══════════════════════════════════════ */
+
+/* Idle state */
+.nb-idle {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 18px;
+  padding: 20px 18px;
+  text-align: center;
+  margin-bottom: 10px;
+}
+.nb-idle-ico {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+.nb-idle-txt {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+.nb-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: linear-gradient(135deg, #1db954, #0a9e3f);
+  color: #fff;
+  border: none;
+  border-radius: 100px;
+  padding: 11px 20px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .12s, opacity .12s;
+}
+.nb-cta:active { transform: scale(.96); opacity: .9; }
+
+/* Loading */
+.nb-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 28px 16px;
+}
+.nb-dots {
+  display: flex;
+  gap: 6px;
+}
+.nb-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #1db954;
+  animation: nb-bounce .9s infinite ease-in-out;
+}
+.nb-dot:nth-child(2) { animation-delay: .15s; }
+.nb-dot:nth-child(3) { animation-delay: .3s; }
+@keyframes nb-bounce {
+  0%,100% { transform: translateY(0); opacity: .5; }
+  50%      { transform: translateY(-6px); opacity: 1; }
+}
+.nb-loading-txt {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* Header */
+.nb-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.nb-city {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text2);
+}
+.nb-refresh {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 100px;
+  padding: 6px 12px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background .15s;
+}
+.nb-refresh:active { background: var(--border); }
+
+/* Filter tabs */
+.nb-filters {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  margin-bottom: 10px;
+  scrollbar-width: none;
+}
+.nb-filters::-webkit-scrollbar { display: none; }
+.nb-ftab {
+  flex-shrink: 0;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 100px;
+  padding: 6px 12px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text2);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all .15s;
+}
+.nb-ftab.on {
+  background: linear-gradient(135deg, #1db954, #0a9e3f);
+  border-color: transparent;
+  color: #fff;
+}
+
+/* Count row */
+.nb-count-row {
+  margin-bottom: 8px;
+}
+.nb-count {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+/* Card list */
+.nb-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.nb-empty {
+  text-align: center;
+  padding: 24px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* Card */
+.nb-card {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 18px;
+  padding: 14px 14px 12px;
+  transition: transform .12s;
+}
+.nb-card:active { transform: scale(.99); }
+
+.nb-card-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  margin-bottom: 8px;
+}
+.nb-card-emoji {
+  font-size: 28px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.nb-card-info {
+  flex: 1;
+  min-width: 0;
+}
+.nb-card-name {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 3px;
+  line-height: 1.3;
+}
+.nb-card-area {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.nb-rating-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.nb-stars {
+  display: flex;
+  gap: 1px;
+}
+.nb-rating-num {
+  font-size: 11px;
+  font-weight: 700;
+  color: #f57c00;
+}
+.nb-review-cnt {
+  font-size: 10px;
+  color: var(--muted);
+}
+
+/* Badge */
+.nb-badge {
+  flex-shrink: 0;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 100px;
+}
+.nb-badge-psikolog  { background: #e8faf0; color: #0a9e3f; }
+.nb-badge-psikiater { background: #e3f2fd; color: #1565c0; }
+.nb-badge-klinik    { background: #fff3e0; color: #e65100; }
+.nb-badge-online    { background: #f3e5f5; color: #7b1fa2; }
+
+/* Description */
+.nb-card-desc {
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.5;
+  margin-bottom: 9px;
+}
+
+/* Meta */
+.nb-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 9px;
+}
+.nb-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* Tags */
+.nb-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+.nb-tag {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: 3px 9px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text2);
+}
+
+/* Action buttons */
+.nb-card-actions {
+  display: flex;
+  gap: 7px;
+}
+.nb-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 13px;
+  border-radius: 100px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  border: none;
+  transition: transform .12s, opacity .12s;
+}
+.nb-btn:active { transform: scale(.96); opacity: .85; }
+.nb-btn-call {
+  background: linear-gradient(135deg, #1db954, #0a9e3f);
+  color: #fff;
+}
+.nb-btn-web {
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  color: var(--text2);
+}
+
+/* Error state */
+.nb-error {
+  text-align: center;
+  padding: 24px 16px;
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 18px;
+}
+.nb-error-ico   { font-size: 32px; margin-bottom: 8px; }
+.nb-error-title { font-size: 14px; font-weight: 800; color: var(--text); margin-bottom: 5px; }
+.nb-error-sub   { font-size: 12px; color: var(--muted); line-height: 1.5; margin-bottom: 14px; }

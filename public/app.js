@@ -17,6 +17,7 @@ import { updateInsight, exportPDF } from '../insight.js';
 import { initNews, forceRefresh, filterNews, openArt, closeArt, buildHomePreview } from './news.js';
 import { buildCheckinUI, startCheckin, goStep, submitCheckin, MOODS } from '../checkin.js';
 import { initChat, sendMessage, buildQuickReplies } from '../chat.js';
+import { initNearby, findNearby, filterNearby, refreshNearby, searchNearby } from '../nearby.js';
 
 /* ════════════════
    GLOBAL STATE
@@ -153,6 +154,7 @@ function updateHome() {
 
   renderHomeCycleBanner();
   buildHomePreview();
+  initNearby();
 }
 
 /* ════════════════
@@ -351,6 +353,12 @@ window._closeArt     = closeArt;
 
 // Insight
 window._exportPDF = () => exportPDF(entries, getPeriods(), getCurrentCycleInfo());
+
+// Nearby
+window._findNearby    = findNearby;
+window._filterNearby  = filterNearby;
+window._refreshNearby = refreshNearby;
+window._searchNearby  = searchNearby;
 
 // Chat
 window._openChat = (moodJson, intensity, causesJson) => openChat(moodJson, intensity, causesJson);
