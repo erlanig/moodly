@@ -1,7 +1,6 @@
 /* ═══════════════════════════════════════
-   MOODLY — nearby.js  (v4 — mirror news.js pattern)
-   Rekomendasi layanan kesehatan mental terdekat
-   ═══════════════════════════════════════ */
+   MOODLY — nearby.js  (v5 — debug + no GPS block)
+═══════════════════════════════════════ */
 
 let nb = {
   loading  : false,
@@ -19,11 +18,10 @@ const FILTERS = [
   { id:'online',    label:'Online',   emoji:'💻' },
 ];
 
-/* ════════════════  INIT  ════════════════ */
 export function initNearby() {
   const el = document.getElementById('nearby-wrap');
   if (!el) return;
-  if (nb.results.length && nb.lastFetch && (Date.now() - nb.lastFetch) < 30 * 60 * 1000) {
+  if (nb.results.length && nb.lastFetch && (Date.now() - nb.lastFetch) < 30*60*1000) {
     renderResults(nb.results, nb.filter);
     return;
   }
@@ -41,7 +39,6 @@ export function initNearby() {
     </div>`;
 }
 
-/* ════════════════  FIND  ════════════════ */
 export async function findNearby() {
   if (nb.loading) return;
   nb.loading = true;
@@ -52,59 +49,77 @@ export async function findNearby() {
   el.innerHTML = `
     <div class="nb-loading">
       <div class="nb-dots"><div class="nb-dot"></div><div class="nb-dot"></div><div class="nb-dot"></div></div>
-      <div class="nb-loading-txt">Mendeteksi lokasi kamu…</div>
+      <div class="nb-loading-txt" id="nb-status">Menyiapkan pencarian…</div>
     </div>`;
 
-  // Step 1: GPS — kalau gagal/ditolak, lanjut tanpa koordinat
+  const setStatus = t => { const s = document.getElementById('nb-status'); if(s) s.textContent = t; };
+
+  // ── Step 1: GPS (opsional, tidak block jika gagal) ──
   let coordStr = '';
   try {
-    const coords = await getLocation();
-    coordStr = `lat=${coords.lat.toFixed(4)}, lng=${coords.lng.toFixed(4)}`;
-    el.querySelector('.nb-loading-txt').textContent = 'Mencari layanan terdekat…';
-  } catch (e) {
-    // GPS gagal atau ditolak — Claude tetap bisa rekomendasikan berdasarkan layanan populer Indonesia
-    coordStr = 'tidak tersedia (gunakan layanan online nasional dan layanan populer Jakarta)';
-    el.querySelector && (el.querySelector('.nb-loading-txt') || {}).textContent;
+    setStatus('Mendeteksi lokasi GPS…');
+    const coords = await Promise.race([
+      getLocation(),
+      new Promise((_,r) => setTimeout(() => r(new Error('timeout')), 8000))
+    ]);
+    coordStr = `${coords.lat.toFixed(4)},${coords.lng.toFixed(4)}`;
+    setStatus('Lokasi terdeteksi. Mencari layanan…');
+  } catch (gpsErr) {
+    console.warn('[nearby] GPS skip:', gpsErr.message);
+    coordStr = '';
+    setStatus('Mencari layanan kesehatan mental Indonesia…');
   }
 
-  // Step 2: Call Claude — persis seperti news.js
-  const today = new Date().toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  // ── Step 2: Call Claude (sama persis seperti news.js) ──
+  const today = new Date().toLocaleDateString('id-ID', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const locationHint = coordStr
+    ? `Koordinat GPS pengguna: ${coordStr}. Tentukan kota/area dari koordinat ini dan cari layanan di sana.`
+    : `Lokasi GPS tidak tersedia. Tampilkan layanan populer di Jakarta dan layanan online nasional.`;
 
   const prompt = `Kamu asisten kesehatan mental Indonesia yang membantu menemukan layanan profesional terpercaya.
-Tanggal hari ini: ${today}.
-Koordinat GPS pengguna: ${coordStr}.
+Tanggal: ${today}.
+${locationHint}
 
-Gunakan web_search untuk mencari layanan kesehatan mental nyata dan aktif. Cari:
-1. Jika koordinat tersedia: identifikasi kota terdekat, lalu cari "psikolog klinik [kota tersebut] 2024 2025"
-2. "psikiater rumah sakit [kota tersebut]"  
-3. "layanan konseling online Indonesia terpercaya 2024 2025"
+Gunakan web_search untuk mencari layanan nyata dan aktif. Cari:
+1. "psikolog klinik [kota] 2025" 
+2. "konseling online Indonesia terpercaya"
 
-Sertakan 8 layanan total: campuran psikolog lokal, psikiater/RS, klinik, dan WAJIB 2 layanan online nasional (Riliv, Into The Light Indonesia, Yayasan Pulih, Into The Light, dll).
+Buat 8 rekomendasi: campuran psikolog, psikiater, klinik lokal, dan min 2 layanan online nasional (Riliv, Into The Light Indonesia, Yayasan Pulih).
 
-Kembalikan HANYA JSON object valid, tanpa markdown, tanpa teks di luar JSON:
-{"city":"<nama kota dari koordinat atau Jakarta jika tidak ada>","items":[{"id":1,"type":"psikolog","name":"<nama>","address":"<alamat>","area":"<kecamatan/kota>","rating":4.5,"reviewCount":120,"phone":"<nomor atau null>","website":"<url atau null>","hours":"<jam buka>","priceRange":"<kisaran harga>","tags":["<tag1>","<tag2>"],"isOnline":false,"emoji":"<emoji>","description":"<1 kalimat keunggulan>"}]}`;
+Kembalikan HANYA JSON ini, tanpa teks lain, tanpa markdown:
+{"city":"<nama kota>","items":[{"id":1,"type":"psikolog","name":"<nama>","address":"<alamat>","area":"<kota>","rating":4.5,"reviewCount":100,"phone":"<nomor atau null>","website":"<url atau null>","hours":"<jam>","priceRange":"<harga>","tags":["<tag>"],"isOnline":false,"emoji":"🧠","description":"<1 kalimat>"}]}`;
 
   try {
+    console.log('[nearby] calling API...');
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method : 'POST',
       headers: { 'Content-Type': 'application/json' },
       body   : JSON.stringify({
         model     : 'claude-sonnet-4-20250514',
         max_tokens: 6000,
-        tools     : [{ type: 'web_search_20250305', name: 'web_search' }],
-        messages  : [{ role: 'user', content: prompt }],
+        tools     : [{ type:'web_search_20250305', name:'web_search' }],
+        messages  : [{ role:'user', content: prompt }],
       })
     });
 
-    const data = await res.json();
+    console.log('[nearby] HTTP status:', res.status);
 
-    // Ikuti pola news.js — filter text blocks
-    const raw = data.content
+    if (!res.ok) {
+      const errBody = await res.text().catch(()=>'');
+      console.warn('[nearby] API error body:', errBody.slice(0,300));
+      throw new Error('http_' + res.status);
+    }
+
+    const data = await res.json();
+    console.log('[nearby] stop_reason:', data.stop_reason, '| blocks:', data.content?.map(c=>c.type).join(','));
+
+    const raw = (data.content || [])
       .filter(c => c.type === 'text')
       .map(c => c.text || '')
       .join('');
 
-    // Cari JSON object (lebih fleksibel dari JSON.parse langsung)
+    console.log('[nearby] raw text:', raw.slice(0, 400));
+
     const match = raw.match(/\{[\s\S]*\}/);
     if (!match) throw new Error('no_json');
 
@@ -117,25 +132,24 @@ Kembalikan HANYA JSON object valid, tanpa markdown, tanpa teks di luar JSON:
     nb.loading   = false;
     renderResults(nb.results, nb.filter);
 
-  } catch (e) {
+  } catch(e) {
     nb.loading = false;
-    showError(el, e.message || 'unknown');
+    console.error('[nearby] FINAL ERROR:', e.message, e);
+    showError(el, e.message);
   }
 }
 
-/* ════════════════  GEOLOCATION  ════════════════ */
 function getLocation() {
   return new Promise((resolve, reject) => {
     if (!navigator.geolocation) { reject(new Error('no_geo')); return; }
     navigator.geolocation.getCurrentPosition(
       p => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }),
-      e => reject(new Error(e.code === 1 ? 'denied' : 'geo_fail')),
-      { timeout: 10000, maximumAge: 300000 }
+      e => reject(new Error('gps_err_' + e.code)),
+      { timeout: 7000, maximumAge: 600000, enableHighAccuracy: false }
     );
   });
 }
 
-/* ════════════════  RENDER  ════════════════ */
 export function renderResults(results, filter) {
   nb.filter = filter;
   const el = document.getElementById('nearby-wrap');
@@ -161,7 +175,7 @@ export function renderResults(results, filter) {
     </div>
     <div class="nb-filters">
       ${FILTERS.map(f => `
-        <button class="nb-ftab ${filter === f.id ? 'on' : ''}" onclick="window._filterNearby('${f.id}')">
+        <button class="nb-ftab ${filter===f.id?'on':''}" onclick="window._filterNearby('${f.id}')">
           ${f.emoji} ${f.label}
         </button>`).join('')}
     </div>
@@ -172,16 +186,16 @@ export function renderResults(results, filter) {
 }
 
 function cardHTML(r) {
-  const labels = { psikolog:'Psikolog', psikiater:'Psikiater', klinik:'Klinik', online:'Online' };
-  const safe   = (r.name||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+  const labels = {psikolog:'Psikolog',psikiater:'Psikiater',klinik:'Klinik',online:'Online'};
+  const safe = (r.name||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');
   return `<div class="nb-card">
     <div class="nb-card-top">
       <div class="nb-card-emoji">${r.emoji||'🏥'}</div>
       <div class="nb-card-info">
         <div class="nb-card-name">${r.name||'—'}</div>
         <div class="nb-card-area">${r.isOnline
-          ? `<svg width="9" height="9" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#1db954" stroke-width="2"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20" stroke="#1db954" stroke-width="2"/></svg> Layanan Online`
-          : `<svg width="9" height="9" viewBox="0 0 24 24" fill="none"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z" stroke="#1db954" stroke-width="2"/><circle cx="12" cy="10" r="3" stroke="#1db954" stroke-width="2"/></svg> ${r.area||''}`}
+          ?`<svg width="9" height="9" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#1db954" stroke-width="2"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20" stroke="#1db954" stroke-width="2"/></svg> Layanan Online`
+          :`<svg width="9" height="9" viewBox="0 0 24 24" fill="none"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z" stroke="#1db954" stroke-width="2"/><circle cx="12" cy="10" r="3" stroke="#1db954" stroke-width="2"/></svg> ${r.area||''}`}
         </div>
         <div class="nb-rating-row">
           ${starsHTML(r.rating||4.0)}
@@ -191,7 +205,7 @@ function cardHTML(r) {
       </div>
       <span class="nb-badge nb-badge-${r.type||'klinik'}">${labels[r.type]||r.type}</span>
     </div>
-    ${r.description ? `<div class="nb-card-desc">${r.description}</div>` : ''}
+    ${r.description?`<div class="nb-card-desc">${r.description}</div>`:''}
     <div class="nb-card-meta">
       <div class="nb-meta-item">
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#8aab97" stroke-width="2"/><path d="M12 6v6l4 2" stroke="#8aab97" stroke-width="2" stroke-linecap="round"/></svg>
@@ -202,42 +216,33 @@ function cardHTML(r) {
         ${r.priceRange||'Hubungi untuk info harga'}
       </div>
     </div>
-    ${r.tags?.length ? `<div class="nb-tags">${r.tags.slice(0,3).map(t=>`<span class="nb-tag">${t}</span>`).join('')}</div>` : ''}
+    ${r.tags?.length?`<div class="nb-tags">${r.tags.slice(0,3).map(t=>`<span class="nb-tag">${t}</span>`).join('')}</div>`:''}
     <div class="nb-card-actions">
-      ${r.phone ? `<a class="nb-btn nb-btn-call" href="tel:${r.phone}">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 11 19.79 19.79 0 01.01 2.34 2 2 0 012 .16h3a2 2 0 012 1.72 12.05 12.05 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.05 12.05 0 002.81.7A2 2 0 0122 16.92z" stroke="currentColor" stroke-width="2"/></svg>
-        Hubungi
-      </a>` : ''}
-      ${r.website ? `<a class="nb-btn nb-btn-web" href="${r.website}" target="_blank" rel="noopener">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20" stroke="currentColor" stroke-width="2"/></svg>
-        Website
-      </a>` : `<button class="nb-btn nb-btn-web" onclick="window._searchNearby('${safe}')">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/></svg>
-        Lihat di Maps
-      </button>`}
+      ${r.phone?`<a class="nb-btn nb-btn-call" href="tel:${r.phone}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 11 19.79 19.79 0 01.01 2.34 2 2 0 012 .16h3a2 2 0 012 1.72 12.05 12.05 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.05 12.05 0 002.81.7A2 2 0 0122 16.92z" stroke="currentColor" stroke-width="2"/></svg> Hubungi</a>`:''}
+      ${r.website?`<a class="nb-btn nb-btn-web" href="${r.website}" target="_blank" rel="noopener"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20" stroke="currentColor" stroke-width="2"/></svg> Website</a>`
+      :`<button class="nb-btn nb-btn-web" onclick="window._searchNearby('${safe}')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/></svg> Lihat di Maps</button>`}
     </div>
   </div>`;
 }
 
 function starsHTML(rating) {
   const r = Math.round((rating||0)*2)/2;
-  let h = '';
-  for (let i=1;i<=5;i++) {
-    const on = i<=r;
-    h += `<svg width="9" height="9" viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z" fill="${on?'#f57c00':'#e0f0e8'}" stroke="${on?'#f57c00':'#c5dfd0'}" stroke-width="1"/></svg>`;
-  }
+  let h='';
+  for(let i=1;i<=5;i++){const on=i<=r;h+=`<svg width="9" height="9" viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z" fill="${on?'#f57c00':'#e0f0e8'}" stroke="${on?'#f57c00':'#c5dfd0'}" stroke-width="1"/></svg>`;}
   return `<div class="nb-stars">${h}</div>`;
 }
 
 function showError(el, code) {
   const msgs = {
-    denied  : { ico:'📍', title:'Izin Lokasi Ditolak',    sub:'Aktifkan izin lokasi di pengaturan browser kamu.' },
-    no_geo  : { ico:'📱', title:'GPS Tidak Tersedia',      sub:'Browser kamu tidak mendukung geolocation.' },
-    geo_fail: { ico:'🌐', title:'Lokasi Gagal Terdeteksi', sub:'Pastikan GPS aktif lalu coba lagi.' },
-    no_json : { ico:'🔄', title:'Data Tidak Valid',        sub:'Terjadi kesalahan format. Coba lagi.' },
-    empty   : { ico:'🔍', title:'Tidak Ada Hasil',         sub:'Coba perbarui atau periksa koneksi.' },
+    denied    :{ico:'📍',title:'Izin Lokasi Ditolak',   sub:'Aktifkan izin lokasi di pengaturan browser.'},
+    no_geo    :{ico:'📱',title:'GPS Tidak Tersedia',     sub:'Browser tidak mendukung geolocation.'},
+    no_json   :{ico:'🔄',title:'Data Tidak Valid',       sub:'Terjadi kesalahan format. Coba lagi.'},
+    empty     :{ico:'🔍',title:'Tidak Ada Hasil',        sub:'Coba perbarui atau periksa koneksi.'},
+    http_401  :{ico:'🔑',title:'API Key Tidak Valid',    sub:'Hubungi developer aplikasi ini.'},
+    http_403  :{ico:'🔑',title:'Akses Ditolak',          sub:'Hubungi developer aplikasi ini.'},
+    http_429  :{ico:'⏱️',title:'Terlalu Banyak Request', sub:'Tunggu beberapa menit lalu coba lagi.'},
   };
-  const m = msgs[code] || { ico:'⚠️', title:'Gagal Memuat', sub:'Terjadi kesalahan. Coba lagi.' };
+  const m = msgs[code] || {ico:'⚠️',title:'Gagal Memuat',sub:`Terjadi kesalahan (${code}). Coba lagi.`};
   el.innerHTML = `
     <div class="nb-error">
       <div class="nb-error-ico">${m.ico}</div>
@@ -247,13 +252,6 @@ function showError(el, code) {
     </div>`;
 }
 
-export function filterNearby(type) {
-  nb.filter = type;
-  if (nb.results.length) renderResults(nb.results, type);
-}
-export function refreshNearby() {
-  nb.results = []; nb.lastFetch = null; findNearby();
-}
-export function searchNearby(name) {
-  window.open(`https://maps.google.com/maps?q=${encodeURIComponent(name + ' kesehatan mental')}`, '_blank');
-}
+export function filterNearby(t){nb.filter=t;if(nb.results.length)renderResults(nb.results,t);}
+export function refreshNearby(){nb.results=[];nb.lastFetch=null;findNearby();}
+export function searchNearby(name){window.open(`https://maps.google.com/maps?q=${encodeURIComponent(name+' kesehatan mental')}`,'_blank');}
