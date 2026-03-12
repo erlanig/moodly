@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════
-   MOODLY — nearby.js  (v9 — Vercel /api/anthropic)
+   MOODLY — nearby.js  (v10 — GPS + IP Geolocation)
 ═══════════════════════════════════════ */
 
 let nb = {
@@ -39,6 +39,96 @@ export function initNearby() {
     </div>`;
 }
 
+// ─── STEP 1: Coba GPS, lalu IP geolocation, lalu fallback ───
+async function detectLocation() {
+  // A) Coba GPS browser dulu (akurat, butuh izin)
+  try {
+    const coords = await Promise.race([
+      getGPS(),
+      new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 10000))
+    ]);
+    // Reverse geocode pakai nominatim (gratis, no key)
+    const city = await reverseGeocode(coords.lat, coords.lng);
+    return { source: 'gps', lat: coords.lat, lng: coords.lng, city };
+  } catch (gpsErr) {
+    console.log('[nearby] GPS gagal:', gpsErr.message, '→ coba IP geolocation');
+  }
+
+  // B) Fallback: IP Geolocation (akurat per kota, tanpa izin user)
+  try {
+    const ipData = await Promise.race([
+      fetch('https://ipapi.co/json/').then(r => r.json()),
+      new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 5000))
+    ]);
+    if (ipData && ipData.city) {
+      return {
+        source: 'ip',
+        lat: ipData.latitude,
+        lng: ipData.longitude,
+        city: `${ipData.city}, ${ipData.region}`,
+      };
+    }
+  } catch (ipErr) {
+    console.log('[nearby] IP geolocation gagal:', ipErr.message);
+  }
+
+  // C) Last resort fallback
+  return { source: 'fallback', lat: null, lng: null, city: null };
+}
+
+// Reverse geocode koordinat → nama kota (Nominatim OpenStreetMap, gratis)
+async function reverseGeocode(lat, lng) {
+  try {
+    const r = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=id`,
+      { headers: { 'User-Agent': 'MoodlyApp/1.0' } }
+    );
+    const d = await r.json();
+    const a = d.address || {};
+    // Ambil kota paling spesifik yang tersedia
+    const kota = a.city || a.town || a.village || a.county || a.state || 'Indonesia';
+    const prov  = a.state || '';
+    return prov ? `${kota}, ${prov}` : kota;
+  } catch {
+    return null;
+  }
+}
+
+function getGPS() {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) { reject(new Error('no_geo')); return; }
+    navigator.geolocation.getCurrentPosition(
+      p => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }),
+      e => reject(new Error('gps_' + e.code)),
+      { timeout: 9000, maximumAge: 600000, enableHighAccuracy: false }
+    );
+  });
+}
+
+// ─── STEP 2: Build prompt berdasarkan lokasi yang didapat ───
+function buildPrompt(loc, today) {
+  let locationCtx;
+
+  if (loc.source === 'gps' && loc.lat) {
+    locationCtx = `Koordinat GPS akurat: ${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)} (${loc.city || 'Indonesia'}). Fokus layanan di kota ini dan sekitarnya.`;
+  } else if (loc.source === 'ip' && loc.city) {
+    locationCtx = `Lokasi berdasarkan IP: ${loc.city} (lat:${loc.lat?.toFixed(2)}, lng:${loc.lng?.toFixed(2)}). Fokus layanan di ${loc.city} dan sekitarnya.`;
+  } else {
+    locationCtx = `Lokasi tidak terdeteksi. Berikan layanan nasional Indonesia yang populer, dengan fokus kota-kota besar (Jakarta, Surabaya, Bandung).`;
+  }
+
+  return `Kamu asisten kesehatan mental Indonesia. Tanggal: ${today}. ${locationCtx}
+
+Gunakan web_search untuk mencari layanan kesehatan mental NYATA dan AKTIF di lokasi tersebut.
+Cari: "psikolog ${loc.city || 'Jakarta'}", "klinik kesehatan mental ${loc.city || 'Jakarta'}", "psikiater ${loc.city || 'Jakarta'}"
+
+Berikan tepat 8 rekomendasi: campuran psikolog lokal, psikiater/RS, klinik, dan min 2 layanan online nasional (Riliv, Into The Light Indonesia, Yayasan Pulih, Sejiwa).
+
+Kembalikan HANYA JSON ini, tanpa teks lain, tanpa markdown, tanpa komentar:
+{"city":"<nama kota>","items":[{"id":1,"type":"psikolog","name":"<nama lengkap>","address":"<alamat lengkap>","area":"<kota/kabupaten>","rating":4.5,"reviewCount":120,"phone":"<nomor atau null>","website":"<url atau null>","hours":"<jam buka>","priceRange":"<kisaran harga>","tags":["<tag1>","<tag2>"],"isOnline":false,"emoji":"🧠","description":"<1 kalimat keunggulan spesifik>"}]}`;
+}
+
+// ─── MAIN findNearby ───
 export async function findNearby() {
   if (nb.loading) return;
   nb.loading = true;
@@ -46,36 +136,27 @@ export async function findNearby() {
   const el = document.getElementById('nearby-wrap');
   if (!el) { nb.loading = false; return; }
 
+  const setStatus = t => { const s = document.getElementById('nb-status'); if (s) s.textContent = t; };
+
   el.innerHTML = `
     <div class="nb-loading">
       <div class="nb-dots"><div class="nb-dot"></div><div class="nb-dot"></div><div class="nb-dot"></div></div>
-      <div class="nb-loading-txt" id="nb-status">Menyiapkan pencarian…</div>
+      <div class="nb-loading-txt" id="nb-status">Mendeteksi lokasi…</div>
     </div>`;
 
-  const setStatus = t => { const s = document.getElementById('nb-status'); if (s) s.textContent = t; };
+  // Deteksi lokasi (GPS → IP → fallback)
+  const loc = await detectLocation();
 
-  // GPS — opsional
-  let cityHint = 'Jakarta';
-  try {
-    setStatus('Mendeteksi lokasi GPS…');
-    const coords = await Promise.race([
-      getLocation(),
-      new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 8000))
-    ]);
-    cityHint = `koordinat GPS ${coords.lat.toFixed(3)},${coords.lng.toFixed(3)} — sebutkan nama kotanya`;
-    setStatus('Lokasi terdeteksi. Mencari layanan…');
-  } catch {
-    setStatus('Mencari layanan kesehatan mental Indonesia…');
-  }
+  const sourceLabel = {
+    gps     : `📍 GPS: ${loc.city || 'Terdeteksi'}`,
+    ip      : `🌐 IP: ${loc.city || 'Terdeteksi'}`,
+    fallback: '🗺️ Layanan Nasional',
+  };
+  setStatus(sourceLabel[loc.source] + ' · Mencari layanan…');
 
-  const today = new Date().toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
-
-  const prompt = `Kamu asisten kesehatan mental Indonesia. Tanggal: ${today}. Lokasi: ${cityHint}.
-
-Berikan 8 rekomendasi layanan kesehatan mental nyata di Indonesia: campuran psikolog lokal, psikiater/RS, klinik, dan min 2 layanan online nasional (Riliv, Into The Light Indonesia, Yayasan Pulih).
-
-Kembalikan HANYA JSON ini, tanpa teks lain, tanpa markdown:
-{"city":"<nama kota>","items":[{"id":1,"type":"psikolog","name":"<nama>","address":"<alamat>","area":"<kota>","rating":4.5,"reviewCount":120,"phone":"<nomor atau null>","website":"<url atau null>","hours":"<jam buka>","priceRange":"<kisaran harga>","tags":["<tag1>","<tag2>"],"isOnline":false,"emoji":"🧠","description":"<1 kalimat keunggulan>"}]}`;
+  const today = new Date().toLocaleDateString('id-ID', {
+    weekday:'long', day:'numeric', month:'long', year:'numeric'
+  });
 
   try {
     const res = await fetch('/api/anthropic', {
@@ -85,14 +166,14 @@ Kembalikan HANYA JSON ini, tanpa teks lain, tanpa markdown:
         model     : 'claude-sonnet-4-20250514',
         max_tokens: 6000,
         tools     : [{ type: 'web_search_20250305', name: 'web_search' }],
-        messages  : [{ role: 'user', content: prompt }],
+        messages  : [{ role: 'user', content: buildPrompt(loc, today) }],
       })
     });
 
     if (!res.ok) throw new Error('http_' + res.status);
 
-    const data = await res.json();
-    const raw  = (data.content || []).filter(c => c.type === 'text').map(c => c.text || '').join('');
+    const data  = await res.json();
+    const raw   = (data.content || []).filter(c => c.type === 'text').map(c => c.text || '').join('');
     const match = raw.match(/\{[\s\S]*\}/);
     if (!match) throw new Error('no_json');
 
@@ -100,7 +181,7 @@ Kembalikan HANYA JSON ini, tanpa teks lain, tanpa markdown:
     if (!Array.isArray(parsed.items) || !parsed.items.length) throw new Error('empty');
 
     nb.results   = parsed.items;
-    nb.cityName  = parsed.city || 'Area kamu';
+    nb.cityName  = parsed.city || loc.city || 'Indonesia';
     nb.lastFetch = Date.now();
     nb.loading   = false;
     renderResults(nb.results, nb.filter);
@@ -108,24 +189,48 @@ Kembalikan HANYA JSON ini, tanpa teks lain, tanpa markdown:
   } catch (e) {
     nb.loading = false;
     console.warn('[nearby] error:', e.message);
-    nb.results   = fallbackServices();
-    nb.cityName  = 'Indonesia';
+    // Fallback dengan data minimal daripada array kosong
+    nb.results   = fallbackServices(loc.city);
+    nb.cityName  = loc.city || 'Indonesia';
     nb.lastFetch = Date.now();
     renderResults(nb.results, nb.filter);
   }
 }
 
-function getLocation() {
-  return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) { reject(new Error('no_geo')); return; }
-    navigator.geolocation.getCurrentPosition(
-      p => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }),
-      e => reject(new Error('gps_' + e.code)),
-      { timeout: 7000, maximumAge: 600000, enableHighAccuracy: false }
-    );
-  });
+// ─── Fallback data (tampil kalau API error) ───
+function fallbackServices(city) {
+  return [
+    {
+      id:1, type:'online', name:'Into The Light Indonesia',
+      address:'Layanan online nasional', area:'Online',
+      rating:4.8, reviewCount:2100, phone:'119', website:'https://www.intothelightid.org',
+      hours:'Senin–Jumat 09.00–17.00', priceRange:'Gratis',
+      tags:['Pencegahan Bunuh Diri','Konseling','Hotline'],
+      isOnline:true, emoji:'💚',
+      description:'Organisasi nasional fokus kesehatan mental & pencegahan bunuh diri.'
+    },
+    {
+      id:2, type:'online', name:'Riliv – Konsultasi Psikologi',
+      address:'Layanan online nasional', area:'Online',
+      rating:4.6, reviewCount:18000, phone:null, website:'https://riliv.co',
+      hours:'24 Jam', priceRange:'Rp 150.000–300.000/sesi',
+      tags:['Online','Meditasi','Chat dengan Psikolog'],
+      isOnline:true, emoji:'💻',
+      description:'Platform kesehatan mental terbesar Indonesia dengan ratusan psikolog berlisensi.'
+    },
+    {
+      id:3, type:'online', name:'Yayasan Pulih',
+      address:'Jl. Teluk Peleng No.63A, Jakarta', area:'Jakarta',
+      rating:4.7, reviewCount:540, phone:'(021) 788-42580', website:'https://yayasanpulih.org',
+      hours:'Senin–Jumat 08.00–17.00', priceRange:'Sesuai kemampuan',
+      tags:['Trauma','Komunitas','Konseling Keluarga'],
+      isOnline:false, emoji:'🧡',
+      description:'Layanan psikologi berbasis komunitas dengan tarif sliding scale sejak 2000.'
+    },
+  ];
 }
 
+// ─── Render & UI (tidak berubah dari v9) ───
 export function renderResults(results, filter) {
   nb.filter = filter;
   const el  = document.getElementById('nearby-wrap');
@@ -210,11 +315,6 @@ function starsHTML(rating) {
     h += `<svg width="9" height="9" viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z" fill="${on?'#f57c00':'#e0f0e8'}" stroke="${on?'#f57c00':'#c5dfd0'}" stroke-width="1"/></svg>`;
   }
   return `<div class="nb-stars">${h}</div>`;
-}
-
-function fallbackServices() {
-  return [
-  ];
 }
 
 export function filterNearby(t) { nb.filter = t; if (nb.results.length) renderResults(nb.results, t); }
