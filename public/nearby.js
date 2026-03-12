@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════
-   MOODLY — nearby.js  (v7 — same pattern as news.js)
+   MOODLY — nearby.js  (v9 — Vercel /api/anthropic)
 ═══════════════════════════════════════ */
 
 let nb = {
@@ -54,41 +54,31 @@ export async function findNearby() {
 
   const setStatus = t => { const s = document.getElementById('nb-status'); if (s) s.textContent = t; };
 
-  // GPS — opsional, tidak block jika gagal
-  let coordStr = '';
+  // GPS — opsional
+  let cityHint = 'Jakarta';
   try {
     setStatus('Mendeteksi lokasi GPS…');
     const coords = await Promise.race([
       getLocation(),
       new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 8000))
     ]);
-    coordStr = `${coords.lat.toFixed(4)},${coords.lng.toFixed(4)}`;
+    cityHint = `koordinat GPS ${coords.lat.toFixed(3)},${coords.lng.toFixed(3)} — sebutkan nama kotanya`;
     setStatus('Lokasi terdeteksi. Mencari layanan…');
   } catch {
-    coordStr = '';
     setStatus('Mencari layanan kesehatan mental Indonesia…');
   }
 
   const today = new Date().toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
-  const locHint = coordStr
-    ? `Koordinat GPS pengguna: ${coordStr}. Tentukan kota dari koordinat ini lalu cari layanan di sana.`
-    : `GPS tidak tersedia. Tampilkan layanan populer di Jakarta dan layanan online nasional.`;
 
-  const prompt = `Kamu asisten kesehatan mental Indonesia yang membantu menemukan layanan profesional terpercaya.
-Tanggal: ${today}. ${locHint}
+  const prompt = `Kamu asisten kesehatan mental Indonesia. Tanggal: ${today}. Lokasi: ${cityHint}.
 
-Gunakan web_search untuk mencari layanan NYATA dan AKTIF:
-1. "psikolog klinik [kota] 2025"
-2. "konseling online Indonesia terpercaya"
-
-Buat 8 rekomendasi: campuran psikolog, psikiater, klinik lokal, dan min 2 layanan online nasional (Riliv, Into The Light Indonesia, Yayasan Pulih).
+Berikan 8 rekomendasi layanan kesehatan mental nyata di Indonesia: campuran psikolog lokal, psikiater/RS, klinik, dan min 2 layanan online nasional (Riliv, Into The Light Indonesia, Yayasan Pulih).
 
 Kembalikan HANYA JSON ini, tanpa teks lain, tanpa markdown:
-{"city":"<nama kota>","items":[{"id":1,"type":"psikolog","name":"<nama>","address":"<alamat>","area":"<kota>","rating":4.5,"reviewCount":100,"phone":"<nomor atau null>","website":"<url atau null>","hours":"<jam>","priceRange":"<harga>","tags":["<tag>"],"isOnline":false,"emoji":"🧠","description":"<1 kalimat>"}]}`;
+{"city":"<nama kota>","items":[{"id":1,"type":"psikolog","name":"<nama>","address":"<alamat>","area":"<kota>","rating":4.5,"reviewCount":120,"phone":"<nomor atau null>","website":"<url atau null>","hours":"<jam buka>","priceRange":"<kisaran harga>","tags":["<tag1>","<tag2>"],"isOnline":false,"emoji":"🧠","description":"<1 kalimat keunggulan>"}]}`;
 
   try {
-    // — URL persis sama dengan news.js —
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('/api/anthropic', {
       method : 'POST',
       headers: { 'Content-Type': 'application/json' },
       body   : JSON.stringify({
@@ -99,14 +89,10 @@ Kembalikan HANYA JSON ini, tanpa teks lain, tanpa markdown:
       })
     });
 
+    if (!res.ok) throw new Error('http_' + res.status);
+
     const data = await res.json();
-
-    // — Parsing persis sama dengan news.js —
-    const raw = data.content
-      .filter(c => c.type === 'text')
-      .map(c => c.text || '')
-      .join('');
-
+    const raw  = (data.content || []).filter(c => c.type === 'text').map(c => c.text || '').join('');
     const match = raw.match(/\{[\s\S]*\}/);
     if (!match) throw new Error('no_json');
 
@@ -121,13 +107,10 @@ Kembalikan HANYA JSON ini, tanpa teks lain, tanpa markdown:
 
   } catch (e) {
     nb.loading = false;
-    // — Fallback persis sama dengan news.js —
-    console.warn('[nearby] fetch failed, using fallback', e.message);
-    const fallback = fallbackServices();
-    nb.results   = fallback;
+    console.warn('[nearby] error:', e.message);
+    nb.results   = fallbackServices();
     nb.cityName  = 'Indonesia';
     nb.lastFetch = Date.now();
-    nb.loading   = false;
     renderResults(nb.results, nb.filter);
   }
 }
@@ -229,19 +212,8 @@ function starsHTML(rating) {
   return `<div class="nb-stars">${h}</div>`;
 }
 
-/* ════════════════
-   FALLBACK — tampil kalau API gagal (sama konsepnya dengan news.js)
-════════════════ */
 function fallbackServices() {
   return [
-    { id:1, type:'online', name:'Into The Light Indonesia', address:'Layanan Online - Seluruh Indonesia', area:'Online', rating:4.8, reviewCount:320, phone:null, website:'https://www.intothelightid.org', hours:'Senin–Jumat 09.00–17.00', priceRange:'Gratis (konsultasi awal)', tags:['Krisis','Suicide Prevention','Konseling'], isOnline:true, emoji:'💚', description:'Organisasi terkemuka untuk pencegahan bunuh diri dan dukungan kesehatan mental di Indonesia.' },
-    { id:2, type:'online', name:'Yayasan Pulih', address:'Layanan Online & Tatap Muka - Jakarta', area:'Jakarta', rating:4.7, reviewCount:210, phone:'021-788-42580', website:'https://yayasanpulih.org', hours:'Senin–Jumat 09.00–17.00', priceRange:'Rp 150.000–400.000/sesi', tags:['Trauma','Konseling','Keluarga'], isOnline:true, emoji:'🌱', description:'Layanan psikologi komprehensif dengan fokus pada pemulihan trauma dan kesejahteraan keluarga.' },
-    { id:3, type:'online', name:'Riliv', address:'Layanan Online - Seluruh Indonesia', area:'Online', rating:4.6, reviewCount:1840, phone:null, website:'https://riliv.co', hours:'24 jam / 7 hari', priceRange:'Rp 95.000–300.000/sesi', tags:['Depresi','Anxiety','Self-Help'], isOnline:true, emoji:'📱', description:'Platform konseling online terbesar di Indonesia dengan ratusan psikolog terverifikasi.' },
-    { id:4, type:'psikolog', name:'Klinik Psikologi Angsamerah', address:'Jl. Kemang Raya No.17, Jakarta Selatan', area:'Jakarta Selatan', rating:4.7, reviewCount:156, phone:'021-719-5700', website:'https://angsamerah.com', hours:'Senin–Sabtu 09.00–18.00', priceRange:'Rp 350.000–600.000/sesi', tags:['Dewasa','Anak','Keluarga'], isOnline:false, emoji:'🧠', description:'Klinik psikologi ternama di Jakarta dengan tim psikolog klinis berpengalaman.' },
-    { id:5, type:'psikiater', name:'RSKJ Soeharto Heerdjan', address:'Jl. Prof. Dr. Latumeten No.1, Jakarta Barat', area:'Jakarta Barat', rating:4.3, reviewCount:289, phone:'021-560-1239', website:null, hours:'Senin–Jumat 08.00–15.00', priceRange:'Rp 100.000–350.000/konsultasi', tags:['Psikiater','Rawat Inap','BPJS'], isOnline:false, emoji:'🏥', description:'Rumah sakit jiwa pemerintah terkemuka yang menerima pasien BPJS dengan fasilitas lengkap.' },
-    { id:6, type:'klinik', name:'Klinik Kesehatan Jiwa RSCM', address:'Jl. Diponegoro No.71, Jakarta Pusat', area:'Jakarta Pusat', rating:4.4, reviewCount:412, phone:'021-391-5140', website:'https://rscm.co.id', hours:'Senin–Jumat 07.30–14.00', priceRange:'Rp 50.000–250.000 (BPJS tersedia)', tags:['BPJS','Psikiater','Umum'], isOnline:false, emoji:'🏨', description:'Poli jiwa RSCM melayani berbagai gangguan mental dengan dukungan BPJS Kesehatan.' },
-    { id:7, type:'online', name:'Alodokter Psikologi', address:'Layanan Online - Seluruh Indonesia', area:'Online', rating:4.5, reviewCount:2100, phone:null, website:'https://www.alodokter.com/cari-dokter/psikolog', hours:'24 jam booking online', priceRange:'Rp 75.000–250.000/sesi', tags:['Online','Psikolog','Chat'], isOnline:true, emoji:'💬', description:'Platform kesehatan digital dengan fitur konsultasi psikolog via chat dan video call.' },
-    { id:8, type:'psikolog', name:'Ohana Space', address:'Jl. Kemang Utara Raya No.3, Jakarta Selatan', area:'Jakarta Selatan', rating:4.8, reviewCount:98, phone:'0812-9898-2255', website:'https://ohanaspace.id', hours:'Senin–Sabtu 10.00–19.00', priceRange:'Rp 300.000–500.000/sesi', tags:['Remaja','Dewasa','Anxiety'], isOnline:false, emoji:'🌿', description:'Safe space konseling psikologi dengan pendekatan modern dan ramah untuk generasi muda.' },
   ];
 }
 
