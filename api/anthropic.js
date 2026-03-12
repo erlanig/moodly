@@ -1,10 +1,7 @@
 /* ═══════════════════════════════════════
-   Vercel Serverless Function
-   /api/anthropic  →  Anthropic API
-   Set env var: ANTHROPIC_API_KEY di Vercel Dashboard
+   Vercel Serverless Function — /api/anthropic
 ═══════════════════════════════════════ */
 export default async function handler(req, res) {
-  // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -21,14 +18,21 @@ export default async function handler(req, res) {
         'Content-Type'      : 'application/json',
         'x-api-key'         : apiKey,
         'anthropic-version' : '2023-06-01',
-        'anthropic-beta'    : 'web-search-2025-03-05',
+        // ✅ HAPUS anthropic-beta — web search sudah GA, tidak perlu beta header
       },
       body: JSON.stringify(req.body),
     });
 
     const data = await upstream.json();
+    
+    // Log error dari Anthropic supaya mudah debug
+    if (!upstream.ok) {
+      console.error('[api/anthropic] upstream error:', upstream.status, JSON.stringify(data));
+    }
+    
     res.status(upstream.status).json(data);
   } catch (e) {
+    console.error('[api/anthropic] fetch error:', e.message);
     res.status(502).json({ error: e.message });
   }
 }

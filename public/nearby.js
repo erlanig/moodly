@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════
-   MOODLY — nearby.js  (v11 — multi-turn tool fix)
+   MOODLY — nearby.js  (v12 — fix web_search tool type)
 ═══════════════════════════════════════ */
 
 let nb = {
@@ -93,61 +93,75 @@ function buildPrompt(loc, today) {
 
   return `Kamu asisten kesehatan mental Indonesia. Tanggal: ${today}. ${locationCtx}
 
-Gunakan web_search untuk mencari layanan NYATA dan AKTIF. Cari:
-- "psikolog ${kotaSearch} terpercaya"
-- "klinik kesehatan mental ${kotaSearch}"
-- "psikiater ${kotaSearch} rumah sakit"
+Cari layanan kesehatan mental NYATA dan AKTIF di ${kotaSearch}: psikolog, psikiater, klinik, dan min 2 layanan online nasional (Riliv, Into The Light Indonesia, Yayasan Pulih).
 
-Berikan tepat 8 rekomendasi: campuran psikolog lokal, psikiater/RS, klinik, dan min 2 layanan online nasional (Riliv, Into The Light Indonesia, Yayasan Pulih).
-
-Setelah selesai mencari, kembalikan HANYA JSON berikut tanpa teks lain, tanpa markdown, tanpa komentar apapun:
-{"city":"<nama kota>","items":[{"id":1,"type":"psikolog","name":"<nama lengkap>","address":"<alamat lengkap>","area":"<kota>","rating":4.5,"reviewCount":120,"phone":"<nomor atau null>","website":"<url atau null>","hours":"<jam buka>","priceRange":"<kisaran harga>","tags":["<tag1>","<tag2>"],"isOnline":false,"emoji":"🧠","description":"<1 kalimat keunggulan>"}]}`;
+Berikan tepat 8 rekomendasi. Kembalikan HANYA JSON ini tanpa teks lain, tanpa markdown:
+{"city":"<nama kota>","items":[{"id":1,"type":"psikolog","name":"<nama>","address":"<alamat>","area":"<kota>","rating":4.5,"reviewCount":120,"phone":"<nomor atau null>","website":"<url atau null>","hours":"<jam buka>","priceRange":"<harga>","tags":["tag1","tag2"],"isOnline":false,"emoji":"🧠","description":"<keunggulan>"}]}`;
 }
 
-/* ─── Multi-turn Claude Call ─── */
-async function callClaudeWithTools(prompt) {
+/* ─── Multi-turn Claude + web search ─── */
+async function callClaudeWithTools(prompt, loc) {
+  // Kirim lokasi user ke tool supaya search lebih relevan
+  const userLocation = (loc.lat && loc.lng) ? {
+    type    : 'approximate',
+    city    : loc.city?.split(',')[0] || 'Jakarta',
+    country : 'ID',
+    timezone: 'Asia/Jakarta',
+  } : null;
+
+  const webSearchTool = {
+    // ✅ Gunakan tool type terbaru
+    type    : 'web_search_20260209',
+    name    : 'web_search',
+    max_uses: 5,
+    ...(userLocation && { user_location: userLocation }),
+  };
+
   const messages = [{ role: 'user', content: prompt }];
 
-  for (let turn = 0; turn < 6; turn++) {
+  for (let turn = 0; turn < 8; turn++) {
     const res = await fetch('/api/anthropic', {
       method : 'POST',
       headers: { 'Content-Type': 'application/json' },
       body   : JSON.stringify({
         model     : 'claude-sonnet-4-20250514',
         max_tokens: 6000,
-        tools     : [{ type: 'web_search_20250305', name: 'web_search' }],
+        tools     : [webSearchTool],
         messages,
       })
     });
 
-    if (!res.ok) throw new Error('http_' + res.status);
+    if (!res.ok) {
+      const errBody = await res.json().catch(() => ({}));
+      throw new Error(`http_${res.status}: ${errBody.error?.message || 'unknown'}`);
+    }
+
     const data = await res.json();
+    const blockTypes = data.content?.map(c => c.type) || [];
+    console.log(`[nearby] turn ${turn} | stop_reason: ${data.stop_reason} | blocks:`, blockTypes);
 
-    console.log(`[nearby] turn ${turn} | stop_reason: ${data.stop_reason} | blocks:`, data.content?.map(c => c.type));
-
-    /* Claude selesai → ekstrak JSON */
+    // ✅ Web search pakai "server_tool_use" — dijalankan otomatis oleh Anthropic
+    // Response langsung end_turn setelah search selesai, tidak perlu loop tool_result
     if (data.stop_reason === 'end_turn') {
       const raw = (data.content || [])
         .filter(c => c.type === 'text')
         .map(c => c.text || '')
         .join('');
 
-      console.log('[nearby] raw text:', raw.slice(0, 500));
+      console.log('[nearby] raw text (500 char):', raw.slice(0, 500));
 
-      // Coba ambil JSON object dari dalam text
       const match = raw.match(/\{[\s\S]*\}/);
-      if (!match) throw new Error('no_json');
+      if (!match) throw new Error('no_json dalam response');
 
-      // Bersihkan karakter aneh sebelum parse
       const cleaned = match[0]
-        .replace(/[\u0000-\u001F\u007F]/g, ' ') // strip control chars
-        .replace(/,\s*}/g, '}')                  // trailing comma object
-        .replace(/,\s*]/g, ']');                 // trailing comma array
+        .replace(/[\u0000-\u001F\u007F]/g, ' ')
+        .replace(/,\s*}/g, '}')
+        .replace(/,\s*]/g, ']');
 
       return JSON.parse(cleaned);
     }
 
-    /* Claude minta tool_use → kirim tool_result dan lanjutkan */
+    // Jika masih ada tool_use biasa (bukan server_tool_use), handle multi-turn
     if (data.stop_reason === 'tool_use') {
       messages.push({ role: 'assistant', content: data.content });
 
@@ -156,14 +170,10 @@ async function callClaudeWithTools(prompt) {
         .map(c => ({
           type       : 'tool_result',
           tool_use_id: c.id,
-          // Hasil search sudah otomatis dijalankan Anthropic di server,
-          // kita hanya perlu acknowledge agar Claude melanjutkan
-          content    : c.input?.query
-            ? `Hasil pencarian untuk "${c.input.query}" telah diterima. Lanjutkan analisis dan buat JSON.`
-            : 'Tool selesai dijalankan.',
+          content    : 'Tool selesai. Lanjutkan dan buat JSON.',
         }));
 
-      if (!toolResults.length) throw new Error('tool_use tanpa tool block');
+      if (!toolResults.length) throw new Error('tool_use tanpa block');
       messages.push({ role: 'user', content: toolResults });
       continue;
     }
@@ -190,9 +200,7 @@ export async function findNearby() {
   el.innerHTML = `
     <div class="nb-loading">
       <div class="nb-dots">
-        <div class="nb-dot"></div>
-        <div class="nb-dot"></div>
-        <div class="nb-dot"></div>
+        <div class="nb-dot"></div><div class="nb-dot"></div><div class="nb-dot"></div>
       </div>
       <div class="nb-loading-txt" id="nb-status">Mendeteksi lokasi…</div>
     </div>`;
@@ -212,7 +220,7 @@ export async function findNearby() {
 
   try {
     setStatus('🔍 Sedang mencari layanan terdekat…');
-    const parsed = await callClaudeWithTools(buildPrompt(loc, today));
+    const parsed = await callClaudeWithTools(buildPrompt(loc, today), loc);
 
     if (!Array.isArray(parsed.items) || !parsed.items.length) throw new Error('empty items');
 
@@ -380,9 +388,7 @@ function starsHTML(rating) {
     const on = i <= r;
     h += `<svg width="9" height="9" viewBox="0 0 24 24">
       <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z"
-        fill="${on ? '#f57c00' : '#e0f0e8'}"
-        stroke="${on ? '#f57c00' : '#c5dfd0'}"
-        stroke-width="1"/>
+        fill="${on ? '#f57c00' : '#e0f0e8'}" stroke="${on ? '#f57c00' : '#c5dfd0'}" stroke-width="1"/>
     </svg>`;
   }
   return `<div class="nb-stars">${h}</div>`;
@@ -410,6 +416,6 @@ export function initNearby() {
     </div>`;
 }
 
-export function filterNearby(t)  { nb.filter = t; if (nb.results.length) renderResults(nb.results, t); }
-export function refreshNearby()  { nb.results = []; nb.lastFetch = null; findNearby(); }
+export function filterNearby(t)    { nb.filter = t; if (nb.results.length) renderResults(nb.results, t); }
+export function refreshNearby()    { nb.results = []; nb.lastFetch = null; findNearby(); }
 export function searchNearby(name) { window.open(`https://maps.google.com/maps?q=${encodeURIComponent(name + ' kesehatan mental')}`, '_blank'); }
