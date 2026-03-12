@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════
-   Vercel Serverless — /api/places
-   Proxy ke Google Places API (New)
+   Vercel Serverless — /api/places.js
+   Pakai Overpass API (OpenStreetMap) — GRATIS, no API key
 ═══════════════════════════════════════ */
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -9,63 +9,43 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') { res.status(204).end(); return; }
   if (req.method !== 'POST')    { res.status(405).json({ error: 'Method not allowed' }); return; }
 
-  const apiKey = process.env.GOOGLE_PLACES_KEY;
-  if (!apiKey) { res.status(500).json({ error: 'GOOGLE_PLACES_KEY not configured' }); return; }
+  const { lat, lng } = req.body || {};
 
-  const { lat, lng, query } = req.body;
-  if (!query) { res.status(400).json({ error: 'query required' }); return; }
+  // Default ke Jakarta kalau tidak ada koordinat
+  const centerLat = parseFloat(lat) || -6.2088;
+  const centerLng = parseFloat(lng) || 106.8456;
+  const radius    = 10000; // 10km
+
+  // Query Overpass — cari semua fasilitas kesehatan mental di sekitar koordinat
+  const overpassQuery = `
+    [out:json][timeout:25];
+    (
+      node["amenity"="doctors"]["healthcare:speciality"="psychiatry"](around:${radius},${centerLat},${centerLng});
+      node["amenity"="doctors"]["healthcare:speciality"="psychology"](around:${radius},${centerLat},${centerLng});
+      node["amenity"="clinic"]["healthcare"~"mental|psychiatry|psychology",i](around:${radius},${centerLat},${centerLng});
+      node["amenity"="hospital"]["healthcare:speciality"~"psychiatry|mental",i](around:${radius},${centerLat},${centerLng});
+      node["healthcare"="psychologist"](around:${radius},${centerLat},${centerLng});
+      node["healthcare"="psychiatrist"](around:${radius},${centerLat},${centerLng});
+      node["amenity"~"clinic|hospital"]["name"~"jiwa|mental|psikolog|psikiater|kesehatan jiwa",i](around:${radius},${centerLat},${centerLng});
+      way["amenity"~"clinic|hospital"]["name"~"jiwa|mental|psikolog|psikiater|kesehatan jiwa",i](around:${radius},${centerLat},${centerLng});
+    );
+    out body center 20;
+  `;
 
   try {
-    // Pakai Text Search (New) — support query bebas + location bias
-    const body = {
-      textQuery       : query,
-      languageCode    : 'id',
-      regionCode      : 'ID',
-      maxResultCount  : 10,
-      locationBias    : (lat && lng) ? {
-        circle: {
-          center: { latitude: lat, longitude: lng },
-          radius: 30000, // 30km radius
-        }
-      } : undefined,
-    };
-
-    const upstream = await fetch('https://places.googleapis.com/v1/places:searchText', {
+    const upstream = await fetch('https://overpass-api.de/api/interpreter', {
       method : 'POST',
-      headers: {
-        'Content-Type'     : 'application/json',
-        'X-Goog-Api-Key'   : apiKey,
-        // Field mask — hanya ambil field yang dibutuhkan (hemat biaya)
-        'X-Goog-FieldMask' : [
-          'places.id',
-          'places.displayName',
-          'places.formattedAddress',
-          'places.location',
-          'places.rating',
-          'places.userRatingCount',
-          'places.nationalPhoneNumber',
-          'places.websiteUri',
-          'places.regularOpeningHours',
-          'places.priceLevel',
-          'places.types',
-          'places.shortFormattedAddress',
-          'places.businessStatus',
-        ].join(','),
-      },
-      body: JSON.stringify(body),
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body   : 'data=' + encodeURIComponent(overpassQuery),
     });
 
+    if (!upstream.ok) throw new Error('overpass_http_' + upstream.status);
+
     const data = await upstream.json();
+    res.status(200).json({ elements: data.elements || [] });
 
-    if (!upstream.ok) {
-      console.error('[places] Google error:', JSON.stringify(data));
-      res.status(upstream.status).json({ error: data.error?.message || 'Google API error' });
-      return;
-    }
-
-    res.status(200).json(data);
   } catch (e) {
-    console.error('[places] fetch error:', e.message);
-    res.status(502).json({ error: e.message });
+    console.error('[places] error:', e.message);
+    res.status(502).json({ error: e.message, elements: [] });
   }
 }
