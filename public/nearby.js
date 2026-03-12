@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════
-   MOODLY — nearby.js  (v12 — fix web_search tool type)
+   MOODLY — nearby.js  (v2 — Google Places API)
 ═══════════════════════════════════════ */
 
 let nb = {
@@ -18,8 +18,17 @@ const FILTERS = [
   { id:'online',    label:'Online',   emoji:'💻' },
 ];
 
+// Query yang akan dicari di Google Places
+const SEARCH_QUERIES = [
+  'psikolog klinis',
+  'psikiater rumah sakit jiwa',
+  'klinik kesehatan mental',
+  'konseling psikologi',
+];
+
 /* ─── Deteksi Lokasi ─── */
 async function detectLocation() {
+  // A) GPS
   try {
     const coords = await Promise.race([
       getGPS(),
@@ -28,27 +37,28 @@ async function detectLocation() {
     const city = await reverseGeocode(coords.lat, coords.lng);
     return { source: 'gps', lat: coords.lat, lng: coords.lng, city };
   } catch {
-    console.log('[nearby] GPS gagal → coba IP geolocation');
+    console.log('[nearby] GPS gagal → IP geolocation');
   }
 
+  // B) IP Geolocation
   try {
-    const ipData = await Promise.race([
+    const ip = await Promise.race([
       fetch('https://ipapi.co/json/').then(r => r.json()),
       new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 5000))
     ]);
-    if (ipData?.city) {
+    if (ip?.city) {
       return {
         source: 'ip',
-        lat   : ipData.latitude,
-        lng   : ipData.longitude,
-        city  : `${ipData.city}, ${ipData.region}`,
+        lat   : ip.latitude,
+        lng   : ip.longitude,
+        city  : `${ip.city}, ${ip.region}`,
       };
     }
   } catch {
     console.log('[nearby] IP geolocation gagal → fallback');
   }
 
-  return { source: 'fallback', lat: null, lng: null, city: null };
+  return { source: 'fallback', lat: -6.2088, lng: 106.8456, city: 'Jakarta' };
 }
 
 function getGPS() {
@@ -71,117 +81,72 @@ async function reverseGeocode(lat, lng) {
     const d = await r.json();
     const a = d.address || {};
     const kota = a.city || a.town || a.village || a.county || a.state || 'Indonesia';
-    const prov  = a.state || '';
-    return prov ? `${kota}, ${prov}` : kota;
+    return a.state ? `${kota}, ${a.state}` : kota;
   } catch {
     return null;
   }
 }
 
-/* ─── Build Prompt ─── */
-function buildPrompt(loc, today) {
-  let locationCtx;
-  if (loc.source === 'gps' && loc.lat) {
-    locationCtx = `Koordinat GPS: ${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)} (${loc.city || 'Indonesia'}). Fokus layanan di kota ini.`;
-  } else if (loc.source === 'ip' && loc.city) {
-    locationCtx = `Lokasi berdasarkan IP: ${loc.city}. Fokus layanan di ${loc.city} dan sekitarnya.`;
-  } else {
-    locationCtx = `Lokasi tidak terdeteksi. Berikan layanan nasional Indonesia populer (Jakarta, Surabaya, Bandung).`;
-  }
-
-  const kotaSearch = loc.city ? loc.city.split(',')[0] : 'Jakarta';
-
-  return `Kamu asisten kesehatan mental Indonesia. Tanggal: ${today}. ${locationCtx}
-
-Cari layanan kesehatan mental NYATA dan AKTIF di ${kotaSearch}: psikolog, psikiater, klinik, dan min 2 layanan online nasional (Riliv, Into The Light Indonesia, Yayasan Pulih).
-
-Berikan tepat 8 rekomendasi. Kembalikan HANYA JSON ini tanpa teks lain, tanpa markdown:
-{"city":"<nama kota>","items":[{"id":1,"type":"psikolog","name":"<nama>","address":"<alamat>","area":"<kota>","rating":4.5,"reviewCount":120,"phone":"<nomor atau null>","website":"<url atau null>","hours":"<jam buka>","priceRange":"<harga>","tags":["tag1","tag2"],"isOnline":false,"emoji":"🧠","description":"<keunggulan>"}]}`;
+/* ─── Fetch dari Google Places via /api/places ─── */
+async function searchPlaces(query, lat, lng) {
+  const res = await fetch('/api/places', {
+    method : 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body   : JSON.stringify({ query, lat, lng }),
+  });
+  if (!res.ok) throw new Error('places_http_' + res.status);
+  const data = await res.json();
+  return data.places || [];
 }
 
-/* ─── Multi-turn Claude + web search ─── */
-async function callClaudeWithTools(prompt, loc) {
-  // Kirim lokasi user ke tool supaya search lebih relevan
-  const userLocation = (loc.lat && loc.lng) ? {
-    type    : 'approximate',
-    city    : loc.city?.split(',')[0] || 'Jakarta',
-    country : 'ID',
-    timezone: 'Asia/Jakarta',
-  } : null;
+/* ─── Konversi Google Places → format kartu Moodly ─── */
+function classifyType(place) {
+  const types  = place.types || [];
+  const name   = (place.displayName?.text || '').toLowerCase();
+  if (types.includes('hospital') || name.includes('rumah sakit') || name.includes('rs '))
+    return 'psikiater';
+  if (name.includes('psikiater')) return 'psikiater';
+  if (name.includes('psikolog') || name.includes('psikologi')) return 'psikolog';
+  if (types.includes('doctor') || name.includes('klinik')) return 'klinik';
+  return 'klinik';
+}
 
-  const webSearchTool = {
-    // ✅ Gunakan tool type terbaru
-    type    : 'web_search_20260209',
-    name    : 'web_search',
-    max_uses: 5,
-    ...(userLocation && { user_location: userLocation }),
+function formatHours(place) {
+  const periods = place.regularOpeningHours?.weekdayDescriptions;
+  if (!periods?.length) return 'Sesuai appointment';
+  // Ambil hari ini
+  const hariIni = new Date().getDay(); // 0=Minggu
+  const idx = hariIni === 0 ? 6 : hariIni - 1;
+  return periods[idx] || periods[0] || 'Sesuai appointment';
+}
+
+function placeToCard(place, idx) {
+  const type    = classifyType(place);
+  const emojiMap = { psikolog:'🧠', psikiater:'🏥', klinik:'🏨', online:'💻' };
+  const name    = place.displayName?.text || '—';
+  const area    = place.shortFormattedAddress || place.formattedAddress || '';
+
+  return {
+    id         : idx + 1,
+    type,
+    name,
+    address    : place.formattedAddress || '—',
+    area       : area.split(',').slice(-2).join(',').trim(),
+    rating     : place.rating || null,
+    reviewCount: place.userRatingCount || 0,
+    phone      : place.nationalPhoneNumber || null,
+    website    : place.websiteUri || null,
+    hours      : formatHours(place),
+    priceRange : 'Hubungi untuk info harga',
+    tags       : (place.types || [])
+                   .filter(t => !['point_of_interest','establishment','health'].includes(t))
+                   .slice(0, 3)
+                   .map(t => t.replace(/_/g, ' ')),
+    isOnline   : false,
+    emoji      : emojiMap[type] || '🏥',
+    description: `${name} — layanan kesehatan mental di ${area}`,
+    googleId   : place.id,
   };
-
-  const messages = [{ role: 'user', content: prompt }];
-
-  for (let turn = 0; turn < 8; turn++) {
-    const res = await fetch('/api/anthropic', {
-      method : 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body   : JSON.stringify({
-        model     : 'claude-sonnet-4-20250514',
-        max_tokens: 6000,
-        tools     : [webSearchTool],
-        messages,
-      })
-    });
-
-    if (!res.ok) {
-      const errBody = await res.json().catch(() => ({}));
-      throw new Error(`http_${res.status}: ${errBody.error?.message || 'unknown'}`);
-    }
-
-    const data = await res.json();
-    const blockTypes = data.content?.map(c => c.type) || [];
-    console.log(`[nearby] turn ${turn} | stop_reason: ${data.stop_reason} | blocks:`, blockTypes);
-
-    // ✅ Web search pakai "server_tool_use" — dijalankan otomatis oleh Anthropic
-    // Response langsung end_turn setelah search selesai, tidak perlu loop tool_result
-    if (data.stop_reason === 'end_turn') {
-      const raw = (data.content || [])
-        .filter(c => c.type === 'text')
-        .map(c => c.text || '')
-        .join('');
-
-      console.log('[nearby] raw text (500 char):', raw.slice(0, 500));
-
-      const match = raw.match(/\{[\s\S]*\}/);
-      if (!match) throw new Error('no_json dalam response');
-
-      const cleaned = match[0]
-        .replace(/[\u0000-\u001F\u007F]/g, ' ')
-        .replace(/,\s*}/g, '}')
-        .replace(/,\s*]/g, ']');
-
-      return JSON.parse(cleaned);
-    }
-
-    // Jika masih ada tool_use biasa (bukan server_tool_use), handle multi-turn
-    if (data.stop_reason === 'tool_use') {
-      messages.push({ role: 'assistant', content: data.content });
-
-      const toolResults = (data.content || [])
-        .filter(c => c.type === 'tool_use')
-        .map(c => ({
-          type       : 'tool_result',
-          tool_use_id: c.id,
-          content    : 'Tool selesai. Lanjutkan dan buat JSON.',
-        }));
-
-      if (!toolResults.length) throw new Error('tool_use tanpa block');
-      messages.push({ role: 'user', content: toolResults });
-      continue;
-    }
-
-    throw new Error('unexpected stop_reason: ' + data.stop_reason);
-  }
-
-  throw new Error('max turns tercapai tanpa JSON');
 }
 
 /* ─── Main findNearby ─── */
@@ -206,71 +171,91 @@ export async function findNearby() {
     </div>`;
 
   const loc = await detectLocation();
-
   const sourceLabel = {
-    gps     : `📍 GPS: ${loc.city || 'Terdeteksi'}`,
+    gps     : `📍 ${loc.city || 'GPS terdeteksi'}`,
     ip      : `🌐 ${loc.city || 'Terdeteksi'}`,
-    fallback: '🗺️ Layanan Nasional',
+    fallback: '🗺️ Jakarta (default)',
   };
   setStatus(sourceLabel[loc.source] + ' · Mencari layanan…');
 
-  const today = new Date().toLocaleDateString('id-ID', {
-    weekday:'long', day:'numeric', month:'long', year:'numeric'
-  });
-
   try {
-    setStatus('🔍 Sedang mencari layanan terdekat…');
-    const parsed = await callClaudeWithTools(buildPrompt(loc, today), loc);
+    // Jalankan beberapa query paralel untuk hasil lebih banyak
+    const queries = SEARCH_QUERIES.map(q =>
+      searchPlaces(q, loc.lat, loc.lng).catch(() => [])
+    );
+    const results = await Promise.all(queries);
 
-    if (!Array.isArray(parsed.items) || !parsed.items.length) throw new Error('empty items');
+    // Gabung + deduplicate berdasarkan Google Place ID
+    const seen = new Set();
+    const allPlaces = results.flat().filter(p => {
+      if (!p.id || seen.has(p.id)) return false;
+      // Filter hanya yang statusnya OPERATIONAL
+      if (p.businessStatus && p.businessStatus !== 'OPERATIONAL') return false;
+      seen.add(p.id);
+      return true;
+    });
 
-    nb.results   = parsed.items;
-    nb.cityName  = parsed.city || loc.city || 'Indonesia';
+    if (!allPlaces.length) throw new Error('no places found');
+
+    // Tambah layanan online nasional (hardcode karena tidak ada di Google Maps lokal)
+    const onlineServices = onlineNational();
+
+    const cards = [
+      ...allPlaces.map(placeToCard),
+      ...onlineServices,
+    ];
+
+    nb.results   = cards;
+    nb.cityName  = loc.city || 'Area kamu';
     nb.lastFetch = Date.now();
     nb.loading   = false;
     renderResults(nb.results, nb.filter);
 
   } catch (e) {
     nb.loading = false;
-    console.warn('[nearby] error final:', e.message);
-    nb.results   = fallbackServices(loc.city);
+    console.warn('[nearby] error:', e.message);
+    nb.results   = fallbackServices();
     nb.cityName  = loc.city || 'Indonesia';
     nb.lastFetch = Date.now();
     renderResults(nb.results, nb.filter);
   }
 }
 
-/* ─── Fallback Data ─── */
-function fallbackServices(city) {
+/* ─── Layanan online nasional (selalu ditambahkan) ─── */
+function onlineNational() {
   return [
     {
-      id:1, type:'online', name:'Into The Light Indonesia',
+      id:9001, type:'online', name:'Into The Light Indonesia',
       address:'Layanan online nasional', area:'Online',
       rating:4.8, reviewCount:2100, phone:'119', website:'https://www.intothelightid.org',
       hours:'Senin–Jumat 09.00–17.00', priceRange:'Gratis',
-      tags:['Pencegahan Bunuh Diri','Konseling','Hotline'],
+      tags:['Hotline','Konseling','Pencegahan Bunuh Diri'],
       isOnline:true, emoji:'💚',
-      description:'Organisasi nasional fokus kesehatan mental & pencegahan bunuh diri.'
+      description:'Hotline & konseling nasional, fokus pencegahan bunuh diri.'
     },
     {
-      id:2, type:'online', name:'Riliv – Konsultasi Psikologi',
+      id:9002, type:'online', name:'Riliv – Konsultasi Psikologi',
       address:'Layanan online nasional', area:'Online',
       rating:4.6, reviewCount:18000, phone:null, website:'https://riliv.co',
       hours:'24 Jam', priceRange:'Rp 150.000–300.000/sesi',
-      tags:['Online','Meditasi','Chat dengan Psikolog'],
+      tags:['Online','Meditasi','Chat Psikolog'],
       isOnline:true, emoji:'💻',
-      description:'Platform kesehatan mental terbesar Indonesia dengan ratusan psikolog berlisensi.'
+      description:'Platform kesehatan mental terbesar Indonesia.'
     },
     {
-      id:3, type:'online', name:'Yayasan Pulih',
-      address:'Jl. Teluk Peleng No.63A, Jakarta', area:'Jakarta',
+      id:9003, type:'online', name:'Yayasan Pulih',
+      address:'Jl. Teluk Peleng No.63A, Jakarta Pusat', area:'Jakarta',
       rating:4.7, reviewCount:540, phone:'(021) 788-42580', website:'https://yayasanpulih.org',
       hours:'Senin–Jumat 08.00–17.00', priceRange:'Sesuai kemampuan',
-      tags:['Trauma','Komunitas','Konseling Keluarga'],
+      tags:['Trauma','Komunitas','Sliding Scale'],
       isOnline:false, emoji:'🧡',
-      description:'Layanan psikologi berbasis komunitas dengan tarif sliding scale sejak 2000.'
+      description:'Konseling berbasis komunitas dengan tarif sliding scale.'
     },
   ];
+}
+
+function fallbackServices() {
+  return onlineNational();
 }
 
 /* ─── Render UI ─── */
@@ -316,6 +301,10 @@ export function renderResults(results, filter) {
 function cardHTML(r) {
   const labels = { psikolog:'Psikolog', psikiater:'Psikiater', klinik:'Klinik', online:'Online' };
   const safe   = (r.name || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+  const mapsUrl = r.googleId
+    ? `https://www.google.com/maps/place/?q=place_id:${r.googleId}`
+    : `https://maps.google.com/?q=${encodeURIComponent(r.name + ' ' + r.area)}`;
+
   return `<div class="nb-card">
     <div class="nb-card-top">
       <div class="nb-card-emoji">${r.emoji || '🏥'}</div>
@@ -326,9 +315,9 @@ function cardHTML(r) {
           : `<svg width="9" height="9" viewBox="0 0 24 24" fill="none"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z" stroke="#1db954" stroke-width="2"/><circle cx="12" cy="10" r="3" stroke="#1db954" stroke-width="2"/></svg> ${r.area || ''}`}
         </div>
         <div class="nb-rating-row">
-          ${starsHTML(r.rating || 4.0)}
-          <span class="nb-rating-num">${(r.rating || 4.0).toFixed(1)}</span>
-          <span class="nb-review-cnt">(${r.reviewCount || '—'})</span>
+          ${r.rating ? starsHTML(r.rating) : '<span style="font-size:10px;color:#8aab97">Belum ada rating</span>'}
+          ${r.rating ? `<span class="nb-rating-num">${r.rating.toFixed(1)}</span>` : ''}
+          ${r.reviewCount ? `<span class="nb-review-cnt">(${r.reviewCount.toLocaleString('id')})</span>` : ''}
         </div>
       </div>
       <span class="nb-badge nb-badge-${r.type || 'klinik'}">${labels[r.type] || r.type}</span>
@@ -370,13 +359,14 @@ function cardHTML(r) {
             </svg>
             Website
            </a>`
-        : `<button class="nb-btn nb-btn-web" onclick="window._searchNearby('${safe}')">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
-              <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z" stroke="currentColor" stroke-width="2"/>
-              <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
-            </svg>
-            Lihat di Maps
-           </button>`}
+        : ''}
+      <a class="nb-btn nb-btn-maps" href="${mapsUrl}" target="_blank" rel="noopener">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+          <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z" stroke="currentColor" stroke-width="2"/>
+          <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
+        </svg>
+        Maps
+      </a>
     </div>
   </div>`;
 }
