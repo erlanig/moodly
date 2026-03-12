@@ -122,7 +122,10 @@ Kategori tiap artikel berurutan: ${cats.join(', ')}`;
 
   try {
     // ✅ FIXED: tambahkan web_search tool agar Claude bisa fetch berita terkini
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const API_URL = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+      ? 'http://localhost:3001/api/anthropic'
+      : '/api/anthropic';
+    const res = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
