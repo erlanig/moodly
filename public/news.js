@@ -45,10 +45,9 @@ const CATMAP = [
 /* ════════════════
    DATE / TIME HELPERS
 ════════════════ */
-/** Key berdasarkan tanggal + slot 6 jam (0,1,2,3) */
 function slotKey() {
   const d    = new Date();
-  const slot = Math.floor(d.getHours() / 6); // 0=00-05, 1=06-11, 2=12-17, 3=18-23
+  const slot = Math.floor(d.getHours() / 6);
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}-s${slot}`;
 }
 
@@ -64,7 +63,6 @@ function slotLabel() {
   return 'Malam';
 }
 
-/** Hash key → index topic yang berbeda tiap slot */
 function getTopicIndex() {
   const key  = slotKey();
   let hash = 0;
@@ -81,11 +79,11 @@ export async function initNews() {
     <svg width="9" height="9" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="#0a9e3f" stroke-width="2"/><path d="M3 10h18M8 2v4M16 2v4" stroke="#0a9e3f" stroke-width="2"/></svg>
     ${todayLabel()} · ${slot}`;
 
-  const key    = slotKey();
-  const cached = await loadNewsCache();
+  const currentKey = slotKey();
+  const cached     = await loadNewsCache();
 
-  // Cache valid jika key slot sama
-  const cacheValid = cached && cached.key === key && cached.arts?.length >= 1;
+  // ✅ FIXED: bandingkan key slot secara eksplisit
+  const cacheValid = cached && cached.key === currentKey && Array.isArray(cached.arts) && cached.arts.length >= 1;
 
   if (cacheValid) {
     artStore = cached.arts;
@@ -97,13 +95,13 @@ export async function initNews() {
 }
 
 /* ════════════════
-   FETCH ARTICLES — 10 artikel
+   FETCH ARTICLES — dengan web search untuk berita terkini
 ════════════════ */
 async function loadArticles() {
   document.getElementById('news-wrap').innerHTML = `
     <div class="ldwrap">
       <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-      <div class="ld-txt">Menyiapkan 10 artikel ${slotLabel().toLowerCase()} ini…</div>
+      <div class="ld-txt">Mencari berita & menyiapkan 10 artikel ${slotLabel().toLowerCase()} ini…</div>
     </div>`;
 
   const today  = new Date();
@@ -112,27 +110,45 @@ async function loadArticles() {
 
   const prompt = `Kamu penulis kesehatan mental Indonesia yang hangat dan berbasis bukti ilmiah.
 Tanggal hari ini: ${today.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}.
+
+PENTING: Sebelum menulis, gunakan web_search untuk mencari 2–3 berita atau studi kesehatan mental terbaru dari Indonesia hari ini atau minggu ini. Sertakan konteks berita terkini ini sebagai referensi relevan di dalam artikel yang sesuai topiknya.
+
 Tulis tepat 10 artikel lengkap dan unik. Topik (satu artikel per topik, urutan sama):
 ${topics.map((t,i) => `${i+1}. ${t}`).join('\n')}
 
 Kembalikan HANYA JSON array valid, tanpa markdown, tanpa teks di luar JSON:
-[{"id":1,"cat":"${cats[0]}","emoji":"<emoji>","source":"<Halodoc|Alodokter|Klikdokter|SehatQ|Kompas Health|Hellosehat|Riliv Blog|Into The Light|Yayasan Pulih>","title":"<judul max 12 kata>","preview":"<2 kalimat menarik>","tags":["<tag1>","<tag2>","<tag3>"],"readTime":"<X menit>","content":"<HTML artikel min 400 kata: pakai p h3 blockquote ul li strong, bahasa hangat relatable, ada tips praktis, akhiri dengan kalimat motivasi>"},...]
+[{"id":1,"cat":"${cats[0]}","emoji":"<emoji>","source":"<Halodoc|Alodokter|Klikdokter|SehatQ|Kompas Health|Hellosehat|Riliv Blog|Into The Light|Yayasan Pulih>","title":"<judul max 12 kata>","preview":"<2 kalimat menarik, bila relevan sebutkan konteks berita terkini>","tags":["<tag1>","<tag2>","<tag3>"],"readTime":"<X menit>","content":"<HTML artikel min 400 kata: pakai p h3 blockquote ul li strong, bahasa hangat relatable, ada tips praktis, bila ada berita terkini yang relevan sisipkan sebagai konteks informatif, akhiri dengan kalimat motivasi>"},...]
 Kategori tiap artikel berurutan: ${cats.join(', ')}`;
 
   try {
+    // ✅ FIXED: tambahkan web_search tool agar Claude bisa fetch berita terkini
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 8000,
+        max_tokens: 10000,
+        tools: [
+          {
+            type: 'web_search_20250305',
+            name: 'web_search'
+          }
+        ],
         messages: [{ role: 'user', content: prompt }]
       })
     });
+
     const data = await res.json();
-    const raw  = data.content.map(c => c.text || '').join('');
+
+    // ✅ FIXED: ekstrak teks dari semua blok (termasuk setelah tool_use)
+    const raw = data.content
+      .filter(c => c.type === 'text')
+      .map(c => c.text || '')
+      .join('');
+
     const arts = JSON.parse(raw.replace(/```json|```/g,'').trim());
     artStore = arts;
+    // ✅ FIXED: simpan dengan key slot yang benar
     await saveNewsCache(slotKey(), arts);
     renderNews(arts, curFilter);
     buildHomePreview();
@@ -150,7 +166,8 @@ export async function forceRefresh() {
   ic.style.transition = 'transform .45s';
   ic.style.transform  = 'rotate(360deg)';
   setTimeout(() => { ic.style.transition=''; ic.style.transform=''; }, 460);
-  await saveNewsCache('', []);
+  // ✅ FIXED: hapus cache dengan key kosong agar pasti invalid
+  await saveNewsCache('__invalidated__', []);
   artStore = [];
   await loadArticles();
 }
