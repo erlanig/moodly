@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════
-   MOODLY — nearby.js  (v11 — Firestore + koordinat real dari CSV)
+   MOODLY — nearby.js  (v12 — koordinat real Indonesia)
 ═══════════════════════════════════════ */
 
 import { db } from '../firebase.js';
@@ -26,72 +26,72 @@ const FILTERS = [
   { id:'Konseling', label:'Konseling',emoji:'💬' },
 ];
 
-/* ─── Koordinat tengah tiap kabupaten_kota dari data CSV ── */
+/* ─── Koordinat REAL tiap kabupaten_kota (bukan dari CSV) ── */
 const CITY_COORDS = {
-  'Ambon': {lat:-2.2449, lng:117.7713},
-  'Badung': {lat:-2.6985, lng:118.1181},
-  'Balikpapan': {lat:-2.9673, lng:114.1258},
-  'Bandar Lampung': {lat:-3.4698, lng:118.1351},
-  'Bandung': {lat:-1.9269, lng:117.0914},
-  'Banjarbaru': {lat:-1.8148, lng:120.2802},
-  'Banjarmasin': {lat:-2.1261, lng:119.6104},
-  'Bantul': {lat:-2.8124, lng:118.345},
-  'Batam': {lat:-2.5764, lng:117.8108},
-  'Bekasi': {lat:-2.3146, lng:117.4964},
-  'Bima': {lat:-3.2006, lng:118.19},
-  'Binjai': {lat:-3.1919, lng:118.0235},
-  'Bitung': {lat:-2.2125, lng:116.8387},
-  'Bogor': {lat:-2.564, lng:116.4988},
-  'Bukittinggi': {lat:-1.8965, lng:118.8646},
-  'Cilegon': {lat:-2.461, lng:117.1921},
-  'Cimahi': {lat:-1.738, lng:117.6605},
-  'Cirebon': {lat:-2.4817, lng:118.4934},
-  'Denpasar': {lat:-2.6882, lng:118.0514},
-  'Depok': {lat:-2.5434, lng:116.7256},
-  'Garut': {lat:-2.8714, lng:119.4663},
-  'Gorontalo': {lat:-2.5331, lng:119.1128},
-  'Gresik': {lat:-1.6281, lng:119.995},
-  'Jakarta Barat': {lat:-2.4174, lng:115.7761},
-  'Jakarta Pusat': {lat:-1.7429, lng:117.2802},
-  'Jakarta Selatan': {lat:-2.1336, lng:118.6889},
-  'Jakarta Timur': {lat:-1.8193, lng:117.3475},
-  'Jakarta Utara': {lat:-2.2509, lng:117.4175},
-  'Jayapura': {lat:-2.052, lng:118.5391},
-  'Kediri': {lat:-2.3227, lng:116.7529},
-  'Kendari': {lat:-2.5072, lng:117.4745},
-  'Kupang': {lat:-2.9336, lng:116.7391},
-  'Madiun': {lat:-2.5867, lng:120.7145},
-  'Magelang': {lat:-2.3984, lng:119.5254},
-  'Makassar': {lat:-2.616, lng:122.5569},
-  'Malang': {lat:-2.5487, lng:117.4238},
-  'Manado': {lat:-2.665, lng:118.3534},
-  'Mataram': {lat:-3.3101, lng:114.9185},
-  'Medan': {lat:-2.0955, lng:117.9677},
-  'Padang': {lat:-2.1675, lng:116.513},
-  'Palembang': {lat:-2.7814, lng:119.7578},
-  'Palu': {lat:-2.1221, lng:118.374},
-  'Parepare': {lat:-1.7496, lng:117.2156},
-  'Pekanbaru': {lat:-3.0449, lng:118.2646},
-  'Pontianak': {lat:-3.3013, lng:117.7167},
-  'Purwokerto': {lat:-1.5339, lng:118.835},
-  'Samarinda': {lat:-1.4814, lng:118.6707},
-  'Semarang': {lat:-2.3485, lng:120.3569},
-  'Serang': {lat:-3.1245, lng:117.9373},
-  'Sidoarjo': {lat:-2.8325, lng:119.3493},
-  'Singkawang': {lat:-2.3046, lng:117.7405},
-  'Sleman': {lat:-3.3431, lng:118.0166},
-  'Solo': {lat:-2.4201, lng:113.7615},
-  'Sorong': {lat:-3.2035, lng:114.7609},
-  'Sukabumi': {lat:-2.2846, lng:119.0138},
-  'Surabaya': {lat:-2.369, lng:116.629},
-  'Tabanan': {lat:-2.6764, lng:117.7637},
-  'Tangerang': {lat:-2.7031, lng:113.6987},
-  'Tangerang Selatan': {lat:-2.0726, lng:119.7717},
-  'Tanjung Pinang': {lat:-3.2525, lng:116.5109},
-  'Tasikmalaya': {lat:-2.7762, lng:120.3572},
-  'Tegal': {lat:-1.5727, lng:117.9101},
-  'Ternate': {lat:-2.4175, lng:116.0563},
-  'Yogyakarta': {lat:-1.5713, lng:116.4671},
+  'Ambon':             { lat:-3.6954,  lng:128.1814 },
+  'Badung':            { lat:-8.6178,  lng:115.1694 },
+  'Balikpapan':        { lat:-1.2654,  lng:116.8312 },
+  'Bandar Lampung':    { lat:-5.3971,  lng:105.2668 },
+  'Bandung':           { lat:-6.9175,  lng:107.6191 },
+  'Banjarbaru':        { lat:-3.4417,  lng:114.8307 },
+  'Banjarmasin':       { lat:-3.3186,  lng:114.5944 },
+  'Bantul':            { lat:-7.8816,  lng:110.3279 },
+  'Batam':             { lat:1.0456,   lng:104.0305 },
+  'Bekasi':            { lat:-6.2383,  lng:106.9756 },
+  'Bima':              { lat:-8.4608,  lng:118.7183 },
+  'Binjai':            { lat:3.5960,   lng:98.4854  },
+  'Bitung':            { lat:1.4406,   lng:125.1904 },
+  'Bogor':             { lat:-6.5971,  lng:106.8060 },
+  'Bukittinggi':       { lat:-0.3080,  lng:100.3690 },
+  'Cilegon':           { lat:-6.0020,  lng:106.0514 },
+  'Cimahi':            { lat:-6.8720,  lng:107.5420 },
+  'Cirebon':           { lat:-6.7320,  lng:108.5523 },
+  'Denpasar':          { lat:-8.6705,  lng:115.2126 },
+  'Depok':             { lat:-6.4025,  lng:106.7942 },
+  'Garut':             { lat:-7.2167,  lng:107.9085 },
+  'Gorontalo':         { lat:0.5435,   lng:123.0595 },
+  'Gresik':            { lat:-7.1560,  lng:112.6509 },
+  'Jakarta Barat':     { lat:-6.1688,  lng:106.7649 },
+  'Jakarta Pusat':     { lat:-6.1865,  lng:106.8240 },
+  'Jakarta Selatan':   { lat:-6.2615,  lng:106.8106 },
+  'Jakarta Timur':     { lat:-6.2255,  lng:106.9004 },
+  'Jakarta Utara':     { lat:-6.1214,  lng:106.7748 },
+  'Jayapura':          { lat:-2.5337,  lng:140.7186 },
+  'Kediri':            { lat:-7.8166,  lng:112.0113 },
+  'Kendari':           { lat:-3.9985,  lng:122.5127 },
+  'Kupang':            { lat:-10.1772, lng:123.6070 },
+  'Madiun':            { lat:-7.6298,  lng:111.5239 },
+  'Magelang':          { lat:-7.4797,  lng:110.2177 },
+  'Makassar':          { lat:-5.1477,  lng:119.4327 },
+  'Malang':            { lat:-7.9797,  lng:112.6304 },
+  'Manado':            { lat:1.4748,   lng:124.8421 },
+  'Mataram':           { lat:-8.5833,  lng:116.1167 },
+  'Medan':             { lat:3.5952,   lng:98.6722  },
+  'Padang':            { lat:-0.9492,  lng:100.3543 },
+  'Palembang':         { lat:-2.9761,  lng:104.7754 },
+  'Palu':              { lat:-0.8917,  lng:119.8707 },
+  'Parepare':          { lat:-4.0135,  lng:119.6298 },
+  'Pekanbaru':         { lat:0.5071,   lng:101.4478 },
+  'Pontianak':         { lat:-0.0264,  lng:109.3425 },
+  'Purwokerto':        { lat:-7.4240,  lng:109.2350 },
+  'Samarinda':         { lat:-0.5022,  lng:117.1536 },
+  'Semarang':          { lat:-6.9932,  lng:110.4203 },
+  'Serang':            { lat:-6.1202,  lng:106.1502 },
+  'Sidoarjo':          { lat:-7.4458,  lng:112.7183 },
+  'Singkawang':        { lat:0.8997,   lng:108.9876 },
+  'Sleman':            { lat:-7.7171,  lng:110.3553 },
+  'Solo':              { lat:-7.5755,  lng:110.8243 },
+  'Sorong':            { lat:-0.8761,  lng:131.2559 },
+  'Sukabumi':          { lat:-6.9215,  lng:106.9270 },
+  'Surabaya':          { lat:-7.2575,  lng:112.7521 },
+  'Tabanan':           { lat:-8.5363,  lng:115.1248 },
+  'Tangerang':         { lat:-6.1783,  lng:106.6319 },
+  'Tangerang Selatan': { lat:-6.2897,  lng:106.7178 },
+  'Tanjung Pinang':    { lat:0.9186,   lng:104.4564 },
+  'Tasikmalaya':       { lat:-7.3274,  lng:108.2207 },
+  'Tegal':             { lat:-6.8697,  lng:109.1402 },
+  'Ternate':           { lat:0.7833,   lng:127.3667 },
+  'Yogyakarta':        { lat:-7.7956,  lng:110.3695 },
 };
 
 function haversineKm(lat1, lng1, lat2, lng2) {
@@ -102,7 +102,6 @@ function haversineKm(lat1, lng1, lat2, lng2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
-/* Cari kabupaten_kota terdekat dari koordinat GPS */
 function nearestCity(lat, lng) {
   let best = null, minDist = Infinity;
   for (const [city, c] of Object.entries(CITY_COORDS)) {
@@ -112,9 +111,7 @@ function nearestCity(lat, lng) {
   return { city: best, distKm: Math.round(minDist) };
 }
 
-/* ════════════════════════════════
-   INIT
-════════════════════════════════ */
+/* ════════════════ INIT ════════════════ */
 export function initNearby() {
   const el = document.getElementById('nearby-wrap');
   if (!el) return;
@@ -135,9 +132,7 @@ export function initNearby() {
     </div>`;
 }
 
-/* ════════════════════════════════
-   FIND
-════════════════════════════════ */
+/* ════════════════ FIND ════════════════ */
 export async function findNearby() {
   if (nb.loading) return;
   nb.loading = true;
@@ -155,8 +150,9 @@ export async function findNearby() {
 
   let targetCity = null;
   let userLat = null, userLng = null;
+  let cityDistKm = null;
 
-  // 1. GPS → cari kota terdekat dari CITY_COORDS
+  // 1. GPS → cari kota terdekat
   try {
     setStatus('Mendeteksi lokasi GPS…');
     const coords = await Promise.race([
@@ -170,7 +166,8 @@ export async function findNearby() {
 
     const { city, distKm } = nearestCity(userLat, userLng);
     targetCity = city;
-    setStatus(`Sekitar ${city} (±${distKm} km). Mencari layanan…`);
+    cityDistKm = distKm;
+    setStatus(`Sekitar ${city}. Mencari layanan…`);
   } catch {
     setStatus('Mencari layanan di Indonesia…');
   }
@@ -178,62 +175,54 @@ export async function findNearby() {
   // 2. Query Firestore
   try {
     let results = [];
+    const existing = () => new Set(results.map(r => r.id));
 
-    // A. Cari by kabupaten_kota terdekat
+    // A. Kota terdekat
     if (targetCity) {
-      const q = query(
+      const snap = await getDocs(query(
         collection(db, COLL),
         where('kabupaten_kota', '==', targetCity),
         orderBy('rating', 'desc'),
         limit(20)
-      );
-      const snap = await getDocs(q);
-      snap.forEach(d => results.push(d.data()));
-      setStatus(`Ditemukan ${results.length} di ${targetCity}. Melengkapi…`);
+      ));
+      snap.forEach(d => results.push({ ...d.data(), _cityDist: cityDistKm }));
     }
 
-    // B. Kalau < 8, ambil kota-kota terdekat lainnya
+    // B. Kota-kota terdekat berikutnya (kalau < 8)
     if (results.length < 8 && userLat && userLng) {
-      // Urutkan semua kota berdasarkan jarak
-      const sortedCities = Object.entries(CITY_COORDS)
-        .map(([city, c]) => ({ city, dist: haversineKm(userLat, userLng, c.lat, c.lng) }))
+      const nearby = Object.entries(CITY_COORDS)
+        .map(([city, c]) => ({ city, dist: Math.round(haversineKm(userLat, userLng, c.lat, c.lng)) }))
         .sort((a,b) => a.dist - b.dist)
-        .slice(1, 4) // 3 kota terdekat berikutnya
-        .map(c => c.city);
+        .filter(c => c.city !== targetCity)
+        .slice(0, 4);
 
-      for (const city of sortedCities) {
+      for (const { city, dist } of nearby) {
         if (results.length >= 12) break;
-        const q = query(
+        const snap = await getDocs(query(
           collection(db, COLL),
           where('kabupaten_kota', '==', city),
           orderBy('rating', 'desc'),
-          limit(6)
-        );
-        const snap = await getDocs(q);
-        const existing = new Set(results.map(r => r.id));
-        snap.forEach(d => { const data=d.data(); if(!existing.has(data.id)) results.push(data); });
+          limit(5)
+        ));
+        const ex = existing();
+        snap.forEach(d => { if (!ex.has(d.data().id)) results.push({ ...d.data(), _cityDist: dist }); });
       }
     }
 
-    // C. Masih < 8? Ambil rating tertinggi nasional
+    // C. Fallback: rating tertinggi nasional
     if (results.length < 8) {
-      const q = query(collection(db, COLL), orderBy('rating', 'desc'), limit(20));
-      const snap = await getDocs(q);
-      const existing = new Set(results.map(r => r.id));
-      snap.forEach(d => { const data=d.data(); if(!existing.has(data.id)) results.push(data); });
+      const snap = await getDocs(query(collection(db, COLL), orderBy('rating', 'desc'), limit(20)));
+      const ex = existing();
+      snap.forEach(d => { if (!ex.has(d.data().id)) results.push({ ...d.data(), _cityDist: null }); });
     }
 
-    // D. Hitung jarak dari GPS ke tiap layanan (pakai koordinat lat/lng dari dokumen)
-    if (userLat && userLng) {
-      results = results.map(r => ({
-        ...r,
-        _distKm: (r.lat && r.lng) ? haversineKm(userLat, userLng, r.lat, r.lng) : 9999
-      })).sort((a,b) => a._distKm - b._distKm);
-    }
+    // Sort: kota terdekat dulu, lalu by rating
+    results.sort((a,b) => {
+      if (a._cityDist !== b._cityDist) return (a._cityDist??9999) - (b._cityDist??9999);
+      return (b.rating||0) - (a.rating||0);
+    });
 
-    results = results.slice(0, 12);
-
-    nb.results   = results;
+    nb.results   = results.slice(0, 12);
     nb.cityName  = targetCity || 'Indonesia';
     nb.lastFetch = Date.now();
     nb.loading   = false;
@@ -241,7 +230,7 @@ export async function findNearby() {
 
   } catch (e) {
     nb.loading = false;
-    console.error('[nearby] Firestore error:', e);
+    console.error('[nearby]', e);
     renderError(e.message);
   }
 }
@@ -257,14 +246,11 @@ function getLocation() {
   });
 }
 
-/* ════════════════════════════════
-   RENDER
-════════════════════════════════ */
+/* ════════════════ RENDER ════════════════ */
 export function renderResults(results, filter) {
   nb.filter = filter;
   const el  = document.getElementById('nearby-wrap');
   if (!el) return;
-
   const list = filter === 'semua' ? results : results.filter(r => r.kategori === filter);
 
   el.innerHTML = `
@@ -298,16 +284,15 @@ export function renderResults(results, filter) {
 
 function cardHTML(r) {
   const typeEmoji = {
-    'Rumah Sakit':'🏥', 'Rumah Sakit Jiwa':'🏨',
-    'Puskesmas':'🏢', 'Klinik Psikologi':'🧠', 'Universitas':'🎓'
+    'Rumah Sakit':'🏥','Rumah Sakit Jiwa':'🏨',
+    'Puskesmas':'🏢','Klinik Psikologi':'🧠','Universitas':'🎓'
   };
   const emoji    = typeEmoji[r.jenis_layanan] || '🏥';
   const safe     = (r.nama_layanan||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');
-  const distLabel= r._distKm && r._distKm < 9999
-    ? `<strong>${r._distKm < 1 ? '<1' : Math.round(r._distKm)} km</strong>` : '';
-  const biaya    = r.biaya_mulai === 0 ? 'Gratis' : `Mulai Rp ${Number(r.biaya_mulai).toLocaleString('id')}`;
+  const distLabel= r._cityDist != null ? `· <strong>~${r._cityDist} km</strong>` : '';
+  const biaya    = !r.biaya_mulai ? 'Gratis' : `Mulai Rp ${Number(r.biaya_mulai).toLocaleString('id')}`;
   const asuransi = Array.isArray(r.insurance) && r.insurance.length ? r.insurance.join(', ') : '';
-  const badgeKat = r.kategori==='Psikiatri' ? 'psikiater' : r.kategori==='Psikolog' ? 'psikolog' : 'klinik';
+  const badgeKat = r.kategori==='Psikiatri'?'psikiater':r.kategori==='Psikolog'?'psikolog':'klinik';
 
   return `<div class="nb-card">
     <div class="nb-card-top">
@@ -325,8 +310,8 @@ function cardHTML(r) {
       </div>
       <div style="display:flex;flex-direction:column;gap:3px;align-items:flex-end;flex-shrink:0">
         <span class="nb-badge nb-badge-${badgeKat}">${r.jenis_layanan||''}</span>
-        ${r.telemedicine ? `<span class="nb-badge" style="background:#e8f5e9;color:#388e3c;font-size:9px">💻 Online</span>` : ''}
-        ${r.verified     ? `<span class="nb-badge" style="background:#e3f2fd;color:#1565c0;font-size:9px">✓ Verified</span>` : ''}
+        ${r.telemedicine?`<span class="nb-badge" style="background:#e8f5e9;color:#388e3c;font-size:9px">💻 Online</span>`:''}
+        ${r.verified?`<span class="nb-badge" style="background:#e3f2fd;color:#1565c0;font-size:9px">✓ Verified</span>`:''}
       </div>
     </div>
     <div style="font-size:11px;color:#777;margin:5px 0 4px">${r.specialization||r.kategori||''}</div>
@@ -337,16 +322,12 @@ function cardHTML(r) {
       </div>
       <div class="nb-meta-item">
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><line x1="12" y1="1" x2="12" y2="23" stroke="#8aab97" stroke-width="2"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" stroke="#8aab97" stroke-width="2" stroke-linecap="round"/></svg>
-        ${biaya}${asuransi ? ' · '+asuransi : ''}
+        ${biaya}${asuransi?' · '+asuransi:''}
       </div>
     </div>
     <div class="nb-card-actions">
-      ${r.telepon ? `<a class="nb-btn nb-btn-call" href="tel:${r.telepon}">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 11 19.79 19.79 0 01.01 2.34 2 2 0 012 .16h3a2 2 0 012 1.72c.12.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.34 1.85.58 2.81.7A2 2 0 0122 16.92z" stroke="currentColor" stroke-width="2"/></svg>
-        Hubungi</a>` : ''}
-      ${r.website ? `<a class="nb-btn nb-btn-web" href="${r.website}" target="_blank" rel="noopener">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20" stroke="currentColor" stroke-width="2"/></svg>
-        Website</a>` : ''}
+      ${r.telepon?`<a class="nb-btn nb-btn-call" href="tel:${r.telepon}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 11 19.79 19.79 0 01.01 2.34 2 2 0 012 .16h3a2 2 0 012 1.72c.12.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.34 1.85.58 2.81.7A2 2 0 0122 16.92z" stroke="currentColor" stroke-width="2"/></svg> Hubungi</a>`:''}
+      ${r.website?`<a class="nb-btn nb-btn-web" href="${r.website}" target="_blank" rel="noopener"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20" stroke="currentColor" stroke-width="2"/></svg> Website</a>`:''}
       <button class="nb-btn nb-btn-web" onclick="window._searchNearby('${safe}')">
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/></svg>
         Maps</button>
@@ -357,9 +338,9 @@ function cardHTML(r) {
 function starsHTML(rating) {
   const r = Math.round((rating||0)*2)/2;
   let h = '';
-  for (let i=1; i<=5; i++) {
-    const on = i<=r;
-    h += `<svg width="9" height="9" viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z" fill="${on?'#f57c00':'#e0f0e8'}" stroke="${on?'#f57c00':'#c5dfd0'}" stroke-width="1"/></svg>`;
+  for (let i=1;i<=5;i++) {
+    const on=i<=r;
+    h+=`<svg width="9" height="9" viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z" fill="${on?'#f57c00':'#e0f0e8'}" stroke="${on?'#f57c00':'#c5dfd0'}" stroke-width="1"/></svg>`;
   }
   return `<div class="nb-stars">${h}</div>`;
 }
