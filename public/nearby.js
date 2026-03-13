@@ -1,436 +1,321 @@
 /* ═══════════════════════════════════════
-   MOODLY — nearby.js  (v20 — CSS self-contained, no nearby.css needed)
+   MOODLY — nearby.js  (v10 — query dari Firestore CSV data)
+   Data 4000 layanan dari mh_ind.csv sudah di Firestore.
+   Pencarian: GPS → cari kabupaten/kota terdekat → query Firestore
 ═══════════════════════════════════════ */
 
-/* ─── Inject CSS sekali saja ─── */
-(function injectCSS() {
-  if (document.getElementById('nb-style')) return;
-  const s = document.createElement('style');
-  s.id = 'nb-style';
-  s.textContent = `
-/* teaser */
-.nb-teaser{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px;box-shadow:var(--sh)}
-.nb-tr{display:flex;align-items:center;gap:10px}
-.nb-tico{width:38px;height:38px;border-radius:10px;flex-shrink:0;background:var(--gl);display:flex;align-items:center;justify-content:center;font-size:19px}
-.nb-ttl{font-size:13px;font-weight:600;margin-bottom:2px;color:var(--text)}
-.nb-tsub{font-size:11px;color:var(--muted)}
-.nb-tbtns{display:flex;gap:7px}
-.nb-tbtn{flex:1;text-align:center;text-decoration:none;font-size:12px;font-weight:500;padding:7px 10px;border-radius:9px;transition:opacity .15s}
-.nb-tbtn:hover{opacity:.8}
-.nb-tg{background:var(--gl);color:var(--g2);border:1px solid rgba(29,185,84,.2)}
-.nb-tb{background:rgba(59,130,246,.1);color:#3b82f6;border:1px solid rgba(59,130,246,.2)}
-.nb-topen{width:100%;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:600;font-family:inherit;background:var(--white);border:1.5px solid var(--border);color:var(--text2);padding:9px;border-radius:9px;cursor:pointer;transition:all .2s}
-.nb-topen:hover{border-color:var(--g1);color:var(--g2);background:var(--gl)}
+import { db } from '../firebase.js';
+import {
+  collection, query, where, orderBy, limit,
+  getDocs, getDoc, doc
+} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
-/* panel overlay */
-#nb-panel{position:fixed;inset:0;z-index:9000;background:rgba(15,36,25,.4);backdrop-filter:blur(6px);display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .25s ease}
-#nb-panel.nb-open{opacity:1;pointer-events:all}
-
-/* panel box */
-.nb-panel-box{width:100%;max-width:430px;margin:0 auto;max-height:92dvh;background:var(--bg);border-radius:20px 20px 0 0;border-top:1px solid var(--border);display:flex;flex-direction:column;transform:translateY(100%);transition:transform .3s cubic-bezier(.32,1,.55,1);overflow:hidden}
-#nb-panel.nb-open .nb-panel-box{transform:translateY(0)}
-.nb-panel-box::before{content:'';display:block;width:36px;height:4px;border-radius:2px;background:var(--border);margin:10px auto 0;flex-shrink:0}
-
-/* header */
-.nb-ph{display:flex;align-items:center;gap:10px;padding:10px 16px 8px;flex-shrink:0}
-.nb-pback{background:none;border:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;padding:4px;border-radius:6px;transition:color .15s}
-.nb-pback:hover{color:var(--g2)}
-.nb-ptitle{font-size:15px;font-weight:700;flex:1;color:var(--text)}
-.nb-ploc{font-size:10px;color:var(--g2);background:var(--gl);border:1px solid rgba(29,185,84,.2);padding:3px 9px;border-radius:20px;white-space:nowrap;max-width:130px;overflow:hidden;text-overflow:ellipsis;font-weight:600}
-
-/* search */
-.nb-psearch{display:flex;align-items:center;gap:8px;margin:0 14px 8px;background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:8px 12px;flex-shrink:0;box-shadow:var(--sh)}
-.nb-psearch svg{color:var(--muted);flex-shrink:0}
-.nb-psearch input{flex:1;background:none;border:none;outline:none;font-size:13px;font-family:inherit;color:var(--text)}
-.nb-psearch input::placeholder{color:var(--muted)}
-
-/* chip rows */
-.nb-scrolx{display:flex;gap:6px;padding:0 14px 8px;overflow-x:auto;scrollbar-width:none;flex-shrink:0}
-.nb-scrolx::-webkit-scrollbar{display:none}
-.nb-chip,.nb-chip2{flex-shrink:0;white-space:nowrap;font-size:12px;font-family:inherit;padding:6px 14px;border-radius:20px;cursor:pointer;background:var(--white);border:1.5px solid var(--border);color:var(--muted);font-weight:700;transition:all .15s}
-.nb-chip:hover,.nb-chip2:hover{color:var(--text2)}
-.nb-chip.on{background:var(--grad);border-color:transparent;color:#fff;box-shadow:0 3px 10px rgba(13,140,62,.2)}
-.nb-chip2.on{background:var(--text2);border-color:transparent;color:#fff}
-
-/* count */
-.nb-pcount{padding:0 16px 8px;display:flex;align-items:center;gap:8px;flex-shrink:0;font-size:11px;color:var(--muted);font-weight:600}
-
-/* list */
-.nb-plist{flex:1;overflow-y:auto;padding:0 12px 24px;display:flex;flex-direction:column;gap:8px}
-.nb-plist::-webkit-scrollbar{width:0}
-
-/* spinner */
-.nb-dot{width:7px;height:7px;border-radius:50%;background:var(--g1);animation:nb-bounce .9s ease-in-out infinite}
-
-/* section label */
-.nb-slabel{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px 4px 4px;display:flex;align-items:center;gap:8px}
-.nb-slabel::after{content:'';flex:1;height:1px;background:var(--border)}
-
-/* card */
-.nb-card{background:var(--white);border:1.5px solid var(--border);border-radius:16px;padding:13px;animation:nb-fadein .25s ease both;box-shadow:var(--sh)}
-.nb-card.nb-cv{border-color:var(--g1);background:linear-gradient(to bottom, #fff, var(--bg))}
-.nb-cico{width:34px;height:34px;border-radius:9px;flex-shrink:0;background:var(--gl);display:flex;align-items:center;justify-content:center;font-size:17px}
-.nb-cn{font-size:14px;font-weight:700;margin-bottom:2px;color:var(--text)}
-.nb-ca{font-size:11px;color:var(--muted)}
-
-/* badges */
-.nb-badge{font-size:10px;padding:3px 8px;border-radius:20px;white-space:nowrap;font-weight:600}
-.nb-bpsikolog{background:rgba(29,185,84,.1);color:var(--g2);border:1px solid rgba(29,185,84,.2)}
-.nb-bpsikiater{background:rgba(59,130,246,.1);color:#3b82f6;border:1px solid rgba(59,130,246,.2)}
-.nb-bklinik{background:#fff3e0;color:#e65100;border:1px solid #ffe0b2}
-.nb-bonline{background:#f5f3ff;color:#8b5cf6;border:1px solid #ddd6fe}
-.nb-bok{background:var(--gl);color:var(--g2);border:1px solid var(--g1);font-size:9px}
-
-.nb-cdesc{font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:7px;opacity:.8}
-.nb-cmeta{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin-bottom:7px;font-weight:500}
-.nb-ctags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
-.nb-tag{font-size:10px;background:var(--bg);border:1px solid var(--border);color:var(--text2);padding:2px 8px;border-radius:100px;font-weight:600}
-
-/* buttons */
-.nb-cbtns{display:flex;flex-wrap:wrap;gap:6px}
-.nb-btn{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;font-family:inherit;padding:7px 12px;border-radius:100px;text-decoration:none;cursor:pointer;transition:all .15s;border:none}
-.nb-bcall{background:var(--grad);color:#fff;box-shadow:0 3px 10px rgba(13,140,62,.2)}
-.nb-bweb{background:var(--white);color:var(--g2);border:1.5px solid var(--border)}
-.nb-bmap{background:var(--bg);color:var(--muted);border:1.5px solid var(--border)}
-  `;
-  document.head.appendChild(s);
-})();
+const COLL = 'mental_health_services';
 
 let nb = {
-  filter  : 'semua',
-  city    : 'gps',
-  search  : '',
-  loc     : null,
-  osmData : [],
-  osmDone : false,
+  loading  : false,
+  results  : [],
+  cityName : '',
+  lastFetch: null,
+  filter   : 'semua',
+  userLat  : null,
+  userLng  : null,
 };
 
-/* ─── Data hardcode verified ─── */
-const STATIC = [
-  /* ONLINE */
-  { id:'s1', type:'online', city:'online', name:'Into The Light Indonesia', emoji:'💚', area:'Nasional', verified:true, phone:'119', website:'https://www.intothelightid.org', email:'info@intothelightid.org', hours:'Sen–Jum 09.00–17.00', price:'Gratis', tags:['Hotline','Konseling','Bunuh Diri'], desc:'Hotline & konseling nasional berbasis bukti untuk pencegahan bunuh diri.', maps:null },
-  { id:'s2', type:'online', city:'online', name:'Riliv – Psikolog Online',   emoji:'💻', area:'Nasional', verified:true, phone:null, website:'https://riliv.co', email:null, hours:'24 Jam', price:'Rp 150k–300k/sesi', tags:['Chat Psikolog','Meditasi'], desc:'300+ psikolog berlisensi, konsultasi via chat & video call.', maps:null },
-  { id:'s3', type:'online', city:'online', name:'Sejiwa (119 ext 8)',         emoji:'📞', area:'Nasional', verified:true, phone:'119', website:'https://sejiwa.org', email:null, hours:'24 Jam', price:'Gratis', tags:['Hotline','Krisis','Remaja'], desc:'Hotline jiwa nasional gratis 24 jam dari Kemenkes RI.', maps:null },
-  { id:'s4', type:'online', city:'online', name:'Yayasan Pulih (Online)',     emoji:'🧡', area:'Nasional', verified:true, phone:'(021) 788-42580', website:'https://yayasanpulih.org', email:'yayasanpulih@cbn.net.id', hours:'Sen–Jum 08.00–17.00', price:'Sliding scale', tags:['Trauma','Komunitas','BPJS'], desc:'Konseling berbasis komunitas sejak 2000, tarif sesuai kemampuan.', maps:null },
-
-  /* JAKARTA */
-  { id:'j1', type:'psikiater', city:'jakarta', name:'RSJ Dr. Soeharto Heerdjan', emoji:'🏥', area:'Jakarta Barat', verified:true, phone:'(021) 5682841', website:'https://rsjsh.co.id', email:null, hours:'24 Jam (IGD)', price:'BPJS & Umum', tags:['RS Jiwa','IGD','Rawat Inap'], desc:'RS Jiwa negeri terbesar Jakarta, poli jiwa & rawat inap lengkap.', maps:'https://maps.google.com/?q=RSJ+Soeharto+Heerdjan+Jakarta' },
-  { id:'j2', type:'psikiater', city:'jakarta', name:'RSKJ Dharma Graha',          emoji:'🏥', area:'Serpong, Tangsel', verified:true, phone:'(021) 7560670', website:'https://rskjdharmagraha.com', email:null, hours:'24 Jam', price:'Umum', tags:['RS Jiwa','Rehabilitasi'], desc:'RS Khusus Jiwa swasta, rawat inap & program rehabilitasi.', maps:'https://maps.google.com/?q=RSKJ+Dharma+Graha+Serpong' },
-  { id:'j3', type:'klinik',    city:'jakarta', name:'Personal Growth',             emoji:'🧩', area:'Jakarta Barat', verified:true, phone:'021-58906870', website:'https://www.personalgrowth.co.id', email:null, hours:'Sen–Sab 09.00–18.00', price:'Hubungi klinik', tags:['Psikolog','Terapi','Asesmen'], desc:'Klinik psikologi klinis terkemuka, psikolog & psikiater berlisensi.', maps:'https://maps.google.com/?q=Personal+Growth+Jakarta+Barat' },
-  { id:'j4', type:'klinik',    city:'jakarta', name:'Yayasan Pulih',               emoji:'🧡', area:'Jakarta Selatan', verified:true, phone:'(021) 788-42580', website:'https://yayasanpulih.org', email:'yayasanpulih@cbn.net.id', hours:'Sen–Jum 08.00–17.00', price:'Sliding scale', tags:['Trauma','Komunitas'], desc:'Konseling tatap muka, tarif sliding scale sejak 2000.', maps:'https://maps.google.com/?q=Yayasan+Pulih+Jakarta' },
-  { id:'j5', type:'klinik',    city:'jakarta', name:'Intl. Wellbeing Center',      emoji:'🌿', area:'Jakarta Selatan', verified:true, phone:'(021) 80657670', website:'https://internationalwellbeingcenter.com', email:null, hours:'Sen–Sab 09.00–18.00', price:'Hubungi klinik', tags:['Psikolog','Psikiater','Bilingual'], desc:'Pusat kesehatan jiwa internasional, tersedia dalam dua bahasa.', maps:'https://maps.google.com/?q=International+Wellbeing+Center+Jakarta' },
-  { id:'j6', type:'klinik',    city:'jakarta', name:'Klinik Psikologi UI',         emoji:'🎓', area:'Depok', verified:true, phone:'(021) 78881150', website:null, email:null, hours:'Sen–Jum 08.00–16.00', price:'Terjangkau', tags:['Psikolog','Asesmen'], desc:'Klinik psikologi klinis Universitas Indonesia yang terpercaya.', maps:'https://maps.google.com/?q=Klinik+Psikologi+UI+Depok' },
-
-  /* SURABAYA */
-  { id:'sb1', type:'psikiater', city:'surabaya', name:'RSJ Menur Surabaya',      emoji:'🏥', area:'Gubeng, Surabaya', verified:true, phone:'(031) 5021635', website:'https://rsjmenur.jatimprov.go.id', email:null, hours:'24 Jam (IGD)', price:'BPJS & Umum', tags:['RS Jiwa','IGD'], desc:'RS Jiwa Pemprov Jatim, layanan psikiater terlengkap di Surabaya.', maps:'https://maps.google.com/?q=RSJ+Menur+Surabaya' },
-  { id:'sb2', type:'klinik',    city:'surabaya', name:'Unit Psikologi UNAIR',     emoji:'🎓', area:'Airlangga, Surabaya', verified:true, phone:'(031) 5047251', website:null, email:null, hours:'Sen–Jum 08.00–15.00', price:'Terjangkau', tags:['Psikolog','Asesmen'], desc:'Layanan psikologi klinis Universitas Airlangga.', maps:'https://maps.google.com/?q=Psikologi+UNAIR+Surabaya' },
-  { id:'sb3', type:'psikiater', city:'surabaya', name:'RS Husada Utama — Poli Jiwa', emoji:'🏥', area:'Gubeng, Surabaya', verified:true, phone:'(031) 5018335', website:null, email:null, hours:'Sen–Sab 07.00–14.00', price:'Umum & BPJS', tags:['Poli Jiwa','Psikiater'], desc:'Poli jiwa RS Husada Utama dengan psikiater berpengalaman.', maps:'https://maps.google.com/?q=RS+Husada+Utama+Surabaya' },
-
-  /* BANDUNG */
-  { id:'bdg1', type:'psikiater', city:'bandung', name:'RSHS — Poli Jiwa',          emoji:'🏥', area:'Pasteur, Bandung', verified:true, phone:'(022) 2551111', website:'https://www.rshs.or.id', email:null, hours:'24 Jam', price:'BPJS & Umum', tags:['RSUP','Poli Jiwa'], desc:'RSUP terbesar Jabar, poli jiwa dengan psikiater spesialis.', maps:'https://maps.google.com/?q=RS+Hasan+Sadikin+Bandung' },
-  { id:'bdg2', type:'psikiater', city:'bandung', name:'RS Jiwa Prov. Jawa Barat',  emoji:'🏥', area:'Cisarua, Bandung Barat', verified:true, phone:'(022) 2786055', website:null, email:null, hours:'24 Jam', price:'BPJS & Umum', tags:['RS Jiwa','Rawat Inap'], desc:'RS Jiwa Pemprov Jabar, psikiater & program rawat inap.', maps:'https://maps.google.com/?q=RS+Jiwa+Cisarua+Bandung' },
-  { id:'bdg3', type:'klinik',    city:'bandung', name:'Pusat Psikologi UPI',       emoji:'🎓', area:'Sukasari, Bandung', verified:true, phone:'08112223100', website:null, email:null, hours:'Sen–Jum 08.00–16.00', price:'Terjangkau', tags:['Psikolog','Konseling'], desc:'Pusat psikologi terapan Universitas Pendidikan Indonesia.', maps:'https://maps.google.com/?q=Pusat+Psikologi+UPI+Bandung' },
-
-  /* YOGYAKARTA */
-  { id:'y1', type:'psikiater', city:'yogyakarta', name:'RSJ Grhasia Yogyakarta',      emoji:'🏥', area:'Pakem, Sleman', verified:true, phone:'(0274) 895231', website:'https://rsjgrhasia.jogjaprov.go.id', email:null, hours:'24 Jam', price:'BPJS & Umum', tags:['RS Jiwa','IGD'], desc:'RS Jiwa Pemprov DIY, layanan psikiater & rehabilitasi jiwa.', maps:'https://maps.google.com/?q=RSJ+Grhasia+Yogyakarta' },
-  { id:'y2', type:'psikiater', city:'yogyakarta', name:'RSUP Sardjito — Poli Jiwa',  emoji:'🏥', area:'Mlati, Sleman', verified:true, phone:'(0274) 587333', website:'https://www.sardjito.co.id', email:null, hours:'Sen–Sab 07.00–14.00', price:'BPJS & Umum', tags:['RSUP','Poli Jiwa'], desc:'RSUP terbesar DIY, poli jiwa dengan tim psikiater spesialis.', maps:'https://maps.google.com/?q=RSUP+Sardjito+Yogyakarta' },
-  { id:'y3', type:'klinik',    city:'yogyakarta', name:'Klinik Psikologi UGM',       emoji:'🎓', area:'Bulaksumur, Yogyakarta', verified:true, phone:'(0274) 550435', website:'https://psikologi.ugm.ac.id', email:null, hours:'Sen–Jum 08.00–16.00', price:'Terjangkau', tags:['Psikolog','Konseling'], desc:'Layanan psikologi klinis Universitas Gadjah Mada.', maps:'https://maps.google.com/?q=Klinik+Psikologi+UGM+Yogyakarta' },
-
-  /* MEDAN */
-  { id:'m1', type:'psikiater', city:'medan', name:'RSJ Prof. M. Ildrem',          emoji:'🏥', area:'Medan', verified:true, phone:'(061) 8361255', website:null, email:null, hours:'24 Jam', price:'BPJS & Umum', tags:['RS Jiwa','IGD'], desc:'RS Jiwa pemerintah Sumut, layanan jiwa terlengkap di Medan.', maps:'https://maps.google.com/?q=RSJ+Ildrem+Medan' },
-  { id:'m2', type:'psikiater', city:'medan', name:'RSUP Adam Malik — Poli Jiwa', emoji:'🏥', area:'Medan', verified:true, phone:'(061) 8360381', website:'https://www.adammalik.co.id', email:null, hours:'Sen–Sab 07.30–14.00', price:'BPJS & Umum', tags:['RSUP','Poli Jiwa'], desc:'RSUP terbesar Sumut, poli jiwa dan psikiater spesialis.', maps:'https://maps.google.com/?q=RSUP+Adam+Malik+Medan' },
+const FILTERS = [
+  { id:'semua',     label:'Semua',    emoji:'🗺️' },
+  { id:'Psikolog',  label:'Psikolog', emoji:'🧠' },
+  { id:'Psikiatri', label:'Psikiater',emoji:'🏥' },
+  { id:'Konseling', label:'Konseling',emoji:'💬' },
 ];
 
-const CITIES = [
-  { id:'gps',        label:'📍 Terdekat' },
-  { id:'online',     label:'💻 Online' },
-  { id:'jakarta',    label:'Jakarta' },
-  { id:'surabaya',   label:'Surabaya' },
-  { id:'bandung',    label:'Bandung' },
-  { id:'yogyakarta', label:'Yogyakarta' },
-  { id:'medan',      label:'Medan' },
-];
+/* ─── MAP: kota populer → koordinat tengah ─────────────────────── */
+const CITY_COORDS = {
+  'Jakarta':         { lat:-6.2088, lng:106.8456 },
+  'Jakarta Selatan': { lat:-6.2615, lng:106.8106 },
+  'Jakarta Utara':   { lat:-6.1214, lng:106.7748 },
+  'Jakarta Barat':   { lat:-6.1688, lng:106.7649 },
+  'Jakarta Timur':   { lat:-6.2255, lng:106.9004 },
+  'Jakarta Pusat':   { lat:-6.1865, lng:106.8240 },
+  'Surabaya':        { lat:-7.2575, lng:112.7521 },
+  'Bandung':         { lat:-6.9175, lng:107.6191 },
+  'Medan':           { lat:3.5952,  lng:98.6722  },
+  'Semarang':        { lat:-6.9932, lng:110.4203 },
+  'Makassar':        { lat:-5.1477, lng:119.4327 },
+  'Yogyakarta':      { lat:-7.7956, lng:110.3695 },
+  'Denpasar':        { lat:-8.6705, lng:115.2126 },
+  'Palembang':       { lat:-2.9761, lng:104.7754 },
+  'Batam':           { lat:1.0456,  lng:104.0305 },
+  'Malang':          { lat:-7.9797, lng:112.6304 },
+  'Solo':            { lat:-7.5755, lng:110.8243 },
+  'Bogor':           { lat:-6.5971, lng:106.8060 },
+};
 
-const TYPES = [
-  { id:'semua',     label:'Semua' },
-  { id:'psikolog',  label:'🧠 Psikolog' },
-  { id:'psikiater', label:'🏥 Psikiater' },
-  { id:'klinik',    label:'🏨 Klinik' },
-  { id:'online',    label:'💻 Online' },
-];
+function haversineKm(lat1, lng1, lat2, lng2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
 
-const BL = ['puskesmas','posyandu','pustu','bidan','gigi','dental','mata','optik',
-  'kandungan','kebidanan','hewan','apotek','farmasi','lab','radiologi',
-  'fisioterapi','kecantikan','spa','salon','paru','jantung','bedah','ginjal','tht'];
+/* ─── Perkirakan kota dari koordinat GPS ───────────────────────── */
+function guessCityFromCoords(lat, lng) {
+  let nearest = null, minDist = Infinity;
+  for (const [city, c] of Object.entries(CITY_COORDS)) {
+    const d = haversineKm(lat, lng, c.lat, c.lng);
+    if (d < minDist) { minDist = d; nearest = city; }
+  }
+  return { city: nearest, distKm: minDist };
+}
 
-/* ════════════════════════════════
-   TEASER — di homepage (seperti widget kecil)
-════════════════════════════════ */
+/* ─── INIT ──────────────────────────────────────────────────────── */
 export function initNearby() {
-  const wrap = document.getElementById('nearby-wrap');
-  if (!wrap) return;
-  wrap.innerHTML = `
-    <div class="nb-teaser">
-      <div class="nb-tr">
-        <div class="nb-tico">🧠</div>
-        <div>
-          <div class="nb-ttl">Butuh bantuan profesional?</div>
-          <div class="nb-tsub">Psikolog & psikiater berlisensi terdekat</div>
-        </div>
-      </div>
-      <div class="nb-tbtns">
-        <a class="nb-tbtn nb-tg" href="tel:119">📞 Hotline 119</a>
-        <a class="nb-tbtn nb-tb" href="https://riliv.co" target="_blank" rel="noopener">💻 Riliv</a>
-      </div>
-      <button class="nb-topen" onclick="window._findNearby()">
-        Lihat Semua Layanan
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+  const el = document.getElementById('nearby-wrap');
+  if (!el) return;
+  if (nb.results.length && nb.lastFetch && (Date.now() - nb.lastFetch) < 30*60*1000) {
+    renderResults(nb.results, nb.filter);
+    return;
+  }
+  el.innerHTML = `
+    <div class="nb-idle">
+      <div class="nb-idle-ico">🏥</div>
+      <div class="nb-idle-txt">Temukan psikolog, psikiater & layanan konseling terdekat dari lokasimu</div>
+      <button class="nb-cta" onclick="window._findNearby()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+          <path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        Cari Layanan Terdekat
       </button>
     </div>`;
 }
 
-/* ════════════════════════════════
-   PANEL — slide up seperti chat
-════════════════════════════════ */
-export function findNearby() {
-  let panel = document.getElementById('nb-panel');
-  if (!panel) {
-    panel = document.createElement('div');
-    panel.id = 'nb-panel';
-    panel.innerHTML = panelHTML();
-    document.body.appendChild(panel);
-    bindEvents(panel);
+/* ─── FIND ──────────────────────────────────────────────────────── */
+export async function findNearby() {
+  if (nb.loading) return;
+  nb.loading = true;
+
+  const el = document.getElementById('nearby-wrap');
+  if (!el) { nb.loading = false; return; }
+
+  el.innerHTML = `
+    <div class="nb-loading">
+      <div class="nb-dots"><div class="nb-dot"></div><div class="nb-dot"></div><div class="nb-dot"></div></div>
+      <div class="nb-loading-txt" id="nb-status">Mendeteksi lokasi…</div>
+    </div>`;
+
+  const setStatus = t => { const s = document.getElementById('nb-status'); if (s) s.textContent = t; };
+
+  // 1. GPS
+  let targetCity = 'Jakarta';
+  let userLat = null, userLng = null;
+
+  try {
+    setStatus('Mendeteksi lokasi GPS…');
+    const coords = await Promise.race([
+      getLocation(),
+      new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 8000))
+    ]);
+    userLat = coords.lat;
+    userLng = coords.lng;
+    nb.userLat = userLat;
+    nb.userLng = userLng;
+
+    const { city, distKm } = guessCityFromCoords(userLat, userLng);
+    targetCity = city;
+    setStatus(`Lokasi: sekitar ${city} (${Math.round(distKm)} km). Mencari layanan…`);
+  } catch {
+    setStatus('Mencari layanan di seluruh Indonesia…');
   }
-  requestAnimationFrame(() => panel.classList.add('nb-open'));
-  if (!nb.loc) initData();
-  else renderList();
-}
 
-function panelHTML() {
-  return `
-  <div class="nb-panel-box" id="nb-box">
-    <div class="nb-ph">
-      <button class="nb-pback" id="nb-back">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-      </button>
-      <span class="nb-ptitle">Layanan Kesehatan Mental</span>
-      <span class="nb-ploc" id="nb-ploc">Mendeteksi…</span>
-    </div>
-
-    <div class="nb-psearch">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-      <input id="nb-sinput" type="text" placeholder="Cari nama, kota, layanan…"/>
-    </div>
-
-    <div class="nb-scrolx" id="nb-cities">
-      ${CITIES.map(c => `<button class="nb-chip ${c.id==='gps'?'on':''}" data-city="${c.id}">${c.label}</button>`).join('')}
-    </div>
-
-    <div class="nb-scrolx" id="nb-types">
-      ${TYPES.map(t => `<button class="nb-chip2 ${t.id==='semua'?'on':''}" data-type="${t.id}">${t.label}</button>`).join('')}
-    </div>
-
-    <div class="nb-pcount">
-      <span id="nb-cnt">Memuat…</span>
-      <span id="nb-osmnote" style="display:none;font-size:10px;color:var(--muted)"></span>
-    </div>
-
-    <div class="nb-plist" id="nb-plist">
-      <div class="nb-pspinner">
-        <div class="nb-dots"><div class="nb-dot"></div><div class="nb-dot"></div><div class="nb-dot"></div></div>
-        <div id="nb-stxt" style="font-size:12px;color:var(--muted);margin-top:8px">Mendeteksi lokasi…</div>
-      </div>
-    </div>
-  </div>`;
-}
-
-function bindEvents(panel) {
-  panel.addEventListener('click', e => {
-    if (e.target === panel) closePanel();
-  });
-  document.getElementById('nb-back').onclick = closePanel;
-
-  document.getElementById('nb-sinput').addEventListener('input', e => {
-    nb.search = e.target.value.trim();
-    renderList();
-  });
-
-  document.getElementById('nb-cities').addEventListener('click', async e => {
-    const btn = e.target.closest('.nb-chip');
-    if (!btn) return;
-    document.querySelectorAll('#nb-cities .nb-chip').forEach(b => b.classList.remove('on'));
-    btn.classList.add('on');
-    nb.city = btn.dataset.city;
-    if (nb.city === 'gps' && !nb.osmDone && nb.loc) await loadOSM();
-    renderList();
-  });
-
-  document.getElementById('nb-types').addEventListener('click', e => {
-    const btn = e.target.closest('.nb-chip2');
-    if (!btn) return;
-    document.querySelectorAll('#nb-types .nb-chip2').forEach(b => b.classList.remove('on'));
-    btn.classList.add('on');
-    nb.filter = btn.dataset.type;
-    renderList();
-  });
-}
-
-function closePanel() {
-  const panel = document.getElementById('nb-panel');
-  if (panel) panel.classList.remove('nb-open');
-}
-
-/* ════════════════════════════════
-   DATA & LOKASI
-════════════════════════════════ */
-async function initData() {
-  setSpin('Mendeteksi lokasi…');
-  await detectLoc();
-  renderList();
-  if (nb.loc) loadOSM();
-}
-
-function setSpin(t) {
-  const el = document.getElementById('nb-stxt');
-  if (el) el.textContent = t;
-}
-
-function setLoc(t) {
-  const el = document.getElementById('nb-ploc');
-  if (el) el.textContent = t;
-}
-
-async function detectLoc() {
+  // 2. Query Firestore
   try {
-    const c = await Promise.race([getGPS(), new Promise((_,r)=>setTimeout(()=>r(new Error),8000))]);
-    const city = await revGeo(c.lat, c.lng);
-    nb.loc = { lat:c.lat, lng:c.lng, city };
-    setLoc('📍 '+(city||'GPS'));
-    return;
-  } catch {}
-  try {
-    const ip = await Promise.race([fetch('https://ipapi.co/json/').then(r=>r.json()), new Promise((_,r)=>setTimeout(()=>r(new Error),4000))]);
-    if (ip?.city) {
-      nb.loc = { lat:ip.latitude, lng:ip.longitude, city:ip.city };
-      setLoc('🌐 '+ip.city);
-      return;
+    let results = [];
+
+    if (targetCity && targetCity !== 'Jakarta') {
+      // Coba cari by kabupaten_kota dulu
+      const q = query(
+        collection(db, COLL),
+        where('kabupaten_kota', '==', targetCity),
+        orderBy('rating', 'desc'),
+        limit(20)
+      );
+      const snap = await getDocs(q);
+      snap.forEach(d => results.push(d.data()));
     }
-  } catch {}
-  nb.loc = { lat:-6.2088, lng:106.8456, city:'Jakarta' };
-  setLoc('🗺️ Jakarta');
+
+    // Kalau kurang dari 6, tambah dari kota lain / online
+    if (results.length < 6) {
+      setStatus('Melengkapi data layanan…');
+      const q2 = query(
+        collection(db, COLL),
+        orderBy('rating', 'desc'),
+        limit(30)
+      );
+      const snap2 = await getDocs(q2);
+      const existing = new Set(results.map(r => r.id));
+      snap2.forEach(d => {
+        const data = d.data();
+        if (!existing.has(data.id)) results.push(data);
+      });
+    }
+
+    // Sort by jarak kalau ada GPS
+    if (userLat && userLng) {
+      results = results.map(r => ({
+        ...r,
+        _distKm: r.lat && r.lng ? haversineKm(userLat, userLng, r.lat, r.lng) : 9999
+      })).sort((a, b) => a._distKm - b._distKm);
+    }
+
+    // Ambil 10 terbaik
+    results = results.slice(0, 10);
+
+    nb.results   = results;
+    nb.cityName  = targetCity || 'Indonesia';
+    nb.lastFetch = Date.now();
+    nb.loading   = false;
+    renderResults(nb.results, nb.filter);
+
+  } catch (e) {
+    nb.loading = false;
+    console.warn('[nearby] Firestore error:', e.message);
+    renderError(e.message);
+  }
 }
 
-function getGPS() {
-  return new Promise((res,rej) => {
-    if (!navigator.geolocation) return rej(new Error('no_geo'));
+function getLocation() {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) { reject(new Error('no_geo')); return; }
     navigator.geolocation.getCurrentPosition(
-      p => res({lat:p.coords.latitude,lng:p.coords.longitude}),
-      rej, {timeout:7000,maximumAge:600000}
+      p => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }),
+      e => reject(new Error('gps_' + e.code)),
+      { timeout: 7000, maximumAge: 600000, enableHighAccuracy: false }
     );
   });
 }
 
-async function revGeo(lat,lng) {
-  try {
-    const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=id`,{headers:{'User-Agent':'MoodlyApp/1.0'}});
-    const d = await r.json(); const a=d.address||{};
-    return a.city||a.town||a.village||a.state||null;
-  } catch { return null; }
-}
+/* ─── RENDER ────────────────────────────────────────────────────── */
+export function renderResults(results, filter) {
+  nb.filter = filter;
+  const el  = document.getElementById('nearby-wrap');
+  if (!el) return;
 
-async function loadOSM() {
-  if (nb.osmDone||!nb.loc) return;
-  try {
-    const {lat,lng}=nb.loc, r=8000;
-    const q=`[out:json][timeout:20];(node["healthcare"="psychologist"](around:${r},${lat},${lng});node["healthcare"="psychiatrist"](around:${r},${lat},${lng});node["amenity"="hospital"](around:${r},${lat},${lng});way["amenity"="hospital"](around:${r},${lat},${lng}););out body center 20;`;
-    const res=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q)});
-    if(!res.ok) throw new Error();
-    const data=await res.json();
-    const seen=new Set();
-    nb.osmData=(data.elements||[]).filter(e=>{
-      if(!e.tags?.name||seen.has(e.id)) return false;
-      const nm=(e.tags.name||'').toLowerCase();
-      if(BL.some(b=>nm.includes(b))) return false;
-      seen.add(e.id); return true;
-    }).map(e=>{
-      const t=e.tags||{},nm=(t.name||'').toLowerCase(),hc=(t.healthcare||'').toLowerCase();
-      const type=hc==='psychologist'||nm.includes('psikolog')?'psikolog':'psikiater';
-      const la=e.lat??e.center?.lat, lo=e.lon??e.center?.lon;
-      return {id:'osm_'+e.id,type,city:'osm',verified:false,name:t.name||'—',emoji:type==='psikolog'?'🧠':'🏥',area:t['addr:city']||t['addr:suburb']||'',phone:t.phone||t['contact:phone']||null,website:t.website||null,email:t.email||null,hours:t.opening_hours||'Sesuai appointment',price:'Hubungi untuk info harga',tags:[t.healthcare,t.amenity].filter(Boolean).map(x=>x.replace(/_/g,' ')),desc:null,maps:la?`https://www.google.com/maps?q=${la},${lo}`:null};
-    });
-    console.log('[nearby] OSM:',nb.osmData.length);
-  } catch(e) { console.warn('[nearby] OSM err:',e.message); }
-  nb.osmDone=true;
-  if(nb.city==='gps') renderList();
-}
+  // Filter by kategori
+  const list = filter === 'semua'
+    ? results
+    : results.filter(r => r.kategori === filter);
 
-/* ════════════════════════════════
-   RENDER
-════════════════════════════════ */
-function getPool() {
-  let p = nb.city==='gps'
-    ? [...STATIC,...nb.osmData]
-    : nb.city==='online'
-      ? STATIC.filter(d=>d.city==='online')
-      : STATIC.filter(d=>d.city===nb.city||d.city==='online');
-
-  if(nb.filter!=='semua') p=p.filter(d=>d.type===nb.filter);
-  if(nb.search){const q=nb.search.toLowerCase();p=p.filter(d=>d.name.toLowerCase().includes(q)||d.area.toLowerCase().includes(q)||d.tags.some(t=>t.toLowerCase().includes(q)));}
-  return p;
-}
-
-function renderList() {
-  const el=document.getElementById('nb-plist'); if(!el) return;
-  const pool=getPool();
-  const vr=pool.filter(d=>d.verified), osm=pool.filter(d=>!d.verified);
-
-  const cnt=document.getElementById('nb-cnt'); if(cnt) cnt.textContent=`${pool.length} layanan`;
-  const note=document.getElementById('nb-osmnote');
-  if(note){if(osm.length){note.style.display='inline';note.textContent=`+${osm.length} dari peta`;}else note.style.display='none';}
-
-  if(!pool.length){el.innerHTML=`<div class="nb-empty">Tidak ada hasil.<br>Coba filter lain.</div>`;return;}
-
-  let h='';
-  if(vr.length) h+=`<div class="nb-slabel">✅ Terverifikasi</div>`+vr.map(cardHTML).join('');
-  if(osm.length) h+=`<div class="nb-slabel">📍 Data Peta Sekitar</div>`+osm.map(cardHTML).join('');
-  el.innerHTML=h;
-}
-
-function cardHTML(d) {
-  const TL={psikolog:'Psikolog',psikiater:'Psikiater',klinik:'Klinik',online:'Online'};
-  const safe=(d.name||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');
-  return `
-  <div class="nb-card ${d.verified?'nb-cv':''}">
-    <div class="nb-ch">
-      <span class="nb-cico">${d.emoji}</span>
-      <div class="nb-ci">
-        <div class="nb-cn">${d.name}</div>
-        <div class="nb-ca">${d.type==='online'?'🌐 Online':'📍 '+d.area}</div>
+  el.innerHTML = `
+    <div class="nb-header">
+      <div class="nb-city">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
+          <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z" stroke="#1db954" stroke-width="2"/>
+          <circle cx="12" cy="10" r="3" stroke="#1db954" stroke-width="2"/>
+        </svg>
+        ${nb.cityName}
       </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0">
-        <span class="nb-badge nb-b${d.type}">${TL[d.type]||d.type}</span>
-        ${d.verified?'<span class="nb-badge nb-bok">✓ Verified</span>':''}
+      <button class="nb-refresh" onclick="window._refreshNearby()">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+          <path d="M1 4v6h6M23 20v-6h-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M20.49 9A9 9 0 005.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 013.51 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Perbarui
+      </button>
+    </div>
+    <div class="nb-filters">
+      ${FILTERS.map(f => `
+        <button class="nb-ftab ${filter === f.id ? 'on' : ''}" onclick="window._filterNearby('${f.id}')">
+          ${f.emoji} ${f.label}
+        </button>`).join('')}
+    </div>
+    <div class="nb-count-row"><span class="nb-count">${list.length} layanan ditemukan</span></div>
+    <div class="nb-list">
+      ${list.length ? list.map(cardHTML).join('') : `<div class="nb-empty">Tidak ada layanan untuk kategori ini.</div>`}
+    </div>`;
+}
+
+function cardHTML(r) {
+  const typeEmoji = {
+    'Rumah Sakit'      : '🏥',
+    'Rumah Sakit Jiwa' : '🏨',
+    'Puskesmas'        : '🏢',
+    'Klinik Psikologi' : '🧠',
+    'Universitas'      : '🎓',
+  };
+  const emoji = typeEmoji[r.jenis_layanan] || '🏥';
+  const safe  = (r.nama_layanan || '').replace(/'/g, "\\'");
+  const distLabel = r._distKm && r._distKm < 9999 ? `${r._distKm < 1 ? '<1' : Math.round(r._distKm)} km` : null;
+  const biaya = r.biaya_mulai === 0 ? 'Gratis' : `Mulai Rp ${r.biaya_mulai.toLocaleString('id')}`;
+  const asuransi = Array.isArray(r.insurance) && r.insurance.length ? r.insurance.join(', ') : null;
+
+  return `<div class="nb-card">
+    <div class="nb-card-top">
+      <div class="nb-card-emoji">${emoji}</div>
+      <div class="nb-card-info">
+        <div class="nb-card-name">${r.nama_layanan || '—'}</div>
+        <div class="nb-card-area">
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="none"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z" stroke="#1db954" stroke-width="2"/><circle cx="12" cy="10" r="3" stroke="#1db954" stroke-width="2"/></svg>
+          ${r.kabupaten_kota || ''}${distLabel ? ` · <strong>${distLabel}</strong>` : ''}
+        </div>
+        <div class="nb-rating-row">
+          ${starsHTML(r.rating)}
+          <span class="nb-rating-num">${(r.rating||0).toFixed(1)}</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;flex-shrink:0">
+        <span class="nb-badge nb-badge-${r.kategori === 'Psikiatri' ? 'psikiater' : r.kategori === 'Psikolog' ? 'psikolog' : 'klinik'}">${r.jenis_layanan || ''}</span>
+        ${r.telemedicine ? `<span class="nb-badge" style="background:#e8f5e9;color:#388e3c;font-size:9px">💻 Online</span>` : ''}
+        ${r.verified    ? `<span class="nb-badge" style="background:#e3f2fd;color:#1565c0;font-size:9px">✓ Verified</span>` : ''}
       </div>
     </div>
-    ${d.desc?`<div class="nb-cdesc">${d.desc}</div>`:''}
-    <div class="nb-cmeta">
-      <span>🕐 ${d.hours}</span>
-      <span>💰 ${d.price}</span>
+
+    <div class="nb-card-desc" style="font-size:11px;color:#666;margin:6px 0 4px">${r.specialization || r.kategori}</div>
+
+    <div class="nb-card-meta">
+      <div class="nb-meta-item">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#8aab97" stroke-width="2"/><path d="M12 6v6l4 2" stroke="#8aab97" stroke-width="2" stroke-linecap="round"/></svg>
+        ${r.jam_buka}–${r.jam_tutup} · ${r.hari}
+      </div>
+      <div class="nb-meta-item">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><line x1="12" y1="1" x2="12" y2="23" stroke="#8aab97" stroke-width="2"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" stroke="#8aab97" stroke-width="2" stroke-linecap="round"/></svg>
+        ${biaya}${asuransi ? ` · ${asuransi}` : ''}
+      </div>
     </div>
-    ${d.tags?.length?`<div class="nb-ctags">${d.tags.slice(0,3).map(t=>`<span class="nb-tag">${t}</span>`).join('')}</div>`:''}
-    <div class="nb-cbtns">
-      ${d.phone?`<a class="nb-btn nb-bcall" href="tel:${d.phone.replace(/\s/g,'')}">📞 ${d.phone}</a>`:''}
-      ${d.website?`<a class="nb-btn nb-bweb" href="${d.website}" target="_blank" rel="noopener">🌐 Website</a>`:''}
-      ${d.maps
-        ?`<a class="nb-btn nb-bmap" href="${d.maps}" target="_blank" rel="noopener">📍 Maps</a>`
-        :`<button class="nb-btn nb-bmap" onclick="window.open('https://maps.google.com/?q='+encodeURIComponent('${safe}'),'_blank')">📍 Maps</button>`}
+
+    <div class="nb-card-actions">
+      ${r.telepon ? `<a class="nb-btn nb-btn-call" href="tel:${r.telepon}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 11 19.79 19.79 0 01.01 2.34 2 2 0 012 .16h3a2 2 0 012 1.72 12.05 12.05 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.05 12.05 0 002.81.7A2 2 0 0122 16.92z" stroke="currentColor" stroke-width="2"/></svg> Hubungi</a>` : ''}
+      ${r.website ? `<a class="nb-btn nb-btn-web" href="${r.website}" target="_blank" rel="noopener"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20" stroke="currentColor" stroke-width="2"/></svg> Website</a>` : ''}
+      <button class="nb-btn nb-btn-web" onclick="window._searchNearby('${safe}')">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/></svg>
+        Maps
+      </button>
     </div>
   </div>`;
 }
 
-/* ════════════════════════════════
-   EXPORTS
-════════════════════════════════ */
-export function filterNearby()  {}
-export function refreshNearby() { nb.osmData=[]; nb.osmDone=false; nb.loc=null; findNearby(); }
-export function searchNearby(n) { window.open(`https://maps.google.com/?q=${encodeURIComponent(n+' kesehatan mental')}`, '_blank'); }
+function starsHTML(rating) {
+  const r = Math.round((rating || 0) * 2) / 2;
+  let h = '';
+  for (let i = 1; i <= 5; i++) {
+    const on = i <= r;
+    h += `<svg width="9" height="9" viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z" fill="${on?'#f57c00':'#e0f0e8'}" stroke="${on?'#f57c00':'#c5dfd0'}" stroke-width="1"/></svg>`;
+  }
+  return `<div class="nb-stars">${h}</div>`;
+}
+
+function renderError(msg) {
+  const el = document.getElementById('nearby-wrap');
+  if (!el) return;
+  el.innerHTML = `
+    <div class="nb-idle">
+      <div class="nb-idle-ico">⚠️</div>
+      <div class="nb-idle-txt">Gagal memuat data: ${msg}</div>
+      <button class="nb-cta" onclick="window._refreshNearby()">Coba Lagi</button>
+    </div>`;
+}
+
+export function filterNearby(t) { nb.filter = t; if (nb.results.length) renderResults(nb.results, t); }
+export function refreshNearby() { nb.results = []; nb.lastFetch = null; findNearby(); }
+export function searchNearby(name) { window.open(`https://maps.google.com/maps?q=${encodeURIComponent(name + ' kesehatan mental')}`, '_blank'); }
