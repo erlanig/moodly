@@ -82,7 +82,6 @@ export async function saveProfile(data) {
   } catch (e) {
     console.warn('[FB] saveProfile:', e.message);
     _syncOk = false;
-    // fallback localStorage
     localStorage.setItem('moodly_profile_local', JSON.stringify(data));
   }
 }
@@ -99,7 +98,6 @@ export async function loadEntries() {
   } catch (e) {
     console.warn('[FB] loadEntries:', e.message);
     _syncOk = false;
-    // fallback local
     try { return JSON.parse(localStorage.getItem('moodly2') || '[]'); } catch { return []; }
   }
 }
@@ -116,7 +114,6 @@ export async function addEntry(entry) {
   } catch (e) {
     console.warn('[FB] addEntry:', e.message);
     _syncOk = false;
-    // fallback local
     const local = JSON.parse(localStorage.getItem('moodly2') || '[]');
     local.push(entry);
     localStorage.setItem('moodly2', JSON.stringify(local));
@@ -232,6 +229,58 @@ export async function deleteAllPeriods() {
 }
 
 /* ════════════════════════════════
+   PERIOD DAILY LOGS  ← BARU
+   Subcollection: periods/{periodId}/days/{date}
+   { date, flow, symptoms: [], notes }
+════════════════════════════════ */
+const periodDaysRef  = (periodId) =>
+  collection(db, 'users', DEVICE_ID, 'periods', periodId, 'days');
+const periodDayDocRef = (periodId, date) =>
+  doc(db, 'users', DEVICE_ID, 'periods', periodId, 'days', date);
+
+export async function loadPeriodDays(periodId) {
+  if (!periodId) return [];
+  const localKey = `moodly_pdays_${periodId}`;
+  try {
+    if (periodId.startsWith('local_')) {
+      return JSON.parse(localStorage.getItem(localKey) || '[]');
+    }
+    const snap = await getDocs(periodDaysRef(periodId));
+    const data = snap.docs.map(d => ({ date: d.id, ...d.data() }));
+    // sync to localStorage
+    localStorage.setItem(localKey, JSON.stringify(data));
+    return data;
+  } catch (e) {
+    console.warn('[FB] loadPeriodDays:', e.message);
+    try { return JSON.parse(localStorage.getItem(localKey) || '[]'); } catch { return []; }
+  }
+}
+
+export async function savePeriodDay(periodId, date, data) {
+  if (!periodId || !date) return;
+  const localKey = `moodly_pdays_${periodId}`;
+
+  // localStorage — always update
+  const local = JSON.parse(localStorage.getItem(localKey) || '[]');
+  const idx = local.findIndex(d => d.date === date);
+  const item = { date, ...data };
+  if (idx >= 0) local[idx] = item; else local.push(item);
+  localStorage.setItem(localKey, JSON.stringify(local));
+
+  // Firestore
+  try {
+    if (!periodId.startsWith('local_')) {
+      await setDoc(periodDayDocRef(periodId, date), {
+        ...data,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    }
+  } catch (e) {
+    console.warn('[FB] savePeriodDay:', e.message);
+  }
+}
+
+/* ════════════════════════════════
    NEWS CACHE
 ════════════════════════════════ */
 export async function loadNewsCache() {
@@ -254,6 +303,48 @@ export async function saveNewsCache(key, arts) {
 }
 
 /* ════════════════════════════════
+   FOOD RECOMMENDATION CACHE  ← BARU
+   Cache saran makanan AI per fase siklus
+════════════════════════════════ */
+const foodCacheRef = () => doc(db, 'users', DEVICE_ID, 'cache', 'food_rec');
+
+export async function loadFoodCache() {
+  try {
+    // cek localStorage dulu (cepat)
+    const local = JSON.parse(localStorage.getItem('moodly_food_cache') || 'null');
+    if (local) return local;
+    // fallback Firestore
+    const snap = await getDoc(foodCacheRef());
+    if (snap.exists()) {
+      const d = snap.data();
+      localStorage.setItem('moodly_food_cache', JSON.stringify(d));
+      return d;
+    }
+  } catch (e) {
+    console.warn('[FB] loadFoodCache:', e.message);
+  }
+  return null;
+}
+
+export async function saveFoodCache(phase, items) {
+  const data = {
+    phase,
+    items,
+    date: new Date().toDateString(),
+    savedAt: new Date().toISOString()
+  };
+  localStorage.setItem('moodly_food_cache', JSON.stringify(data));
+  try {
+    setDoc(foodCacheRef(), {
+      ...data,
+      savedAt: serverTimestamp()
+    }).catch(() => {});
+  } catch (e) {
+    console.warn('[FB] saveFoodCache:', e.message);
+  }
+}
+
+/* ════════════════════════════════
    FULL DATA WIPE
 ════════════════════════════════ */
 export async function clearAllData() {
@@ -266,6 +357,11 @@ export async function clearAllData() {
   localStorage.removeItem('moodly_periods');
   localStorage.removeItem('moodly_cycle');
   localStorage.removeItem('moodly_nc');
+  localStorage.removeItem('moodly_food_cache');
+  // clear all period day caches
+  Object.keys(localStorage)
+    .filter(k => k.startsWith('moodly_pdays_'))
+    .forEach(k => localStorage.removeItem(k));
 }
 
 /* ════════════════════════════════
@@ -275,12 +371,10 @@ export async function clearAllData() {
 const jesMemoryRef = () => doc(db, 'users', DEVICE_ID, 'cache', 'jes_memory');
 
 export async function loadJesMemory() {
-  // Cek localStorage dulu — instan
   try {
     const local = JSON.parse(localStorage.getItem('moodly_jes_mem') || 'null');
     if (local) return local;
   } catch {}
-  // Fallback Firestore
   try {
     const snap = await getDoc(jesMemoryRef());
     if (snap.exists()) {
@@ -293,7 +387,6 @@ export async function loadJesMemory() {
 }
 
 export async function saveJesMemory(memory) {
-  // memory = { facts: [...string], updatedAt: ISO }
   const data = { ...memory, updatedAt: new Date().toISOString() };
   localStorage.setItem('moodly_jes_mem', JSON.stringify(data));
   try {

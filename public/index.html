@@ -178,6 +178,9 @@
   <!-- Current phase card -->
   <div id="phase-card-wrap"></div>
 
+  <!-- Daily log banner (muncul saat periode aktif) ← BARU -->
+  <div id="daily-log-banner"></div>
+
   <!-- 28-day strip -->
   <div class="cycle-strip">
     <div class="card-ttl" style="margin-bottom:8px">
@@ -236,6 +239,10 @@
     <div class="pill-hd ph-p">🌸 Tips Fase Ini</div>
     <div class="pill-txt" id="cycle-tip">Catat siklus pertamamu untuk tips yang personal.</div>
   </div>
+
+  <!-- AI Food Recommendation ← BARU -->
+  <div id="food-rec-card"></div>
+
 </div>
 
 <!-- ═══════════════ INSIGHT ═══════════════ -->
@@ -509,6 +516,26 @@
 
     <button class="cta pink" style="margin-top:14px" onclick="window._submitLogPeriod()">Simpan Catatan 🌸</button>
     <button class="cta out" style="margin-top:8px" onclick="window._closeLogPeriod()">Batal</button>
+  </div>
+</div>
+
+<!-- Daily Log Modal ← BARU -->
+<!-- Modal isi kondisi harian selama periode aktif -->
+<div id="daily-log-modal" class="modal-bg" onclick="if(event.target===this)window._closeDailyLog()">
+  <div class="modal-sheet">
+    <div class="sh-handle"></div>
+    <div class="sh-title" id="daily-modal-title">🩸 Log Hari Ini</div>
+    <div class="sh-sub">Catat kondisi harian untuk tracking yang lebih detail.</div>
+
+    <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:6px">Seberapa deras hari ini?</div>
+    <div class="flow-row" id="daily-flow-row"></div>
+
+    <div style="font-size:11px;font-weight:700;color:var(--text2);margin:12px 0 6px">Gejala yang dirasakan hari ini</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:7px">Bisa pilih lebih dari satu</div>
+    <div class="sym-grid" id="daily-sym-grid"></div>
+
+    <button class="cta pink" style="margin-top:14px" onclick="window._submitDailyLog()">Simpan Log Harian 🌸</button>
+    <button class="cta out" style="margin-top:8px" onclick="window._closeDailyLog()">Batal</button>
   </div>
 </div>
 
