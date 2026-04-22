@@ -1183,135 +1183,186 @@ html, body {
 .nb-error-title { font-size: 14px; font-weight: 800; color: var(--text); margin-bottom: 5px; }
 .nb-error-sub   { font-size: 12px; color: var(--muted); line-height: 1.5; margin-bottom: 14px; }
 /* ═══════════════════════════════════════
-   DAILY LOG BANNER  ← BARU
-   Banner harian saat periode aktif
+   MULAI / SELESAI MENS BUTTONS
+═══════════════════════════════════════ */
+#mens-action-wrap { flex-shrink: 0; }
+
+.mens-start-btn {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(135deg, #ff6b8a, #e0405e);
+  color: #fff; border: none; border-radius: var(--rs);
+  font-family: inherit; font-size: 15px; font-weight: 800;
+  cursor: pointer; letter-spacing: -.01em;
+  box-shadow: 0 4px 20px rgba(224,64,94,.32);
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: transform .15s, opacity .15s;
+}
+.mens-start-btn:active { transform: scale(.97); opacity: .92; }
+
+.mens-active-row {
+  display: flex; align-items: center; justify-content: space-between;
+  background: linear-gradient(135deg, #fff0f3, #ffe4ea);
+  border: 1.5px solid var(--mens-border);
+  border-radius: var(--rs); padding: 13px 15px;
+  gap: 12px;
+}
+.mar-info   { flex: 1; }
+.mar-badge  {
+  font-size: 11px; font-weight: 700; color: var(--mens);
+  text-transform: uppercase; letter-spacing: .06em; margin-bottom: 3px;
+}
+.mar-sub    { font-size: 12px; color: var(--text2); }
+.mens-stop-btn {
+  padding: 10px 16px; border-radius: 100px;
+  background: var(--mens); color: #fff;
+  border: none; font-family: inherit; font-size: 13px; font-weight: 700;
+  cursor: pointer; white-space: nowrap; flex-shrink: 0;
+  transition: transform .12s, opacity .15s;
+  box-shadow: 0 3px 10px rgba(255,107,138,.3);
+}
+.mens-stop-btn:active { transform: scale(.96); opacity: .9; }
+
+/* ═══════════════════════════════════════
+   DAILY LOG BANNER
 ═══════════════════════════════════════ */
 .daily-banner {
-  border-radius: var(--rs);
-  padding: 13px 14px;
+  border-radius: var(--rs); padding: 13px 14px;
   display: flex; align-items: center; gap: 11px;
-  cursor: pointer; transition: transform .12s, opacity .15s;
-  flex-shrink: 0;
+  cursor: pointer; transition: transform .12s; flex-shrink: 0;
 }
-.daily-banner:active { transform: scale(.98); opacity: .9; }
-
+.daily-banner:active { transform: scale(.98); }
 .daily-banner-prompt {
-  background: linear-gradient(135deg, #fff0f3, #ffe0e8);
+  background: linear-gradient(135deg,#fff0f3,#ffe4ea);
   border: 1.5px solid var(--mens-border);
 }
 .daily-banner-done {
   background: var(--white);
-  border: 1.5px solid var(--border);
-  box-shadow: var(--sh);
+  border: 1.5px solid var(--border); box-shadow: var(--sh);
 }
-
 .db-icon { font-size: 26px; flex-shrink: 0; line-height: 1; }
 .db-body { flex: 1; min-width: 0; }
 .db-day  { font-size: 10px; font-weight: 700; color: var(--mens); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 2px; }
-.db-status {
-  font-size: 13px; font-weight: 700; color: var(--text);
-  display: flex; align-items: center; gap: 4px; margin-bottom: 3px;
-}
-.db-sub   { font-size: 11px; color: var(--muted); line-height: 1.4; }
+.db-status { font-size: 13px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 4px; margin-bottom: 3px; }
+.db-sub  { font-size: 11px; color: var(--muted); line-height: 1.4; }
 .db-chips { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
-.db-chip  {
-  font-size: 10px; padding: 2px 8px; border-radius: 100px;
-  background: var(--mens-bg); color: var(--mens);
-  border: 1px solid var(--mens-border);
-}
-.db-edit-btn {
-  font-size: 12px; font-weight: 700; color: var(--muted); flex-shrink: 0;
-}
+.db-chip { font-size: 10px; padding: 2px 8px; border-radius: 100px; background: var(--mens-bg); color: var(--mens); border: 1px solid var(--mens-border); }
+.db-edit-btn { font-size: 12px; font-weight: 700; color: var(--muted); flex-shrink: 0; }
 .db-fill-btn {
   flex-shrink: 0; padding: 8px 14px; border-radius: 100px;
   background: var(--mens); color: #fff; border: none;
   font-family: inherit; font-size: 12px; font-weight: 700;
-  cursor: pointer; white-space: nowrap;
-  transition: transform .12s; pointer-events: none;
+  cursor: pointer; pointer-events: none;
 }
 
 /* ═══════════════════════════════════════
-   DAILY LOG MODAL  ← BARU
+   AI PREDICTION CARD
 ═══════════════════════════════════════ */
-#daily-log-modal .sh-title { color: var(--mens); }
+.ai-pred-empty {
+  background: var(--white); border: 1.5px dashed var(--border);
+  border-radius: var(--r); padding: 24px 16px;
+  text-align: center; flex-shrink: 0;
+}
+.ape-ico   { font-size: 32px; margin-bottom: 8px; }
+.ape-title { font-size: 15px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+.ape-sub   { font-size: 12px; color: var(--muted); line-height: 1.6; }
+
+.ai-pred-loading {
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: var(--r); padding: 20px 16px;
+  text-align: center; flex-shrink: 0;
+}
+
+.ai-pred-card {
+  background: linear-gradient(135deg, #fff0f3, #fce7ed);
+  border: 1.5px solid var(--mens-border);
+  border-radius: var(--r); overflow: hidden; flex-shrink: 0;
+}
+.apc-header {
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--mens-border);
+}
+.apc-title-row {
+  display: flex; align-items: center; margin-bottom: 8px;
+}
+.apc-badge {
+  font-size: 10px; font-weight: 800; color: var(--mens);
+  text-transform: uppercase; letter-spacing: .06em; flex: 1;
+}
+.apc-refresh {
+  background: none; border: 1px solid var(--mens-border); border-radius: 100px;
+  padding: 3px 9px; font-size: 10px; font-weight: 700; color: var(--mens);
+  cursor: pointer; font-family: inherit;
+}
+.apc-refresh:active { background: var(--mens-bg); }
+.apc-motivasi {
+  font-size: 13px; font-weight: 600; color: #c02050; line-height: 1.5;
+  font-style: italic;
+}
+.apc-rows { padding: 12px 16px 14px; display: flex; flex-direction: column; gap: 10px; }
+.apc-row {
+  display: flex; align-items: flex-start; gap: 11px;
+}
+.apc-row-icon { font-size: 22px; flex-shrink: 0; line-height: 1; width: 28px; text-align: center; }
+.apc-row-body { flex: 1; }
+.apc-row-label { font-size: 9px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 2px; }
+.apc-row-val   { font-size: 14px; font-weight: 800; color: var(--text); margin-bottom: 1px; }
+.apc-row-sub   { font-size: 11px; }
+.apc-note      { font-size: 11px; color: var(--muted); line-height: 1.5; padding-top: 8px; border-top: 1px solid var(--mens-border); }
 
 /* ═══════════════════════════════════════
-   PERIOD HISTORY — PER-DAY FLOW DOTS  ← BARU
+   FOOD RECOMMENDATION CARD
+═══════════════════════════════════════ */
+#food-rec-card {
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: var(--r); box-shadow: var(--sh); flex-shrink: 0;
+}
+.food-rec-inner { padding: 16px; }
+.food-motivasi {
+  font-size: 12px; color: var(--text2); line-height: 1.55;
+  font-style: italic; background: var(--gl);
+  border-radius: 10px; padding: 9px 13px; margin-bottom: 12px;
+}
+.food-section-lbl {
+  font-size: 10px; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: .07em; margin-bottom: 6px;
+}
+.food-refresh-btn {
+  margin-left: auto; padding: 3px 10px; border-radius: 100px;
+  border: 1.5px solid var(--border); background: var(--bg);
+  color: var(--muted); font-family: inherit; font-size: 10px;
+  font-weight: 700; cursor: pointer;
+}
+.food-refresh-btn:active { background: var(--gl); }
+.food-list { display: flex; flex-direction: column; }
+.food-item {
+  display: flex; align-items: flex-start; gap: 11px;
+  padding: 9px 0; border-bottom: 1px solid var(--border);
+}
+.food-item:last-child { border-bottom: none; }
+.food-emoji { font-size: 24px; flex-shrink: 0; line-height: 1; width: 28px; text-align: center; }
+.food-name  { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 1px; }
+.food-reason{ font-size: 11px; color: var(--text2); line-height: 1.4; }
+.food-note  { font-size: 10px; color: var(--muted); margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border); line-height: 1.5; }
+
+/* ═══════════════════════════════════════
+   PERIOD HISTORY — PER-DAY DOTS
 ═══════════════════════════════════════ */
 .ph-daily-row {
   display: flex; gap: 6px; flex-wrap: wrap;
-  margin-top: 6px; padding-top: 6px;
-  border-top: 1px dashed var(--border);
+  margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--border);
 }
-.ph-day-col {
-  display: flex; flex-direction: column; align-items: center;
-  gap: 2px; cursor: default;
-}
-.ph-day-lbl {
-  font-size: 8px; color: var(--muted); font-weight: 600;
-  white-space: nowrap;
-}
+.ph-day-col { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.ph-day-lbl { font-size: 8px; color: var(--muted); font-weight: 600; white-space: nowrap; }
 .ph-day-dots { display: flex; gap: 1px; }
-
-/* mini dot variants */
-.fd-mini {
-  width: 5px; height: 5px; border-radius: 50%;
-  background: var(--mens-border); display: inline-block;
-}
+.fd-mini { width: 5px; height: 5px; border-radius: 50%; display: inline-block; background: var(--mens-border); }
 .fd-mini.fd-light  { background: #ffb3c0; }
 .fd-mini.fd-med    { background: #ff8099; }
 .fd-mini.fd-heavy  { background: #ff4d6d; }
 .fd-mini.fd-vheavy { background: #cc0033; }
 
-/* ph-row layout fix for new actions column */
-.ph-row {
-  display: flex; align-items: flex-start; gap: 8px;
-  padding: 9px 0; border-bottom: 1px solid var(--border);
-}
+.ph-row { display: flex; align-items: flex-start; gap: 8px; padding: 9px 0; border-bottom: 1px solid var(--border); }
 .ph-row:last-child { border-bottom: none; }
 .ph-acts { display: flex; gap: 6px; flex-shrink: 0; margin-left: auto; }
-.ph-act  {
-  font-size: 14px; cursor: pointer; padding: 2px;
-  border-radius: 6px; transition: background .12s;
-}
+.ph-act  { font-size: 14px; cursor: pointer; padding: 2px; border-radius: 6px; transition: background .12s; }
 .ph-act:hover { background: var(--bg); }
-
-/* ═══════════════════════════════════════
-   FOOD RECOMMENDATION CARD  ← BARU
-═══════════════════════════════════════ */
-#food-rec-card {
-  background: var(--white);
-  border: 1.5px solid var(--border);
-  border-radius: var(--r);
-  box-shadow: var(--sh);
-  overflow: hidden;
-  flex-shrink: 0;
-}
-.food-rec-inner { padding: 16px; }
-.food-refresh-btn {
-  margin-left: auto;
-  padding: 3px 10px; border-radius: 100px;
-  border: 1.5px solid var(--border);
-  background: var(--bg);
-  color: var(--muted); font-family: inherit;
-  font-size: 10px; font-weight: 700; cursor: pointer;
-  transition: background .15s;
-}
-.food-refresh-btn:active { background: var(--gl); }
-
-.food-list  { display: flex; flex-direction: column; gap: 0; }
-.food-item  {
-  display: flex; align-items: flex-start; gap: 11px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--border);
-}
-.food-item:last-child { border-bottom: none; }
-.food-emoji { font-size: 26px; flex-shrink: 0; line-height: 1; width: 30px; text-align: center; }
-.food-info  { flex: 1; }
-.food-name  { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
-.food-reason{ font-size: 11px; color: var(--text2); line-height: 1.45; }
-.food-note  {
-  font-size: 10px; color: var(--muted); margin-top: 10px;
-  padding-top: 8px; border-top: 1px solid var(--border);
-  line-height: 1.5;
-}

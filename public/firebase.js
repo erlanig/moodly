@@ -8,8 +8,7 @@ import {
   getFirestore,
   doc, collection,
   getDoc, getDocs, setDoc, addDoc, deleteDoc, updateDoc,
-  query, orderBy, limit, onSnapshot, serverTimestamp,
-  where
+  query, orderBy, serverTimestamp,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 const FIREBASE_CONFIG = {
@@ -22,11 +21,9 @@ const FIREBASE_CONFIG = {
   measurementId: "G-GNNWT0NGQF"
 };
 
-/* ── Init ── */
 const firebaseApp = initializeApp(FIREBASE_CONFIG);
 const db = getFirestore(firebaseApp);
 
-/* ── Device ID (anonymous, persisted) ── */
 function getDeviceId() {
   let id = localStorage.getItem('moodly_device_id');
   if (!id) {
@@ -37,366 +34,196 @@ function getDeviceId() {
 }
 const DEVICE_ID = getDeviceId();
 
-/* ── Collection refs ── */
-const userDocRef    = () => doc(db, 'users', DEVICE_ID);
-const entriesRef    = () => collection(db, 'users', DEVICE_ID, 'entries');
-const cycleLogsRef  = () => collection(db, 'users', DEVICE_ID, 'cycleLogs');
-const periodsRef    = () => collection(db, 'users', DEVICE_ID, 'periods');
-const newsCacheRef  = () => doc(db, 'users', DEVICE_ID, 'cache', 'news');
+const userDocRef   = () => doc(db, 'users', DEVICE_ID);
+const entriesRef   = () => collection(db, 'users', DEVICE_ID, 'entries');
+const periodsRef   = () => collection(db, 'users', DEVICE_ID, 'periods');
+const newsCacheRef = () => doc(db, 'users', DEVICE_ID, 'cache', 'news');
+const foodCacheRef = () => doc(db, 'users', DEVICE_ID, 'cache', 'food_ai');
+const aiPredRef    = () => doc(db, 'users', DEVICE_ID, 'cache', 'ai_prediction');
+const jesMemRef    = () => doc(db, 'users', DEVICE_ID, 'cache', 'jes_memory');
 
-/* ════════════════════════════════
-   STATUS & CONNECTIVITY
-════════════════════════════════ */
+/* ════════════════ STATUS ════════════════ */
 let _syncOk = false;
 export function isSynced() { return _syncOk; }
-
 export async function checkConnection() {
-  try {
-    await getDoc(userDocRef());
-    _syncOk = true;
-    return true;
-  } catch (e) {
-    _syncOk = false;
-    return false;
-  }
+  try { await getDoc(userDocRef()); _syncOk = true; return true; }
+  catch { _syncOk = false; return false; }
 }
 
-/* ════════════════════════════════
-   USER PROFILE
-════════════════════════════════ */
+/* ════════════════ PROFILE ════════════════ */
 export async function loadProfile() {
-  try {
-    const snap = await getDoc(userDocRef());
-    if (snap.exists()) return snap.data();
-    return null;
-  } catch (e) {
-    console.warn('[FB] loadProfile:', e.message);
-    return null;
-  }
+  try { const s = await getDoc(userDocRef()); return s.exists() ? s.data() : null; }
+  catch (e) { console.warn('[FB] loadProfile:', e.message); return null; }
 }
-
 export async function saveProfile(data) {
-  try {
-    await setDoc(userDocRef(), { ...data, updatedAt: serverTimestamp() }, { merge: true });
-    _syncOk = true;
-  } catch (e) {
-    console.warn('[FB] saveProfile:', e.message);
-    _syncOk = false;
-    localStorage.setItem('moodly_profile_local', JSON.stringify(data));
-  }
+  try { await setDoc(userDocRef(), { ...data, updatedAt: serverTimestamp() }, { merge: true }); _syncOk = true; }
+  catch (e) { _syncOk = false; localStorage.setItem('moodly_profile_local', JSON.stringify(data)); }
 }
 
-/* ════════════════════════════════
-   MOOD ENTRIES
-════════════════════════════════ */
+/* ════════════════ ENTRIES ════════════════ */
 export async function loadEntries() {
   try {
-    const q = query(entriesRef(), orderBy('ts', 'asc'));
-    const snap = await getDocs(q);
+    const snap = await getDocs(query(entriesRef(), orderBy('ts', 'asc')));
     _syncOk = true;
     return snap.docs.map(d => ({ id: d.id, ...d.data() }));
   } catch (e) {
-    console.warn('[FB] loadEntries:', e.message);
     _syncOk = false;
     try { return JSON.parse(localStorage.getItem('moodly2') || '[]'); } catch { return []; }
   }
 }
-
 export async function addEntry(entry) {
   try {
-    const docRef = await addDoc(entriesRef(), {
-      ...entry,
-      ts: entry.ts || new Date().toISOString(),
-      createdAt: serverTimestamp()
-    });
-    _syncOk = true;
-    return docRef.id;
+    const ref = await addDoc(entriesRef(), { ...entry, ts: entry.ts || new Date().toISOString(), createdAt: serverTimestamp() });
+    _syncOk = true; return ref.id;
   } catch (e) {
-    console.warn('[FB] addEntry:', e.message);
     _syncOk = false;
     const local = JSON.parse(localStorage.getItem('moodly2') || '[]');
-    local.push(entry);
-    localStorage.setItem('moodly2', JSON.stringify(local));
-    return null;
+    local.push(entry); localStorage.setItem('moodly2', JSON.stringify(local)); return null;
   }
 }
-
 export async function deleteAllEntries() {
   try {
     const snap = await getDocs(entriesRef());
-    const dels = snap.docs.map(d => deleteDoc(doc(db, 'users', DEVICE_ID, 'entries', d.id)));
-    await Promise.all(dels);
-  } catch (e) {
-    console.warn('[FB] deleteAllEntries:', e.message);
-  }
+    await Promise.all(snap.docs.map(d => deleteDoc(doc(db, 'users', DEVICE_ID, 'entries', d.id))));
+  } catch {}
 }
 
-/* ════════════════════════════════
-   CYCLE SETTINGS
-════════════════════════════════ */
-export async function loadCycleSettings() {
-  try {
-    const snap = await getDoc(userDocRef());
-    if (snap.exists() && snap.data().cycleSettings) {
-      return snap.data().cycleSettings;
-    }
-    return null;
-  } catch (e) {
-    console.warn('[FB] loadCycleSettings:', e.message);
-    try { return JSON.parse(localStorage.getItem('moodly_cycle') || 'null'); } catch { return null; }
-  }
-}
-
-export async function saveCycleSettings(settings) {
-  try {
-    await setDoc(userDocRef(), {
-      cycleSettings: settings,
-      updatedAt: serverTimestamp()
-    }, { merge: true });
-    _syncOk = true;
-  } catch (e) {
-    console.warn('[FB] saveCycleSettings:', e.message);
-    localStorage.setItem('moodly_cycle', JSON.stringify(settings));
-  }
-}
-
-/* ════════════════════════════════
-   PERIOD LOGS (manual entries)
-   Each doc = one period event
-   { startDate, endDate, flow, symptoms, notes }
-════════════════════════════════ */
+/* ════════════════ PERIODS ════════════════ */
 export async function loadPeriods() {
   try {
-    const q = query(periodsRef(), orderBy('startDate', 'desc'));
-    const snap = await getDocs(q);
+    const snap = await getDocs(query(periodsRef(), orderBy('startDate', 'desc')));
     return snap.docs.map(d => ({ id: d.id, ...d.data() }));
   } catch (e) {
-    console.warn('[FB] loadPeriods:', e.message);
     try { return JSON.parse(localStorage.getItem('moodly_periods') || '[]'); } catch { return []; }
   }
 }
-
 export async function addPeriod(period) {
   try {
-    const ref = await addDoc(periodsRef(), {
-      ...period,
-      createdAt: serverTimestamp()
-    });
-    _syncOk = true;
-    return ref.id;
+    const ref = await addDoc(periodsRef(), { ...period, createdAt: serverTimestamp() });
+    _syncOk = true; return ref.id;
   } catch (e) {
-    console.warn('[FB] addPeriod:', e.message);
     const local = JSON.parse(localStorage.getItem('moodly_periods') || '[]');
     const withId = { ...period, id: 'local_' + Date.now() };
-    local.unshift(withId);
-    localStorage.setItem('moodly_periods', JSON.stringify(local));
+    local.unshift(withId); localStorage.setItem('moodly_periods', JSON.stringify(local));
     return withId.id;
   }
 }
-
 export async function updatePeriod(id, data) {
   try {
-    if (id.startsWith('local_')) throw new Error('local id');
-    await updateDoc(doc(db, 'users', DEVICE_ID, 'periods', id), data);
-  } catch (e) {
-    console.warn('[FB] updatePeriod:', e.message);
-    const local = JSON.parse(localStorage.getItem('moodly_periods') || '[]');
-    const idx = local.findIndex(p => p.id === id);
-    if (idx >= 0) { local[idx] = { ...local[idx], ...data }; localStorage.setItem('moodly_periods', JSON.stringify(local)); }
-  }
+    if (!id.startsWith('local_')) await updateDoc(doc(db, 'users', DEVICE_ID, 'periods', id), data);
+  } catch {}
+  const local = JSON.parse(localStorage.getItem('moodly_periods') || '[]');
+  const idx = local.findIndex(p => p.id === id);
+  if (idx >= 0) { local[idx] = { ...local[idx], ...data }; localStorage.setItem('moodly_periods', JSON.stringify(local)); }
 }
-
 export async function deletePeriod(id) {
-  try {
-    if (!id.startsWith('local_')) {
-      await deleteDoc(doc(db, 'users', DEVICE_ID, 'periods', id));
-    }
-    const local = JSON.parse(localStorage.getItem('moodly_periods') || '[]');
-    localStorage.setItem('moodly_periods', JSON.stringify(local.filter(p => p.id !== id)));
-  } catch (e) {
-    console.warn('[FB] deletePeriod:', e.message);
-  }
+  try { if (!id.startsWith('local_')) await deleteDoc(doc(db, 'users', DEVICE_ID, 'periods', id)); } catch {}
+  const local = JSON.parse(localStorage.getItem('moodly_periods') || '[]');
+  localStorage.setItem('moodly_periods', JSON.stringify(local.filter(p => p.id !== id)));
 }
-
 export async function deleteAllPeriods() {
   try {
     const snap = await getDocs(periodsRef());
     await Promise.all(snap.docs.map(d => deleteDoc(doc(db, 'users', DEVICE_ID, 'periods', d.id))));
-    localStorage.removeItem('moodly_periods');
-  } catch (e) {
-    console.warn('[FB] deleteAllPeriods:', e.message);
-  }
+  } catch {}
+  localStorage.removeItem('moodly_periods');
 }
 
-/* ════════════════════════════════
-   PERIOD DAILY LOGS  ← BARU
-   Subcollection: periods/{periodId}/days/{date}
-   { date, flow, symptoms: [], notes }
-════════════════════════════════ */
-const periodDaysRef  = (periodId) =>
-  collection(db, 'users', DEVICE_ID, 'periods', periodId, 'days');
-const periodDayDocRef = (periodId, date) =>
-  doc(db, 'users', DEVICE_ID, 'periods', periodId, 'days', date);
+/* ════════════════ PERIOD DAILY LOGS ════════════════ */
+const periodDaysRef   = (pid) => collection(db, 'users', DEVICE_ID, 'periods', pid, 'days');
+const periodDayDocRef = (pid, date) => doc(db, 'users', DEVICE_ID, 'periods', pid, 'days', date);
 
 export async function loadPeriodDays(periodId) {
   if (!periodId) return [];
-  const localKey = `moodly_pdays_${periodId}`;
+  const k = `moodly_pdays_${periodId}`;
   try {
-    if (periodId.startsWith('local_')) {
-      return JSON.parse(localStorage.getItem(localKey) || '[]');
-    }
+    if (periodId.startsWith('local_')) return JSON.parse(localStorage.getItem(k) || '[]');
     const snap = await getDocs(periodDaysRef(periodId));
     const data = snap.docs.map(d => ({ date: d.id, ...d.data() }));
-    // sync to localStorage
-    localStorage.setItem(localKey, JSON.stringify(data));
+    localStorage.setItem(k, JSON.stringify(data));
     return data;
-  } catch (e) {
-    console.warn('[FB] loadPeriodDays:', e.message);
-    try { return JSON.parse(localStorage.getItem(localKey) || '[]'); } catch { return []; }
+  } catch {
+    try { return JSON.parse(localStorage.getItem(k) || '[]'); } catch { return []; }
   }
 }
-
 export async function savePeriodDay(periodId, date, data) {
   if (!periodId || !date) return;
-  const localKey = `moodly_pdays_${periodId}`;
-
-  // localStorage — always update
-  const local = JSON.parse(localStorage.getItem(localKey) || '[]');
+  const k = `moodly_pdays_${periodId}`;
+  const local = JSON.parse(localStorage.getItem(k) || '[]');
   const idx = local.findIndex(d => d.date === date);
   const item = { date, ...data };
   if (idx >= 0) local[idx] = item; else local.push(item);
-  localStorage.setItem(localKey, JSON.stringify(local));
-
-  // Firestore
+  localStorage.setItem(k, JSON.stringify(local));
   try {
-    if (!periodId.startsWith('local_')) {
-      await setDoc(periodDayDocRef(periodId, date), {
-        ...data,
-        updatedAt: serverTimestamp()
-      }, { merge: true });
-    }
-  } catch (e) {
-    console.warn('[FB] savePeriodDay:', e.message);
-  }
+    if (!periodId.startsWith('local_'))
+      await setDoc(periodDayDocRef(periodId, date), { ...data, updatedAt: serverTimestamp() }, { merge: true });
+  } catch {}
 }
 
-/* ════════════════════════════════
-   NEWS CACHE
-════════════════════════════════ */
-export async function loadNewsCache() {
+/* ════════════════ AI PREDICTION CACHE ════════════════ */
+export async function loadAIPredCache() {
   try {
-    const snap = await getDoc(newsCacheRef());
-    if (snap.exists()) return snap.data();
-    return null;
-  } catch (e) {
-    try { return JSON.parse(localStorage.getItem('moodly_nc') || 'null'); } catch { return null; }
-  }
+    const local = JSON.parse(localStorage.getItem('moodly_ai_pred') || 'null');
+    if (local) return local;
+    const snap = await getDoc(aiPredRef());
+    if (snap.exists()) { const d = snap.data(); localStorage.setItem('moodly_ai_pred', JSON.stringify(d)); return d; }
+  } catch {}
+  return null;
+}
+export async function saveAIPredCache(data) {
+  const item = { ...data, savedAt: new Date().toISOString() };
+  localStorage.setItem('moodly_ai_pred', JSON.stringify(item));
+  try { setDoc(aiPredRef(), { ...item, savedAt: serverTimestamp() }).catch(() => {}); } catch {}
 }
 
-export async function saveNewsCache(key, arts) {
-  const data = { key, arts, savedAt: serverTimestamp() };
-  try {
-    await setDoc(newsCacheRef(), data);
-  } catch (e) {
-    localStorage.setItem('moodly_nc', JSON.stringify({ key, arts }));
-  }
-}
-
-/* ════════════════════════════════
-   FOOD RECOMMENDATION CACHE  ← BARU
-   Cache saran makanan AI per fase siklus
-════════════════════════════════ */
-const foodCacheRef = () => doc(db, 'users', DEVICE_ID, 'cache', 'food_rec');
-
+/* ════════════════ FOOD / AI CACHE ════════════════ */
 export async function loadFoodCache() {
   try {
-    // cek localStorage dulu (cepat)
     const local = JSON.parse(localStorage.getItem('moodly_food_cache') || 'null');
     if (local) return local;
-    // fallback Firestore
     const snap = await getDoc(foodCacheRef());
-    if (snap.exists()) {
-      const d = snap.data();
-      localStorage.setItem('moodly_food_cache', JSON.stringify(d));
-      return d;
-    }
-  } catch (e) {
-    console.warn('[FB] loadFoodCache:', e.message);
-  }
+    if (snap.exists()) { const d = snap.data(); localStorage.setItem('moodly_food_cache', JSON.stringify(d)); return d; }
+  } catch {}
   return null;
 }
-
-export async function saveFoodCache(phase, items) {
-  const data = {
-    phase,
-    items,
-    date: new Date().toDateString(),
-    savedAt: new Date().toISOString()
-  };
+export async function saveFoodCache(phase, items, drinks, motivasi) {
+  const data = { phase, items, drinks, motivasi, date: new Date().toDateString(), savedAt: new Date().toISOString() };
   localStorage.setItem('moodly_food_cache', JSON.stringify(data));
-  try {
-    setDoc(foodCacheRef(), {
-      ...data,
-      savedAt: serverTimestamp()
-    }).catch(() => {});
-  } catch (e) {
-    console.warn('[FB] saveFoodCache:', e.message);
-  }
+  try { setDoc(foodCacheRef(), { ...data, savedAt: serverTimestamp() }).catch(() => {}); } catch {}
 }
 
-/* ════════════════════════════════
-   FULL DATA WIPE
-════════════════════════════════ */
+/* ════════════════ NEWS CACHE ════════════════ */
+export async function loadNewsCache() {
+  try { const s = await getDoc(newsCacheRef()); return s.exists() ? s.data() : null; }
+  catch { try { return JSON.parse(localStorage.getItem('moodly_nc') || 'null'); } catch { return null; } }
+}
+export async function saveNewsCache(key, arts) {
+  try { await setDoc(newsCacheRef(), { key, arts, savedAt: serverTimestamp() }); }
+  catch { localStorage.setItem('moodly_nc', JSON.stringify({ key, arts })); }
+}
+
+/* ════════════════ FULL WIPE ════════════════ */
 export async function clearAllData() {
-  await Promise.all([
-    deleteAllEntries(),
-    deleteAllPeriods(),
-    setDoc(userDocRef(), { clearedAt: serverTimestamp() }),
-  ]);
-  localStorage.removeItem('moodly2');
-  localStorage.removeItem('moodly_periods');
-  localStorage.removeItem('moodly_cycle');
-  localStorage.removeItem('moodly_nc');
-  localStorage.removeItem('moodly_food_cache');
-  // clear all period day caches
-  Object.keys(localStorage)
-    .filter(k => k.startsWith('moodly_pdays_'))
+  await Promise.all([deleteAllEntries(), deleteAllPeriods(), setDoc(userDocRef(), { clearedAt: serverTimestamp() })]);
+  ['moodly2','moodly_periods','moodly_cycle','moodly_nc','moodly_food_cache','moodly_ai_pred']
     .forEach(k => localStorage.removeItem(k));
+  Object.keys(localStorage).filter(k => k.startsWith('moodly_pdays_')).forEach(k => localStorage.removeItem(k));
 }
 
-/* ════════════════════════════════
-   JES MEMORY SYSTEM
-   Simpan hal-hal penting yang diceritakan user
-════════════════════════════════ */
-const jesMemoryRef = () => doc(db, 'users', DEVICE_ID, 'cache', 'jes_memory');
-
+/* ════════════════ JES MEMORY ════════════════ */
 export async function loadJesMemory() {
-  try {
-    const local = JSON.parse(localStorage.getItem('moodly_jes_mem') || 'null');
-    if (local) return local;
-  } catch {}
-  try {
-    const snap = await getDoc(jesMemoryRef());
-    if (snap.exists()) {
-      const data = snap.data();
-      localStorage.setItem('moodly_jes_mem', JSON.stringify(data));
-      return data;
-    }
-  } catch {}
+  try { const l = JSON.parse(localStorage.getItem('moodly_jes_mem') || 'null'); if (l) return l; } catch {}
+  try { const s = await getDoc(jesMemRef()); if (s.exists()) { const d = s.data(); localStorage.setItem('moodly_jes_mem', JSON.stringify(d)); return d; } } catch {}
   return null;
 }
-
 export async function saveJesMemory(memory) {
   const data = { ...memory, updatedAt: new Date().toISOString() };
   localStorage.setItem('moodly_jes_mem', JSON.stringify(data));
-  try {
-    setDoc(jesMemoryRef(), { ...data, updatedAt: serverTimestamp() }).catch(() => {});
-  } catch {}
+  try { setDoc(jesMemRef(), { ...data, updatedAt: serverTimestamp() }).catch(() => {}); } catch {}
 }
-
 export async function clearJesMemory() {
   localStorage.removeItem('moodly_jes_mem');
-  try { await setDoc(jesMemoryRef(), { facts: [], updatedAt: serverTimestamp() }); } catch {}
+  try { await setDoc(jesMemRef(), { facts: [], updatedAt: serverTimestamp() }); } catch {}
 }
 
 export { db, DEVICE_ID };
