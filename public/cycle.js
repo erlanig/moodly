@@ -385,7 +385,6 @@ function renderPeriodHistory() {
         ${dayHtml}
       </div>
       <div class="ph-acts">
-        ${!p.endDate ? '' : `<div class="ph-act" onclick="window._editPeriodDay('${p.id}')" title="Log harian">📝</div>`}
         <div class="ph-act" onclick="window._deletePeriod('${p.id}')" title="Hapus">🗑</div>
       </div>
     </div>`;
