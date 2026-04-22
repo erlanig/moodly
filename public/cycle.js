@@ -372,7 +372,6 @@ function renderPeriodHistory() {
             const tip  = `${fmtDateShort(d.date)}: ${d.flow || '—'}${d.symptoms?.length ? ' · ' + d.symptoms.join(', ') : ''}`;
             return `<div class="ph-day-col" title="${tip}">
               <div class="ph-day-lbl">${fmtDateShort(d.date)}</div>
-              <div class="ph-day-dots">${'<div class="fd-mini '+cls+'"></div>'.repeat(dots || 1)}</div>
             </div>`;
           }).join('')}
         </div>` : '';
@@ -385,6 +384,7 @@ function renderPeriodHistory() {
         ${dayHtml}
       </div>
       <div class="ph-acts">
+        ${!p.endDate ? '' : `<div class="ph-act" onclick="window._editPeriodDay('${p.id}')" title="Log harian">📝</div>`}
         <div class="ph-act" onclick="window._deletePeriod('${p.id}')" title="Hapus">🗑</div>
       </div>
     </div>`;
