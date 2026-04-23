@@ -4,15 +4,25 @@
    ═══════════════════════════════════════ */
 
 /* ════════════════
+   AYAT OF THE DAY DATA
+════════════════ */
+const AYAT_LIST = [
+  { arabic: 'وَعَسَىٰ أَن تَكْرَهُوا شَيْئًا وَهُوَ خَيْرٌ لَّكُمْ', id: '"Boleh jadi kamu membenci sesuatu, padahal ia amat baik bagimu."', src: 'QS. Al-Baqarah: 216' },
+  { arabic: 'فَإِنَّ مَعَ الْعُسْرِ يُسْرًا', id: '"Karena sesungguhnya sesudah kesulitan itu ada kemudahan."', src: 'QS. Al-Insyirah: 5' },
+  { arabic: 'لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا', id: '"Allah tidak membebani seseorang melainkan sesuai dengan kesanggupannya."', src: 'QS. Al-Baqarah: 286' },
+  { arabic: 'وَاصْبِرْ وَمَا صَبْرُكَ إِلَّا بِاللَّهِ', id: '"Dan bersabarlah (hai Muhammad) dan tiadalah kesabaranmu itu melainkan dengan pertolongan Allah."', src: 'QS. An-Nahl: 127' },
+  { arabic: 'أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ', id: '"Ingatlah, hanya dengan mengingati Allah-lah hati menjadi tenteram."', src: 'QS. Ar-Ra\'d: 28' },
+  { arabic: 'وَاللَّهُ يَعْلَمُ وَأَنْتُمْ لَا تَعْلَمُونَ', id: '"Allah mengetahui, sedang kamu tidak mengetahui."', src: 'QS. Al-Baqarah: 216' },
+  { arabic: 'إِنَّ اللَّهَ مَعَ الصَّابِرِينَ', id: '"Sesungguhnya Allah beserta orang-orang yang sabar."', src: 'QS. Al-Baqarah: 153' }
+];
+
+/* ════════════════
    KAJIAN ISLAMI
    Curated local content — no API needed
 ════════════════ */
 const KAJIAN_LIST = [
   {
-    id: 'k1',
-    emoji: '🤲',
-    category: 'Ketenangan Hati',
-    title: 'Ketika Hati Terasa Berat',
+    id: 'k1', emoji: '🤲', category: 'Ketenangan Hati', title: 'Ketika Hati Terasa Berat',
     content: `"Ingatlah, hanya dengan mengingat Allah hati menjadi tenteram." (QS. Ar-Ra'd: 28)
 
 Perasaan berat, gelisah, atau sedih adalah bagian dari ujian hidup yang Allah berikan. Kamu tidak sendirian merasakan ini. Bahkan para nabi pun pernah menangis dan merasa lelah.
@@ -20,14 +30,10 @@ Perasaan berat, gelisah, atau sedih adalah bagian dari ujian hidup yang Allah be
 Yang perlu kamu ingat: Allah tidak menguji seorang hamba melebihi kemampuannya. Setiap rasa berat yang kamu rasakan hari ini adalah bukti bahwa Allah percaya kamu mampu melewatinya.
 
 ✦ Coba luangkan 5 menit untuk duduk diam, tarik napas dalam, dan ucapkan: "Hasbunallah wa ni'mal wakiil" — Cukuplah Allah sebagai pelindung kami, dan Dia sebaik-baik pelindung.`,
-    source: 'Dari QS. Ar-Ra\'d: 28',
-    readTime: '3 menit',
+    source: 'Dari QS. Ar-Ra\'d: 28', readTime: '3 menit',
   },
   {
-    id: 'k2',
-    emoji: '🌙',
-    category: 'Doa & Dzikir',
-    title: 'Dzikir Pagi untuk Memulai Hari',
+    id: 'k2', emoji: '🌙', category: 'Doa & Dzikir', title: 'Dzikir Pagi untuk Memulai Hari',
     content: `Memulai pagi dengan dzikir adalah investasi terbaik untuk harimu. Rasulullah SAW mengajarkan beberapa dzikir singkat namun luar biasa manfaatnya:
 
 📿 "Bismillahilladzii laa yadurru ma'asmihi syai'un fil ardhi wa laa fis samaa'i wa huwas samii'ul 'aliim" (3x)
@@ -37,14 +43,10 @@ Yang perlu kamu ingat: Allah tidak menguji seorang hamba melebihi kemampuannya. 
 — Segala puji bagi Allah yang telah menghidupkan kami setelah mematikan kami, dan kepada-Nya kami dikembalikan.
 
 ✦ Konsistensi dzikir pagi lebih baik dari dzikir panjang yang bolong-bolong. 5 menit setiap pagi, cukup.`,
-    source: 'HR. Abu Dawud & Tirmidzi',
-    readTime: '4 menit',
+    source: 'HR. Abu Dawud & Tirmidzi', readTime: '4 menit',
   },
   {
-    id: 'k3',
-    emoji: '💪',
-    category: 'Kesabaran',
-    title: 'Sabar Bukan Berarti Diam',
+    id: 'k3', emoji: '💪', category: 'Kesabaran', title: 'Sabar Bukan Berarti Diam',
     content: `Sabar sering disalahpahami sebagai "mendiamkan semua masalah dan pura-pura baik-baik saja." Padahal sabar yang sesungguhnya jauh lebih aktif dari itu.
 
 "Dan bersabarlah kamu bersama orang-orang yang menyeru Tuhannya..." (QS. Al-Kahfi: 28)
@@ -57,14 +59,10 @@ Sabar artinya:
 Yang tidak termasuk sabar: menekan perasaan, pura-pura kuat, tidak mau minta tolong. Itu bukan sabar — itu menyiksa diri.
 
 ✦ Menangis, curhat, minta bantuan, istirahat — semua itu boleh dan tidak membatalkan kesabaran kamu.`,
-    source: 'QS. Al-Kahfi: 28',
-    readTime: '3 menit',
+    source: 'QS. Al-Kahfi: 28', readTime: '3 menit',
   },
   {
-    id: 'k4',
-    emoji: '🌟',
-    category: 'Rasa Syukur',
-    title: 'Syukur yang Mengubah Perspektif',
+    id: 'k4', emoji: '🌟', category: 'Rasa Syukur', title: 'Syukur yang Mengubah Perspektif',
     content: `"Sesungguhnya jika kamu bersyukur, pasti Kami akan menambah nikmat kepadamu." (QS. Ibrahim: 7)
 
 Syukur bukan tentang pura-pura happy. Syukur adalah kemampuan untuk melihat nikmat di tengah kesulitan — dan itu butuh latihan.
@@ -77,14 +75,10 @@ Coba praktik "3 hal kecil" setiap malam sebelum tidur:
 Otak manusia secara alami lebih mudah merekam hal negatif (negativity bias). Latihan syukur ini melatih otak untuk melihat lebih seimbang.
 
 ✦ "Alhamdulillah" bukan sekadar kata — ia adalah pernyataan bahwa kamu melihat kebaikan Allah di hari ini.`,
-    source: 'QS. Ibrahim: 7',
-    readTime: '4 menit',
+    source: 'QS. Ibrahim: 7', readTime: '4 menit',
   },
   {
-    id: 'k5',
-    emoji: '🤍',
-    category: 'Kesehatan Mental',
-    title: 'Islam dan Kesehatan Mental',
+    id: 'k5', emoji: '🤍', category: 'Kesehatan Mental', title: 'Islam dan Kesehatan Mental',
     content: `Tidak ada dalam Islam yang melarang seseorang mencari bantuan profesional untuk kesehatan mentalnya. Justru sebaliknya.
 
 Imam Al-Ghazali dalam Ihya Ulumuddin menulis panjang tentang penyakit hati (amradul qulub) dan cara penyembuhannya — termasuk muhasabah (introspeksi), mujahadah (perjuangan melawan nafsu), dan muraqabah (kesadaran diri).
@@ -97,14 +91,10 @@ Yang perlu kamu pahami:
 Rasulullah SAW bersabda: "Berobatlah, karena Allah tidak menciptakan penyakit kecuali menciptakan pula obatnya." (HR. Abu Dawud)
 
 ✦ Terapi psikologi, konseling, check-in mood seperti di Moodly — semua termasuk ikhtiar yang dianjurkan Islam.`,
-    source: 'HR. Abu Dawud',
-    readTime: '4 menit',
+    source: 'HR. Abu Dawud', readTime: '4 menit',
   },
   {
-    id: 'k6',
-    emoji: '🌱',
-    category: 'Tawakkal',
-    title: 'Ikat Untamu, Baru Bertawakkal',
+    id: 'k6', emoji: '🌱', category: 'Tawakkal', title: 'Ikat Untamu, Baru Bertawakkal',
     content: `Seorang sahabat bertanya kepada Rasulullah: "Apakah aku ikat untaku atau langsung aku tawakkal?" Rasulullah menjawab: "Ikat, kemudian tawakkal." (HR. Tirmidzi)
 
 Tawakkal yang sesungguhnya bukan pasrah tanpa usaha. Ia adalah kombinasi dari:
@@ -115,8 +105,7 @@ Tawakkal yang sesungguhnya bukan pasrah tanpa usaha. Ia adalah kombinasi dari:
 Kalau kamu lagi merasa stuck — sudah usaha keras tapi belum ada hasilnya — mungkin ini saat yang tepat untuk evaluasi: apakah "ikatan unta"-mu sudah cukup kuat? Atau kamu sudah berusaha dengan baik dan ini memang waktunya untuk bersabar?
 
 ✦ Keduanya valid. Yang tidak valid adalah tawakkal tanpa usaha, atau usaha tanpa tawakkal.`,
-    source: 'HR. Tirmidzi',
-    readTime: '3 menit',
+    source: 'HR. Tirmidzi', readTime: '3 menit',
   },
 ];
 
@@ -124,7 +113,7 @@ Kalau kamu lagi merasa stuck — sudah usaha keras tapi belum ada hasilnya — m
    SURAH DATA (mini — 10 popular surahs)
 ════════════════ */
 const FEATURED_SURAHS = [
-  { no: 1,   name: 'Al-Fatihah',   ayat: 7,  arti: 'Pembuka',          theme: '🌟' },
+  { no: 1,   name: 'Al-Fatihah',  ayat: 7,  arti: 'Pembuka',         theme: '🌟' },
   { no: 2,   name: 'Al-Baqarah',  ayat: 286, arti: 'Sapi Betina',      theme: '📖' },
   { no: 18,  name: 'Al-Kahfi',    ayat: 110, arti: 'Gua',              theme: '🌿' },
   { no: 36,  name: 'Ya-Sin',      ayat: 83,  arti: 'Ya Sin',           theme: '💫' },
@@ -134,6 +123,68 @@ const FEATURED_SURAHS = [
   { no: 78,  name: 'An-Naba',     ayat: 40,  arti: 'Berita Besar',     theme: '📜' },
   { no: 112, name: 'Al-Ikhlas',   ayat: 4,   arti: 'Ikhlas',           theme: '🤍' },
   { no: 114, name: 'An-Nas',      ayat: 6,   arti: 'Manusia',          theme: '🌱' },
+];
+
+/* ════════════════
+   DOA LIST
+════════════════ */
+const DOA_LIST = [
+  {
+    emoji: '🌅', name: 'Bangun Tidur',
+    arabic: 'الْحَمْدُ لِلَّهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورُ',
+    latin: 'Alhamdulillaahil ladzii ahyaanaa ba\'da maa amaatanaa wa ilaihin nusyuur',
+    arti: 'Segala puji bagi Allah yang telah menghidupkan kami setelah mematikan kami, dan kepada-Nya kami dikembalikan.',
+    faedah: 'Dibaca sekali setelah bangun tidur',
+  },
+  {
+    emoji: '😴', name: 'Sebelum Tidur',
+    arabic: 'بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا',
+    latin: 'Bismikallaahumma amuutu wa ahyaa',
+    arti: 'Dengan nama-Mu ya Allah, aku mati dan aku hidup.',
+    faedah: 'Dibaca ketika berbaring hendak tidur',
+  },
+  {
+    emoji: '😰', name: 'Ketika Gelisah',
+    arabic: 'حَسْبُنَا اللَّهُ وَنِعْمَ الْوَكِيلُ',
+    latin: 'Hasbunallah wa ni\'mal wakiil',
+    arti: 'Cukuplah Allah menjadi penolong kami dan Allah adalah sebaik-baik pelindung.',
+    faedah: 'Dibaca saat merasa cemas, takut, atau tertekan. Minimal 3x.',
+  },
+  {
+    emoji: '😔', name: 'Ketika Sedih',
+    arabic: 'اللَّهُمَّ إِنِّي عَبْدُكَ، ابْنُ عَبْدِكَ، ابْنُ أَمَتِكَ',
+    latin: 'Allahumma inni abduka, ibnu abdika, ibnu amatika...',
+    arti: 'Ya Allah, sesungguhnya aku adalah hamba-Mu, putra hamba-Mu (laki-laki), putra hamba-Mu (perempuan)...',
+    faedah: 'Doa Nabi ﷺ saat sedih (HR. Ahmad). Dibaca dengan penuh perasaan.',
+  },
+  {
+    emoji: '📚', name: 'Sebelum Belajar',
+    arabic: 'رَبِّ زِدْنِي عِلْمًا',
+    latin: 'Rabbi zidnii ilmaa',
+    arti: 'Ya Tuhanku, tambahkanlah ilmu kepadaku.',
+    faedah: 'QS. Thaha: 114. Dibaca sebelum belajar atau membaca.',
+  },
+  {
+    emoji: '🍽️', name: 'Sebelum Makan',
+    arabic: 'بِسْمِ اللَّهِ وَعَلَى بَرَكَةِ اللَّهِ',
+    latin: 'Bismillaahi wa \'alaa barakatillaah',
+    arti: 'Dengan nama Allah dan atas berkah Allah.',
+    faedah: 'HR. Abu Dawud. Jika lupa di awal, tambahkan: Bismillaahi awwalahu wa aakhirahu.',
+  },
+  {
+    emoji: '🚪', name: 'Keluar Rumah',
+    arabic: 'بِسْمِ اللَّهِ تَوَكَّلْتُ عَلَى اللَّهِ وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ',
+    latin: 'Bismillaah, tawakkaltu \'alallaah, wa laa hawla wa laa quwwata illaa billaah',
+    arti: 'Dengan nama Allah, aku bertawakkal kepada Allah, tiada daya dan kekuatan kecuali dengan pertolongan Allah.',
+    faedah: 'HR. Abu Dawud & Tirmidzi. Dibaca saat keluar rumah.',
+  },
+  {
+    emoji: '🙏', name: 'Istighfar',
+    arabic: 'أَسْتَغْفِرُ اللَّهَ الْعَظِيمَ الَّذِي لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ وَأَتُوبُ إِلَيْهِ',
+    latin: 'Astaghfirullaahal \'adziim alladzii laa ilaaha illaa huwal hayyul qayyuumu wa atuubu ilaih',
+    arti: 'Aku memohon ampun kepada Allah yang Maha Agung, yang tiada tuhan selain Dia, Yang Maha Hidup lagi terus-menerus mengurus makhluk-Nya, dan aku bertobat kepada-Nya.',
+    faedah: 'Istighfar penghapus dosa. Dibaca minimal 3x setiap hari.',
+  },
 ];
 
 /* ════════════════
@@ -205,36 +256,39 @@ function renderSafePlace() {
   // Get current greeting
   const h = new Date().getHours();
   const greeting = h < 12 ? 'Selamat Pagi' : h < 15 ? 'Selamat Siang' : h < 18 ? 'Selamat Sore' : 'Selamat Malam';
-  const arabGreeting = h < 12 ? 'صباح الخير' : 'مساء الخير';
+  
+  // Dapatkan ayat sesuai hari ini (rotasi otomatis menggunakan modulo)
+  const todayAyat = AYAT_LIST[new Date().getDay() % AYAT_LIST.length];
 
   screen.innerHTML = `
-    <!-- TOP BAR -->
-    <div class="tb">
-      <div class="tb-logo">
-        <div class="tb-dot" style="background:linear-gradient(135deg,#2d8a5e,#1a5c40)">
-          <span style="font-size:18px">🕌</span>
+    <div class="tb" style="display: flex; justify-content: flex-end; padding: 16px 0;">
+      <div class="sync-dot" style="width:8px;height:8px;border-radius:50%;background:#1db954;flex-shrink:0" title="Rohani Online"></div>
+    </div>
+
+    <div class="sp-hero" style="text-align: left; margin-bottom: 32px; padding-top: 8px;">
+      <div style="font-size: 12px; font-weight: 800; color: #8FA89B; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px;">
+        ROHANI & KETENANGAN
+      </div>
+      <div style="font-size: 44px; font-weight: 900; color: #153223; line-height: 1.05; letter-spacing: -1px; display: flex; align-items: flex-end; gap: 8px;">
+        <div>Safe<br>Place</div>
+        <span style="font-size: 34px; margin-bottom: 4px;">🕌</span>
+      </div>
+      <div style="margin-top: 16px; font-size: 15px; color: var(--muted);">${greeting}, hati yang tenang dimulai dari sini 🤍</div>
+
+      <div class="sp-ayat-box" id="sp-ayat-box" style="margin-top: 24px; padding: 20px; background: #f8faf9; border-radius: 16px; border: 1px solid #e2e8e4;">
+        <div class="sp-ayat-ar" style="font-size: 26px; font-weight: bold; text-align: right; margin-bottom: 12px; color: #153223; line-height: 1.6; font-family: 'Amiri', 'Scheherazade New', serif;">
+          ${todayAyat.arabic}
         </div>
-        <span class="tb-name">Safe <b>Place</b></span>
-      </div>
-      <div class="sync-dot" style="width:8px;height:8px;border-radius:50%;background:#1db954;flex-shrink:0" title="Rohani"></div>
-    </div>
-
-    <!-- HERO ROHANI -->
-    <div class="sp-hero">
-      <div class="sp-arabic">${arabGreeting}</div>
-      <div class="sp-greet">${greeting}</div>
-      <div class="sp-tagline">Hati yang tenang dimulai dari sini 🤍</div>
-
-      <!-- Ayat of the Day -->
-      <div class="sp-ayat-box" id="sp-ayat-box">
-        <div class="sp-ayat-ar">وَعَسَىٰ أَن تَكْرَهُوا شَيْئًا وَهُوَ خَيْرٌ لَّكُمْ</div>
-        <div class="sp-ayat-id">"Boleh jadi kamu membenci sesuatu, padahal ia amat baik bagimu"</div>
-        <div class="sp-ayat-src">QS. Al-Baqarah: 216</div>
+        <div class="sp-ayat-id" style="font-size: 14px; font-style: italic; color: #4a5c52; margin-bottom: 8px; line-height: 1.5;">
+          ${todayAyat.id}
+        </div>
+        <div class="sp-ayat-src" style="font-size: 12px; font-weight: 700; color: #8FA89B;">
+          ${todayAyat.src}
+        </div>
       </div>
     </div>
 
-    <!-- SECTION: JADWAL SHOLAT -->
-    <div class="slbl">🕐 Jadwal Sholat</div>
+    <div class="slbl" style="font-weight: 800; color: #153223; font-size: 18px; margin-top: 32px;">🕐 Jadwal Sholat</div>
     <div class="sp-prayer-card" id="sp-prayer-card">
       <div class="sp-prayer-loading">
         <div class="sp-prayer-dots">
@@ -244,8 +298,7 @@ function renderSafePlace() {
       </div>
     </div>
 
-    <!-- SECTION: AL-QURAN -->
-    <div class="slbl">📖 Al-Quran</div>
+    <div class="slbl" style="font-weight: 800; color: #153223; font-size: 18px; margin-top: 32px;">📖 Al-Quran</div>
     <div class="sp-quran-card">
       <div class="sp-quran-header">
         <div>
@@ -268,8 +321,7 @@ function renderSafePlace() {
       </div>
     </div>
 
-    <!-- SECTION: KAJIAN -->
-    <div class="slbl">💡 Kajian Islami</div>
+    <div class="slbl" style="font-weight: 800; color: #153223; font-size: 18px; margin-top: 32px;">💡 Kajian Islami</div>
     <div class="sp-kajian-list">
       ${KAJIAN_LIST.map(k => `
         <div class="sp-kajian-card" onclick="window._openKajian('${k.id}')">
@@ -286,8 +338,7 @@ function renderSafePlace() {
       `).join('')}
     </div>
 
-    <!-- SECTION: DOA HARIAN -->
-    <div class="slbl">🤲 Doa Harian</div>
+    <div class="slbl" style="font-weight: 800; color: #153223; font-size: 18px; margin-top: 32px;">🤲 Doa Harian</div>
     <div class="sp-doa-grid">
       ${DOA_LIST.map((d,i) => `
         <button class="sp-doa-btn" onclick="window._showDoa(${i})">
@@ -297,8 +348,7 @@ function renderSafePlace() {
       `).join('')}
     </div>
 
-    <!-- Spacer -->
-    <div style="height:8px"></div>
+    <div style="height:32px"></div>
   `;
 
   // Load prayer times
@@ -395,7 +445,6 @@ function renderPrayerTimes(timings, cityName) {
       ${cityName}
     </div>
 
-    <!-- Next prayer highlight -->
     <div class="sp-next-prayer">
       <div>
         <div class="sp-next-label">Sholat Berikutnya</div>
@@ -405,7 +454,6 @@ function renderPrayerTimes(timings, cityName) {
       <div class="sp-next-countdown">${countdownStr}</div>
     </div>
 
-    <!-- All prayers -->
     <div class="sp-prayer-row">
       ${prayers.map(p => {
         const isPast = p.minutes < nowMinutes;
@@ -522,68 +570,6 @@ export function openKajian(id) {
 
 window._openKajian  = openKajian;
 window._closeKajian = () => document.getElementById('kajian-modal')?.classList.remove('show');
-
-/* ════════════════
-   DOA LIST
-════════════════ */
-const DOA_LIST = [
-  {
-    emoji: '🌅', name: 'Bangun Tidur',
-    arabic: 'الْحَمْدُ لِلَّهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورُ',
-    latin: 'Alhamdulillaahil ladzii ahyaanaa ba\'da maa amaatanaa wa ilaihin nusyuur',
-    arti: 'Segala puji bagi Allah yang telah menghidupkan kami setelah mematikan kami, dan kepada-Nya kami dikembalikan.',
-    faedah: 'Dibaca sekali setelah bangun tidur',
-  },
-  {
-    emoji: '😴', name: 'Sebelum Tidur',
-    arabic: 'بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا',
-    latin: 'Bismikallaahumma amuutu wa ahyaa',
-    arti: 'Dengan nama-Mu ya Allah, aku mati dan aku hidup.',
-    faedah: 'Dibaca ketika berbaring hendak tidur',
-  },
-  {
-    emoji: '😰', name: 'Ketika Gelisah',
-    arabic: 'حَسْبُنَا اللَّهُ وَنِعْمَ الْوَكِيلُ',
-    latin: 'Hasbunallah wa ni\'mal wakiil',
-    arti: 'Cukuplah Allah menjadi penolong kami dan Allah adalah sebaik-baik pelindung.',
-    faedah: 'Dibaca saat merasa cemas, takut, atau tertekan. Minimal 3x.',
-  },
-  {
-    emoji: '😔', name: 'Ketika Sedih',
-    arabic: 'اللَّهُمَّ إِنِّي عَبْدُكَ، ابْنُ عَبْدِكَ، ابْنُ أَمَتِكَ',
-    latin: 'Allahumma inni abduka, ibnu abdika, ibnu amatika...',
-    arti: 'Ya Allah, sesungguhnya aku adalah hamba-Mu, putra hamba-Mu (laki-laki), putra hamba-Mu (perempuan)...',
-    faedah: 'Doa Nabi ﷺ saat sedih (HR. Ahmad). Dibaca dengan penuh perasaan.',
-  },
-  {
-    emoji: '📚', name: 'Sebelum Belajar',
-    arabic: 'رَبِّ زِدْنِي عِلْمًا',
-    latin: 'Rabbi zidnii ilmaa',
-    arti: 'Ya Tuhanku, tambahkanlah ilmu kepadaku.',
-    faedah: 'QS. Thaha: 114. Dibaca sebelum belajar atau membaca.',
-  },
-  {
-    emoji: '🍽️', name: 'Sebelum Makan',
-    arabic: 'بِسْمِ اللَّهِ وَعَلَى بَرَكَةِ اللَّهِ',
-    latin: 'Bismillaahi wa \'alaa barakatillaah',
-    arti: 'Dengan nama Allah dan atas berkah Allah.',
-    faedah: 'HR. Abu Dawud. Jika lupa di awal, tambahkan: Bismillaahi awwalahu wa aakhirahu.',
-  },
-  {
-    emoji: '🚪', name: 'Keluar Rumah',
-    arabic: 'بِسْمِ اللَّهِ تَوَكَّلْتُ عَلَى اللَّهِ وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ',
-    latin: 'Bismillaah, tawakkaltu \'alallaah, wa laa hawla wa laa quwwata illaa billaah',
-    arti: 'Dengan nama Allah, aku bertawakkal kepada Allah, tiada daya dan kekuatan kecuali dengan pertolongan Allah.',
-    faedah: 'HR. Abu Dawud & Tirmidzi. Dibaca saat keluar rumah.',
-  },
-  {
-    emoji: '🙏', name: 'Istighfar',
-    arabic: 'أَسْتَغْفِرُ اللَّهَ الْعَظِيمَ الَّذِي لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ وَأَتُوبُ إِلَيْهِ',
-    latin: 'Astaghfirullaahal \'adziim alladzii laa ilaaha illaa huwal hayyul qayyuumu wa atuubu ilaih',
-    arti: 'Aku memohon ampun kepada Allah yang Maha Agung, yang tiada tuhan selain Dia, Yang Maha Hidup lagi terus-menerus mengurus makhluk-Nya, dan aku bertobat kepada-Nya.',
-    faedah: 'Istighfar penghapus dosa. Dibaca minimal 3x setiap hari.',
-  },
-];
 
 export function showDoa(idx) {
   const doa   = DOA_LIST[idx];
