@@ -145,11 +145,16 @@ export async function submitCheckin(entries) {
   const s = document.getElementById('success');
   s.classList.add('show');
   setTimeout(() => {
+    s.classList.remove('show');
+    if (onSubmitCallback) onSubmitCallback(entry);
+  }, 2100);
+  setTimeout(() => {
     const shareBtn = document.getElementById('post-checkin-share');
     if (shareBtn) {
       shareBtn.style.display = 'flex';
     }
   }, 2200); // muncul setelah success toast hilang
+
 
   // Tunjukkan tombol chat ke AI setelah check-in
   const chatBtn = document.getElementById('post-checkin-chat');
