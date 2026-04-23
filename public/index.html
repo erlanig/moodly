@@ -146,6 +146,9 @@
     <div class="step-hint">Seberapa besar dampaknya hari ini?</div>
     <div class="int-row" id="int-row"></div>
     <button class="cta" id="btn3" disabled onclick="window._submitCheckin()">Selesai ✓</button>
+    <button id="post-checkin-share" onclick="window._openStoryFromCheckin()">
+      📸 Bagikan ke Story
+    </button>
     <button class="cta out" onclick="window._goStep(2)">← Kembali</button>
   </div>
 </div>
@@ -373,7 +376,7 @@
 
 </div><!-- /app -->
 
-<section class="screen" id="safeplace"></section>
+
 
 <!-- ═══════════════ BOTTOM NAV ═══════════════ -->
 <nav id="nav">
@@ -409,6 +412,13 @@
       <path d="M10 10h6M10 14h6M10 18h4"/>
     </svg>
     <span class="ni-lbl">Artikel</span>
+  </button>
+  <button class="ni ni-safeplace" id="ni-safeplace" onclick="window._showScreen('safeplace')">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8aab97" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+      <!-- Moon inside bubble: sesuaikan jika mau ikon lain -->
+    </svg>
+    <span class="ni-lbl">Rohani</span>
   </button>
 </nav>
 
@@ -497,6 +507,91 @@
 
 <!-- ═══════════════ SCRIPTS (ES Modules) ═══════════════ -->
 <script type="module" src="app.js"></script>
+
+<section class="screen" id="safeplace">
+</section>
+
+<div id="stories-modal" onclick="if(event.target===this)window._closeStories()">
+  <div class="stories-box">
+    <div class="stories-handle"></div>
+    <div class="stories-header">
+      <span class="stories-title">📸 Bagikan Mood Story</span>
+      <button class="stories-close" onclick="window._closeStories()">✕</button>
+    </div>
+
+    <!-- Preview canvas -->
+    <div id="story-canvas"></div>
+
+    <!-- Theme picker -->
+    <div id="story-themes"></div>
+
+    <!-- Actions -->
+    <div class="stories-actions">
+      <button class="stories-btn stories-btn-dl" onclick="window._downloadStory()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Simpan
+      </button>
+      <button class="stories-btn stories-btn-sh" onclick="window._shareStory()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Share Story
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<div id="surah-modal" onclick="if(event.target===this)window._closeSurah()">
+  <div class="surah-box">
+    <div class="modal-handle"></div>
+    <div class="surah-header">
+      <div class="surah-header-title" id="surah-modal-title">Memuat...</div>
+      <button class="modal-close-btn" onclick="window._closeSurah()">✕</button>
+    </div>
+    <div id="surah-modal-content"></div>
+  </div>
+</div>
+
+<div id="kajian-modal" onclick="if(event.target===this)window._closeKajian()">
+  <div class="kajian-box">
+    <div class="modal-handle"></div>
+    <div class="kajian-header">
+      <div class="kajian-h-top">
+        <span id="kajian-modal-emoji" class="kjh-emoji">📖</span>
+        <div class="kjh-meta">
+          <div id="kajian-modal-cat" class="kjh-cat">Kategori</div>
+          <div id="kajian-modal-title" class="kjh-title">Judul Kajian</div>
+        </div>
+        <button class="modal-close-btn" onclick="window._closeKajian()">✕</button>
+      </div>
+      <div class="kjh-info">
+        <span id="kajian-modal-src">Sumber</span>
+        <span>·</span>
+        <span id="kajian-modal-time">3 menit</span>
+      </div>
+    </div>
+    <div id="kajian-modal-content"></div>
+  </div>
+</div>
+
+<div id="doa-modal" onclick="if(event.target===this)window._closeDoa()">
+  <div class="doa-box">
+    <div class="modal-handle"></div>
+    <div class="doa-header">
+      <span id="doa-modal-emoji">🤲</span>
+      <div class="doa-header-info">
+        <div id="doa-modal-name">Nama Doa</div>
+      </div>
+      <button class="modal-close-btn" onclick="window._closeDoa()">✕</button>
+    </div>
+    <div class="doa-content">
+      <div class="doa-ar" id="doa-modal-ar"></div>
+      <div class="doa-lat" id="doa-modal-lat"></div>
+      <div class="doa-sep"></div>
+      <div class="doa-arti" id="doa-modal-arti"></div>
+      <div class="doa-faedah" id="doa-modal-faedah"></div>
+    </div>
+  </div>
+</div>
 
 </body>
 
