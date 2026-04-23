@@ -1366,3 +1366,538 @@ html, body {
 .ph-acts { display: flex; gap: 6px; flex-shrink: 0; margin-left: auto; }
 .ph-act  { font-size: 14px; cursor: pointer; padding: 2px; border-radius: 6px; transition: background .12s; }
 .ph-act:hover { background: var(--bg); }
+
+/* ════════════════════════════════════════
+   STORIES MODAL
+════════════════════════════════════════ */
+#stories-modal {
+  position: fixed; inset: 0; z-index: 9000;
+  background: rgba(0,0,0,.7);
+  backdrop-filter: blur(8px);
+  display: flex; align-items: flex-end;
+  opacity: 0; pointer-events: none;
+  transition: opacity .25s;
+}
+#stories-modal.show {
+  opacity: 1; pointer-events: all;
+}
+.stories-box {
+  width: 100%; max-width: 430px; margin: 0 auto;
+  background: #0f1923;
+  border-radius: 24px 24px 0 0;
+  padding: 16px 16px max(env(safe-area-inset-bottom),24px);
+  transform: translateY(100%);
+  transition: transform .3s cubic-bezier(.32,1,.55,1);
+}
+#stories-modal.show .stories-box {
+  transform: none;
+}
+.stories-handle {
+  width: 36px; height: 4px; border-radius: 2px;
+  background: #2a3441; margin: 0 auto 16px;
+}
+.stories-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px;
+}
+.stories-title { font-size: 16px; font-weight: 800; color: #e6edf3; }
+.stories-close {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: #1c2330; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; color: #7d8590;
+}
+ 
+/* Story canvas preview */
+#story-canvas {
+  width: 100%; border-radius: 16px; overflow: hidden;
+  margin-bottom: 14px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.4);
+}
+.story-frame {
+  width: 100%; aspect-ratio: 9/16; max-height: 420px;
+  position: relative; overflow: hidden;
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: center;
+  padding: 24px 20px;
+  box-sizing: border-box;
+}
+.story-blob {
+  position: absolute; border-radius: 50%;
+  pointer-events: none;
+}
+.story-blob-1 {
+  width: 200px; height: 200px;
+  top: -60px; right: -60px;
+}
+.story-blob-2 {
+  width: 150px; height: 150px;
+  bottom: -40px; left: -40px;
+}
+.story-header {
+  position: absolute; top: 20px; left: 20px; right: 20px;
+  display: flex; justify-content: space-between; align-items: flex-start;
+  font-size: 10px; font-weight: 600; letter-spacing: .04em;
+}
+.story-app { font-size: 11px; font-weight: 800; }
+.story-time { font-size: 9px; }
+.story-center {
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; z-index: 1; gap: 10px;
+}
+.story-em-wrap {
+  width: 80px; height: 80px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+.story-em { font-size: 44px; line-height: 1; }
+.story-mood-name {
+  font-size: 26px; font-weight: 900;
+  letter-spacing: -.03em; line-height: 1;
+}
+.story-quote {
+  font-size: 13px; line-height: 1.5; max-width: 240px;
+  font-style: italic; font-weight: 500;
+}
+.story-int-wrap {
+  position: absolute; bottom: 90px; left: 20px; right: 20px;
+  z-index: 1;
+}
+.story-int-label {
+  font-size: 9px; font-weight: 600; letter-spacing: .06em;
+  text-transform: uppercase; margin-bottom: 5px;
+}
+.story-int-track {
+  height: 4px; border-radius: 2px; overflow: hidden;
+}
+.story-int-fill {
+  height: 100%; border-radius: 2px;
+  transition: width .4s ease;
+}
+.story-causes {
+  position: absolute; bottom: 55px; left: 20px; right: 20px;
+  display: flex; flex-wrap: wrap; gap: 5px; z-index: 1;
+  justify-content: center;
+}
+.story-chip {
+  font-size: 10px; font-weight: 600;
+  padding: 3px 10px; border-radius: 100px;
+  border: 1px solid; white-space: nowrap;
+}
+.story-particles {
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 100%; pointer-events: none; overflow: hidden;
+}
+.story-particles span {
+  position: absolute; font-size: 12px;
+  animation: sp-float 6s ease-in-out infinite alternate;
+}
+@keyframes sp-float {
+  0%  { transform: translateY(0) rotate(0deg); }
+  100%{ transform: translateY(-20px) rotate(15deg); }
+}
+.story-footer {
+  position: absolute; bottom: 16px;
+  font-size: 9px; font-weight: 600;
+  letter-spacing: .12em; text-transform: uppercase;
+}
+ 
+/* Theme selector */
+#story-themes {
+  display: flex; gap: 8px; overflow-x: auto;
+  padding-bottom: 4px; margin-bottom: 12px;
+  scrollbar-width: none;
+}
+#story-themes::-webkit-scrollbar { display: none; }
+.story-theme-btn {
+  flex-shrink: 0; width: 48px; height: 48px;
+  border-radius: 12px; border: 2px solid transparent;
+  cursor: pointer; display: flex; align-items: flex-end;
+  justify-content: center; padding-bottom: 6px;
+  transition: border-color .15s, transform .15s;
+  position: relative; overflow: hidden;
+}
+.story-theme-btn.on {
+  border-color: #fff;
+  transform: scale(1.08);
+  box-shadow: 0 0 0 2px rgba(255,255,255,.3);
+}
+.story-theme-name {
+  font-size: 8px; font-weight: 700; color: rgba(255,255,255,.8);
+  text-shadow: 0 1px 4px rgba(0,0,0,.6);
+}
+ 
+/* Action buttons */
+.stories-actions {
+  display: flex; gap: 8px;
+}
+.stories-btn {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 13px; border-radius: 14px; border: none;
+  font-family: inherit; font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: transform .12s, opacity .15s;
+}
+.stories-btn:active { transform: scale(.97); opacity: .9; }
+.stories-btn-dl  { background: #1c2330; color: #58a6ff; border: 1px solid #2a3441; }
+.stories-btn-sh  { background: var(--grad); color: #fff; box-shadow: 0 4px 16px rgba(29,185,84,.3); }
+ 
+/* Post-checkin share button (appears after submit) */
+#post-checkin-share {
+  display: none;
+  width: 100%; padding: 13px; border-radius: var(--rs);
+  background: #f0fff4; border: 1.5px solid var(--border);
+  font-family: inherit; font-size: 13px; font-weight: 700;
+  color: var(--g2); cursor: pointer; align-items: center;
+  justify-content: center; gap: 8px; margin-top: 4px;
+  transition: background .15s;
+}
+#post-checkin-share:hover { background: var(--gl); }
+ 
+/* ════════════════════════════════════════
+   SAFE PLACE SCREEN
+════════════════════════════════════════ */
+/* Hero */
+.sp-hero {
+  background: linear-gradient(160deg, #0a3d1f 0%, #1a6b3a 60%, #0d8c3e 100%);
+  border-radius: var(--r); padding: 20px;
+  position: relative; overflow: hidden;
+  box-shadow: 0 6px 28px rgba(13,140,62,.2);
+}
+.sp-arabic {
+  font-size: 22px; font-weight: 700; color: rgba(255,255,255,.4);
+  font-family: 'Scheherazade New', serif, sans-serif;
+  margin-bottom: 2px;
+}
+.sp-greet {
+  font-size: 20px; font-weight: 800; color: #fff;
+  letter-spacing: -.02em; margin-bottom: 2px;
+}
+.sp-tagline { font-size: 12px; color: rgba(255,255,255,.7); margin-bottom: 14px; }
+.sp-ayat-box {
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 12px; padding: 13px;
+}
+.sp-ayat-ar {
+  font-size: 18px; text-align: right; direction: rtl;
+  color: #fff; font-weight: 500; line-height: 1.8; margin-bottom: 8px;
+}
+.sp-ayat-id { font-size: 12px; color: rgba(255,255,255,.85); line-height: 1.55; font-style: italic; margin-bottom: 5px; }
+.sp-ayat-src { font-size: 10px; color: rgba(255,255,255,.5); font-weight: 600; letter-spacing: .04em; }
+ 
+/* Prayer Times Card */
+.sp-prayer-card {
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: var(--rs); padding: 14px;
+  box-shadow: var(--sh);
+}
+.sp-prayer-loading {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 16px 0;
+}
+.sp-prayer-dots { display: flex; gap: 4px; }
+.sp-prayer-dots span {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--g1);
+  animation: sp-bounce .9s ease-in-out infinite;
+}
+.sp-prayer-dots span:nth-child(2) { animation-delay: .15s; }
+.sp-prayer-dots span:nth-child(3) { animation-delay: .3s; }
+@keyframes sp-bounce {
+  0%,80%,100% { transform: scale(.5); opacity: .3; }
+  40% { transform: scale(1); opacity: 1; }
+}
+.sp-prayer-city {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; color: var(--muted); margin-bottom: 10px;
+}
+.sp-next-prayer {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--gl); border-radius: 12px;
+  padding: 12px 14px; margin-bottom: 12px;
+}
+.sp-next-label { font-size: 9px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 2px; }
+.sp-next-name  { font-size: 16px; font-weight: 800; color: var(--text); }
+.sp-next-time  { font-size: 12px; color: var(--text2); font-weight: 600; }
+.sp-next-countdown {
+  font-size: 13px; font-weight: 800; color: var(--g2);
+  background: rgba(29,185,84,.12); border: 1.5px solid var(--border);
+  border-radius: 100px; padding: 5px 12px; white-space: nowrap;
+}
+.sp-prayer-row {
+  display: grid; grid-template-columns: repeat(5,1fr); gap: 4px;
+}
+.sp-prayer-item {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 8px 4px; border-radius: 10px;
+  background: var(--bg); position: relative;
+  transition: background .15s;
+}
+.sp-prayer-item.sp-prayer-next {
+  background: var(--grad); box-shadow: 0 3px 12px rgba(29,185,84,.25);
+}
+.sp-prayer-item.sp-prayer-next .sp-pi-name,
+.sp-prayer-item.sp-prayer-next .sp-pi-time { color: #fff !important; }
+.sp-prayer-item.sp-prayer-past { opacity: .55; }
+.sp-pi-em   { font-size: 14px; }
+.sp-pi-name { font-size: 9px; font-weight: 700; color: var(--text2); }
+.sp-pi-time { font-size: 10px; font-weight: 800; color: var(--text); }
+.sp-pi-done {
+  position: absolute; top: 4px; right: 4px;
+  font-size: 8px; color: var(--g1);
+}
+ 
+/* Quran Card */
+.sp-quran-card {
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: var(--rs); padding: 14px;
+  box-shadow: var(--sh);
+}
+.sp-quran-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.sp-quran-title { font-size: 14px; font-weight: 800; color: var(--text); margin-bottom: 2px; }
+.sp-quran-sub   { font-size: 11px; color: var(--muted); }
+.sp-quran-badge {
+  font-size: 10px; font-weight: 700;
+  background: var(--gl); color: var(--g2);
+  padding: 4px 10px; border-radius: 100px;
+  border: 1.5px solid var(--border);
+}
+.sp-surah-grid {
+  display: flex; flex-direction: column; gap: 4px;
+}
+.sp-surah-btn {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px; border-radius: 10px;
+  background: var(--bg); border: 1.5px solid var(--border);
+  cursor: pointer; font-family: inherit; text-align: left;
+  transition: background .15s, border-color .15s;
+}
+.sp-surah-btn:active { background: var(--gl); border-color: var(--g1); }
+.sp-surah-no {
+  width: 26px; height: 26px; border-radius: 7px;
+  background: var(--gl); color: var(--g2);
+  font-size: 11px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.sp-surah-info { flex: 1; }
+.sp-surah-name { font-size: 13px; font-weight: 700; color: var(--text); }
+.sp-surah-arti { font-size: 10px; color: var(--muted); }
+.sp-surah-em   { font-size: 16px; }
+ 
+/* Kajian List */
+.sp-kajian-list {
+  display: flex; flex-direction: column; gap: 8px;
+}
+.sp-kajian-card {
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: var(--rs); padding: 12px 13px;
+  cursor: pointer; box-shadow: var(--sh);
+  transition: background .15s, border-color .15s;
+}
+.sp-kajian-card:active { background: var(--gl); border-color: var(--g1); }
+.sp-kajian-top {
+  display: flex; align-items: flex-start; gap: 10px;
+  margin-bottom: 6px;
+}
+.sp-kajian-em   { font-size: 22px; flex-shrink: 0; line-height: 1; }
+.sp-kajian-meta { flex: 1; }
+.sp-kajian-cat  { font-size: 9px; font-weight: 700; color: var(--g1); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 2px; }
+.sp-kajian-title{ font-size: 13px; font-weight: 700; color: var(--text); line-height: 1.35; }
+.sp-kajian-time { font-size: 10px; color: var(--muted); white-space: nowrap; margin-top: 2px; }
+.sp-kajian-src  { font-size: 10px; color: var(--muted); }
+ 
+/* Doa Grid */
+.sp-doa-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px;
+}
+.sp-doa-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 11px 6px; border-radius: 12px;
+  background: var(--white); border: 1.5px solid var(--border);
+  cursor: pointer; font-family: inherit;
+  font-size: 10px; font-weight: 600; color: var(--text2);
+  box-shadow: var(--sh); text-align: center;
+  transition: background .15s;
+}
+.sp-doa-btn:active { background: var(--gl); }
+.sp-doa-btn span:first-child { font-size: 20px; }
+ 
+/* ════════════════════════════════════════
+   SURAH READER MODAL
+════════════════════════════════════════ */
+#surah-modal, #kajian-modal, #doa-modal {
+  position: fixed; inset: 0; z-index: 9100;
+  background: rgba(0,0,0,.6);
+  backdrop-filter: blur(8px);
+  display: flex; align-items: flex-end;
+  opacity: 0; pointer-events: none;
+  transition: opacity .25s;
+}
+#surah-modal.show, #kajian-modal.show, #doa-modal.show {
+  opacity: 1; pointer-events: all;
+}
+.surah-box, .kajian-box, .doa-box {
+  width: 100%; max-width: 430px; margin: 0 auto;
+  background: var(--bg);
+  border-radius: 24px 24px 0 0;
+  max-height: 88dvh;
+  display: flex; flex-direction: column;
+  transform: translateY(100%);
+  transition: transform .3s cubic-bezier(.32,1,.55,1);
+}
+#surah-modal.show .surah-box,
+#kajian-modal.show .kajian-box,
+#doa-modal.show .doa-box {
+  transform: none;
+}
+ 
+/* Handle */
+.modal-handle {
+  width: 36px; height: 4px; border-radius: 2px;
+  background: var(--border); margin: 12px auto 0;
+  flex-shrink: 0;
+}
+ 
+/* Surah Header */
+.surah-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px 10px; flex-shrink: 0;
+  border-bottom: 1.5px solid var(--border);
+}
+.surah-header-title {
+  flex: 1; font-size: 14px; font-weight: 800; color: var(--text);
+}
+.modal-close-btn {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--gl); border: none; cursor: pointer;
+  font-size: 16px; display: flex; align-items: center; justify-content: center;
+}
+ 
+/* Surah content */
+#surah-modal-content {
+  flex: 1; overflow-y: auto; padding: 16px;
+}
+.surah-meta-row {
+  display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px;
+}
+.surah-meta-badge {
+  font-size: 10px; font-weight: 700;
+  background: var(--gl); color: var(--g2);
+  padding: 3px 9px; border-radius: 100px;
+  border: 1px solid var(--border);
+}
+.surah-bismillah {
+  font-size: 22px; text-align: center; direction: rtl;
+  color: var(--g2); font-weight: 600;
+  padding: 16px 0; border-bottom: 1px solid var(--border);
+  margin-bottom: 12px; line-height: 1.8;
+}
+.surah-ayah {
+  padding: 12px 0; border-bottom: 1px solid var(--border);
+}
+.surah-ayah:last-child { border-bottom: none; }
+.surah-ar {
+  font-size: 20px; text-align: right; direction: rtl;
+  color: var(--text); font-weight: 500; line-height: 1.8;
+  margin-bottom: 8px;
+}
+.surah-num {
+  font-size: 14px; color: var(--g1);
+}
+.surah-id {
+  font-size: 12px; color: var(--text2); line-height: 1.6;
+}
+ 
+/* ════════════════════════════════════════
+   KAJIAN MODAL
+════════════════════════════════════════ */
+.kajian-header {
+  padding: 14px 16px 12px; flex-shrink: 0;
+  border-bottom: 1.5px solid var(--border);
+}
+.kajian-h-top {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+}
+.kjh-emoji { font-size: 28px; }
+.kjh-meta  { flex: 1; }
+.kjh-cat   { font-size: 9px; font-weight: 700; color: var(--g1); text-transform: uppercase; letter-spacing: .06em; }
+.kjh-title { font-size: 15px; font-weight: 800; color: var(--text); line-height: 1.3; }
+.kjh-info  { display: flex; gap: 8px; font-size: 10px; color: var(--muted); }
+ 
+#kajian-modal-content {
+  flex: 1; overflow-y: auto; padding: 16px;
+}
+.kjm-p { font-size: 13px; color: var(--text2); line-height: 1.65; margin-bottom: 2px; }
+.kjm-quote {
+  font-size: 14px; font-weight: 700; color: var(--g2); font-style: italic;
+  padding: 10px 14px; background: var(--gl);
+  border-left: 3px solid var(--g1); border-radius: 0 8px 8px 0;
+  line-height: 1.5; margin: 4px 0;
+}
+.kjm-arrow {
+  font-size: 12px; color: var(--text2); padding: 2px 0 2px 8px;
+  border-left: 2px solid var(--border);
+}
+.kjm-dzikir {
+  font-size: 12px; color: var(--g2); padding: 6px 10px;
+  background: var(--gl); border-radius: 8px; line-height: 1.6;
+  margin: 2px 0;
+}
+.kjm-tip {
+  font-size: 12px; font-weight: 700; color: var(--g2);
+  padding: 8px 12px; background: var(--gl);
+  border-radius: 10px; border: 1px solid var(--border);
+  margin-top: 6px;
+}
+.kjm-num {
+  font-size: 12px; color: var(--text2); padding: 2px 0;
+}
+ 
+/* ════════════════════════════════════════
+   DOA MODAL
+════════════════════════════════════════ */
+.doa-box {
+  max-height: 70dvh;
+}
+.doa-header {
+  padding: 14px 16px 12px; flex-shrink: 0;
+  border-bottom: 1.5px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+#doa-modal-emoji { font-size: 28px; }
+.doa-header-info { flex: 1; }
+#doa-modal-name  { font-size: 16px; font-weight: 800; color: var(--text); }
+.doa-content {
+  flex: 1; overflow-y: auto; padding: 16px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.doa-ar {
+  font-size: 22px; direction: rtl; text-align: right;
+  color: var(--text); font-weight: 500; line-height: 1.8;
+  padding: 12px; background: var(--gl); border-radius: 12px;
+}
+.doa-lat {
+  font-size: 13px; color: var(--g2); font-style: italic;
+  line-height: 1.6; font-weight: 600;
+}
+.doa-sep {
+  height: 1px; background: var(--border);
+}
+.doa-arti {
+  font-size: 13px; color: var(--text2); line-height: 1.65;
+}
+.doa-faedah {
+  font-size: 11px; color: var(--muted);
+  padding: 8px 12px; background: var(--bg);
+  border-radius: 8px; border: 1px solid var(--border);
+  line-height: 1.5;
+}
+ 
+/* ════════════════════════════════════════
+   NAV BAR — Safe Place icon
+   (Ganti salah satu nav icon atau tambah)
+════════════════════════════════════════ */
+.ni-safeplace svg path { stroke: var(--muted); }
+.ni-safeplace.on svg path { stroke: white; }

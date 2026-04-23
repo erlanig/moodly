@@ -18,6 +18,8 @@ import { initNews, forceRefresh, filterNews, openArt, closeArt, buildHomePreview
 import { buildCheckinUI, startCheckin, goStep, submitCheckin, MOODS } from '../checkin.js';
 import { initChat, sendMessage, buildQuickReplies } from '../chat.js';
 import { initNearby, findNearby, filterNearby, refreshNearby, searchNearby } from '../nearby.js';
+import { openStories, closeStories } from '../stories.js';
+import { initSafePlace } from '../safeplace.js';
 
 /* ════════════════
    GLOBAL STATE
@@ -94,15 +96,14 @@ export function showScreen(id) {
     nb.querySelector('.ni-lbl').style.color = 'white';
   }
 
-  if (id === 'home')    updateHome();
-  if (id === 'insight') updateInsight(entries, getPeriods());
-  if (id === 'news')    initNews();
-  if (id === 'cycle')   renderCycleScreen(entries);
+  if (id === 'home')       updateHome();
+  if (id === 'insight')    updateInsight(entries, getPeriods());
+  if (id === 'news')       initNews();
+  if (id === 'cycle')      renderCycleScreen(entries);
+  if (id === 'safeplace')  initSafePlace();
   if (id === 'chat') {
-    // Trigger viewport update setelah screen aktif
     setTimeout(() => window._chatViewportUpdate?.(), 50);
   } else {
-    // Reset tinggi chat saat keluar
     window._chatViewportReset?.();
   }
 
@@ -280,7 +281,6 @@ function buildNavHandlers() {
 
 /* ════════════════
    VISUAL VIEWPORT (keyboard handler)
-   Buat chat screen resize mengikuti keyboard
 ════════════════ */
 function initViewportHandler() {
   const chatEl = document.getElementById('chat');
@@ -290,12 +290,10 @@ function initViewportHandler() {
     if (!chatEl.classList.contains('active')) return;
     const vv = window.visualViewport;
     if (!vv) return;
-    // Tinggi = visualViewport height, posisi top mengikuti offset
     const h = vv.height;
     const t = vv.offsetTop;
     chatEl.style.height = h + 'px';
     chatEl.style.top    = t + 'px';
-    // Scroll messages ke bawah saat keyboard muncul
     const msgs = document.getElementById('chat-messages');
     if (msgs) msgs.scrollTop = msgs.scrollHeight;
   }
@@ -305,7 +303,6 @@ function initViewportHandler() {
     window.visualViewport.addEventListener('scroll', updateChatHeight);
   }
 
-  // Reset saat keluar chat
   window._chatViewportReset = () => {
     chatEl.style.height = '';
     chatEl.style.top    = '';
@@ -323,7 +320,6 @@ window._closeModal = closeModal;
 
 /* ════════════════
    GLOBAL WINDOW BINDINGS
-   (called from inline HTML onclicks)
 ════════════════ */
 window._enterApp    = enterApp;
 window._saveName    = saveName;
@@ -363,7 +359,6 @@ window._searchNearby  = searchNearby;
 // Chat
 window._openChat = (moodJson, intensity, causesJson) => openChat(moodJson, intensity, causesJson);
 window._openChatDirect = () => {
-  // Buka chat dari home tanpa data check-in — pakai entry terakhir kalau ada
   const last = entries.length ? entries[entries.length - 1] : null;
   openChat(
     last?.mood ? JSON.stringify(last.mood) : 'null',
@@ -386,6 +381,20 @@ window._sendQuick = (btn) => {
 };
 window._chatKeydown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); window._sendChat(); } };
 
+// Stories
+window._openStoryFromCheckin = () => {
+  const last = entries.length ? entries[entries.length - 1] : null;
+  if (last) {
+    openStories(last);
+  } else {
+    window._moodlyAlert({ icon: '📸', title: 'Belum ada check-in', msg: 'Check-in dulu ya biar bisa share story!' });
+  }
+};
+window._openStoriesDirect = (entryJson) => {
+  try { openStories(JSON.parse(entryJson)); } catch {}
+};
+window._closeStories = closeStories;
+
 /* ════════════════
    AFTER CHECK-IN
 ════════════════ */
@@ -406,9 +415,9 @@ function openChat(moodJson, intensity, causesJson) {
     intensity,
     causes,
     cyclePhase: cycleInfo?.phase || null,
+    dayOfCycle: cycleInfo?.dayOfCycle || null,
     userName: uname,
   });
-  // Build quick replies
   const qr = document.getElementById('chat-quick');
   if (qr) {
     const replies = buildQuickReplies(mood);
@@ -417,7 +426,6 @@ function openChat(moodJson, intensity, causesJson) {
     ).join('');
   }
   showScreen('chat');
-  // Sembunyikan tombol post-checkin
   const btn = document.getElementById('post-checkin-chat');
   if (btn) btn.style.display = 'none';
 }

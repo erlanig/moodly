@@ -11,7 +11,7 @@ import { loadJesMemory, saveJesMemory } from './firebase.js';
 ════════════════ */
 let chatHistory = [];
 let chatContext = {};
-let jesMemory   = { facts: [] }; // ingatan Jes tentang user
+let jesMemory   = { facts: [] };
 let isTyping    = false;
 
 /* ════════════════
@@ -23,7 +23,6 @@ export async function initChat(context) {
   renderMessages();
   setInputState(true);
 
-  // Load memory Jes dari storage
   const saved = await loadJesMemory();
   jesMemory = saved || { facts: [] };
 
@@ -32,19 +31,39 @@ export async function initChat(context) {
   setTimeout(() => appendMessage('assistant', openingCap, true), 350);
 }
 
+/* ════════════════
+   OPENING MESSAGE
+   FIX: handle 4 kondisi — mood+phase, mood only, phase only, none
+════════════════ */
 function buildOpeningMessage(ctx) {
   const name  = ctx.userName || 'kamu';
   const mood  = ctx.mood;
   const phase = ctx.cyclePhase;
 
-// Intro selalu sama — memory dipakai oleh AI di dalam percakapan, bukan ditampilkan
   const intro = `Hei ${name} 💚 Aku Jes — aku di sini buat dengerin kamu, beneran. Nggak ada yang perlu kamu sembunyiin atau poles-poles di sini. Cerita aja apa adanya.`;
 
   let followUp = '';
-  if (!mood) {
+
+  /* ── Kondisi 1: Belum check-in, tidak ada data siklus ── */
+  if (!mood && !phase) {
     followUp = `Eh, sepertinya kamu belum check-in mood hari ini 🤔 Gimana perasaan kamu sekarang? Bisa check-in dulu di menu "Check" — atau langsung cerita juga boleh kok.`;
-  } else {
-    const map = {
+  }
+
+  /* ── Kondisi 2: Belum check-in mood, tapi ada data siklus ── */
+  else if (!mood && phase) {
+    const dayInfo = ctx.dayOfCycle ? ` (hari ke-${ctx.dayOfCycle})` : '';
+    const phaseOpeners = {
+      mens: `Aku lihat kamu lagi di fase menstruasi${dayInfo} 🩸 Gimana kondisi badan & perasaan kamu hari ini? Fase ini sering bikin capek lebih dari biasanya — cerita dong.`,
+      foll: `Aku lihat kamu lagi di fase folikular${dayInfo} 🌱 Energi biasanya mulai naik di sini. Kamu ngerasa gimana hari ini?`,
+      ovul: `Kamu lagi di fase ovulasi${dayInfo} ⭐ Biasanya ini puncak energi — tapi tiap orang beda-beda. Hari ini gimana perasaannya?`,
+      lute: `Aku lihat kamu lagi di fase luteal${dayInfo} 🌙 Fase ini kadang bikin lebih sensitif atau gampang overwhelmed. Gimana kamu hari ini?`,
+    };
+    followUp = phaseOpeners[phase] || `Gimana perasaan kamu hari ini? Aku di sini dengerin.`;
+  }
+
+  /* ── Kondisi 3: Ada check-in mood ── */
+  else if (mood) {
+    const moodMap = {
       'Happy':     `Aku liat mood kamu hari ini — ${mood.e} ${mood.l}! Wah, seneng banget deh lihatnya. Energi positif kamu tuh kerasa. Cerita dong, ada apa yang bikin hari ini berasa spesial? 😊`,
       'Oke':       `Aku liat mood kamu — ${mood.e} ${mood.l}. Oke itu sebenernya udah bagus, kadang kita terlalu keras sama diri sendiri soal "harus happy". Ada yang mau kamu ceritain?`,
       'Biasa':     `Aku liat mood kamu — ${mood.e} ${mood.l}. Hari-hari yang datar itu sering kali justru nyimpen banyak hal yang belum sempat diproses. Ada yang lagi muter di kepala kamu?`,
@@ -54,18 +73,19 @@ function buildOpeningMessage(ctx) {
       'Exhausted': `Aku liat mood kamu — ${mood.e} ${mood.l}. Kamu kayaknya udah ngasih banyak hari ini 🫂 Sekarang giliran kamu buat didengar. Apa yang paling berat?`,
       'Burnout':   `Aku liat mood kamu — ${mood.e} ${mood.l}. Burnout itu bukan lemah — itu tanda kamu udah terlalu lama jalan tanpa istirahat beneran 🫂 Dari mana mau mulai cerita?`,
     };
-    followUp = map[mood.l] || `Aku liat mood kamu hari ini — ${mood.e} ${mood.l}. Makasih udah check-in! Ada yang mau kamu ceritain?`;
+    followUp = moodMap[mood.l] || `Aku liat mood kamu hari ini — ${mood.e} ${mood.l}. Makasih udah check-in! Ada yang mau kamu ceritain?`;
 
-    // Fase siklus
-    const dayInfo = ctx.dayOfCycle ? ` (hari ke-${ctx.dayOfCycle})` : '';
-    if (phase === 'mens')
-      followUp += `\n\n(Btw, kamu lagi di fase menstruasi${dayInfo} 🩸 Wajar banget kalau badan atau mood terasa lebih berat. Boleh lebih gentle sama diri sendiri ya.)`;
-    else if (phase === 'foll')
-      followUp += `\n\n(Btw, kamu lagi di fase folikular${dayInfo} 🌱 Energi biasanya mulai naik di fase ini!)`;
-    else if (phase === 'ovul')
-      followUp += `\n\n(Btw, kamu lagi di fase ovulasi${dayInfo} ⭐ Biasanya puncak energi — manfaatin ya!)`;
-    else if (phase === 'lute')
-      followUp += `\n\n(Btw, kamu lagi di fase luteal${dayInfo} 🌙 Kalau ngerasa lebih sensitif belakangan ini, itu sangat bisa terkait siklus — valid kok.)`;
+    /* ── Tambahan konteks siklus (hanya jika ada) ── */
+    if (phase) {
+      const dayInfo = ctx.dayOfCycle ? ` (hari ke-${ctx.dayOfCycle})` : '';
+      const phaseNotes = {
+        mens: `\n\n(Btw, kamu lagi di fase menstruasi${dayInfo} 🩸 Wajar banget kalau badan atau mood terasa lebih berat. Boleh lebih gentle sama diri sendiri ya.)`,
+        foll: `\n\n(Btw, kamu lagi di fase folikular${dayInfo} 🌱 Energi biasanya mulai naik di fase ini!)`,
+        ovul: `\n\n(Btw, kamu lagi di fase ovulasi${dayInfo} ⭐ Biasanya puncak energi — manfaatin ya!)`,
+        lute: `\n\n(Btw, kamu lagi di fase luteal${dayInfo} 🌙 Kalau ngerasa lebih sensitif belakangan ini, itu sangat bisa terkait siklus — valid kok.)`,
+      };
+      if (phaseNotes[phase]) followUp += phaseNotes[phase];
+    }
   }
 
   return `${intro}\n\n${followUp}`;
@@ -90,11 +110,10 @@ export async function sendMessage(text) {
     appendMessage('assistant', reply, true, articleIdx);
     chatHistory.push({ role: 'assistant', content: reply });
 
-    // Update memory kalau ada fakta baru yang perlu diingat
     if (newFacts?.length) {
       const merged = [...new Set([...(jesMemory.facts || []), ...newFacts])].slice(0, 20);
       jesMemory = { facts: merged };
-      saveJesMemory(jesMemory); // fire and forget
+      saveJesMemory(jesMemory);
     }
   } catch (e) {
     hideTypingIndicator();
@@ -107,25 +126,31 @@ export async function sendMessage(text) {
 
 /* ════════════════
    API CALL
+   FIX: instruksi AI soal siklus diperjelas
 ════════════════ */
 async function callChatAPI(history, ctx) {
   const name    = ctx.userName || 'pengguna';
-  const mood    = ctx.mood ? `${ctx.mood.l} (${ctx.mood.e}), intensitas: ${ctx.intensity || 'tidak diketahui'}` : 'belum check-in';
+  const mood    = ctx.mood
+    ? `${ctx.mood.l} (${ctx.mood.e}), intensitas: ${ctx.intensity || 'tidak diketahui'}`
+    : 'belum check-in hari ini';
   const causes  = ctx.causes?.length ? ctx.causes.join(', ') : 'tidak disebutkan';
   const hasMood = !!ctx.mood;
 
-  const phaseNames = { mens:'Menstruasi 🩸', foll:'Folikular 🌱', ovul:'Ovulasi ⭐', lute:'Luteal 🌙' };
-  const cycleInfo  = ctx.cyclePhase
-    ? `${phaseNames[ctx.cyclePhase] || ctx.cyclePhase}${ctx.dayOfCycle ? ', hari ke-'+ctx.dayOfCycle : ''}`
-    : 'belum ada data';
+  const phaseNames = {
+    mens: 'Menstruasi 🩸',
+    foll: 'Folikular 🌱',
+    ovul: 'Ovulasi ⭐',
+    lute: 'Luteal 🌙',
+  };
+  const cycleInfo = ctx.cyclePhase
+    ? `${phaseNames[ctx.cyclePhase] || ctx.cyclePhase}${ctx.dayOfCycle ? ', hari ke-' + ctx.dayOfCycle : ''}`
+    : 'belum ada data siklus';
 
-  // Memory Jes tentang user
-  const memFacts = (jesMemory.facts || []);
+  const memFacts = jesMemory.facts || [];
   const memStr   = memFacts.length
-    ? memFacts.map((f,i) => `${i+1}. ${f}`).join('\n')
+    ? memFacts.map((f, i) => `${i + 1}. ${f}`).join('\n')
     : 'Belum ada (sesi pertama atau memory kosong)';
 
-  // Artikel tersedia
   const availableArts = (artStore || []).slice(0, 8).map((a, i) =>
     `[${i}] "${a.title}" — ${a.cat}`
   ).join('\n');
@@ -137,10 +162,16 @@ Jes ngobrol seperti manusia beneran — hangat, ada humor ringan di momen tepat,
 
 KONTEKS PENGGUNA:
 - Nama: ${name}
-- Check-in: ${hasMood ? 'sudah' : 'belum hari ini'}
+- Check-in mood: ${hasMood ? 'sudah' : 'belum hari ini'}
 - Mood: ${mood}
 - Penyebab: ${causes}
 - Fase siklus: ${cycleInfo}
+
+PENTING SOAL SIKLUS:
+- Fase siklus hanya KONTEKS — bukan penentu mood. Jangan assume mood dari fase.
+- Kalau ada data siklus tapi belum check-in mood: gunakan fase sebagai pembuka percakapan yang empatik, lalu gali kondisi user secara langsung.
+- Kalau fase siklus disebutkan dalam percakapan: gunakan sebagai informasi tambahan yang normalize pengalaman mereka (contoh: "wajar banget ngerasa sensitif di fase luteal"), bukan sebagai diagnosis.
+- Jangan terlalu sering sebut fase siklus — maksimal sekali per percakapan, dan hanya kalau benar-benar relevan.
 
 INGATAN JES TENTANG ${name.toUpperCase()}:
 ${memStr}
@@ -159,7 +190,7 @@ Contoh benar:
 ATURAN "remember":
 - Isi HANYA kalau user menyebut fakta personal penting: nama orang, pekerjaan, masalah spesifik, kondisi kesehatan, dll
 - Contoh valid: "kerja di startup yang toxic", "lagi LDR sama pacar", "punya anxiety disorder", "nama anjingnya Luna"
-- Contoh TIDAK valid: ekspresi perasaan umum seperti "lagi sedih" atau "stres" — itu terlalu umum
+- Contoh TIDAK valid: ekspresi perasaan umum seperti "lagi sedih" atau "stres"
 - Maksimal 2 fakta per pesan, kalimat singkat
 - Kalau tidak ada fakta penting: "remember": []
 
@@ -170,7 +201,9 @@ ATURAN RESPONS:
 4. Emoji 1-2 saja: 💚 🫂 💙 🌱 ✨
 5. JANGAN list/tips kecuali diminta
 6. Kalau ada sinyal krisis: "Aku mau kamu tahu ada yang bisa dihubungi: Into The Light Indonesia 119 ext 8 💙"
-7. Artikel: rekomendasikan hanya kalau BENAR-BENAR relevan, jangan dipaksakan`;
+7. Artikel: rekomendasikan hanya kalau BENAR-BENAR relevan, jangan dipaksakan
+8. Kalau fase siklus ada tapi belum ada check-in mood: tanya kondisi fisik & emosional dulu — jangan assume
+9. Jangan sebut fase siklus lebih dari sekali per percakapan`;
 
   const messages = [
     { role: 'system', content: systemPrompt },
@@ -195,26 +228,20 @@ ATURAN RESPONS:
   const data = await res.json();
   if (data.error) throw new Error(data.error);
 
-  // Parse JSON response dari Jes — robust handler
   let reply = '', newFacts = [], articleIdx = null;
   const raw = data.reply || '';
   try {
-    // Coba parse JSON (Groq kadang wrap dengan ```json)
-    const clean  = raw.replace(/```json|```/g, '').trim();
-    // Ambil JSON object dari dalam string kalau ada teks sebelumnya
+    const clean     = raw.replace(/```json|```/g, '').trim();
     const jsonMatch = clean.match(/\{[\s\S]*\}/);
-    const parsed = JSON.parse(jsonMatch ? jsonMatch[0] : clean);
+    const parsed    = JSON.parse(jsonMatch ? jsonMatch[0] : clean);
     reply      = parsed.reply || '';
     newFacts   = parsed.remember || [];
     articleIdx = typeof parsed.article === 'number' ? parsed.article : null;
   } catch {
-    // Kalau sama sekali tidak bisa parse, cek apakah raw mengandung "reply":
-    // Kalau iya, coba extract manual
     const replyMatch = raw.match(/"reply"\s*:\s*"([\s\S]*?)(?:",\s*"remember"|"\s*\})/);
     if (replyMatch) {
       reply = replyMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"');
     } else {
-      // Fallback: tampilkan raw tapi strip semua JSON artifacts
       reply = raw
         .replace(/```json|```/g, '')
         .replace(/"reply"\s*:\s*"/g, '')
@@ -225,7 +252,6 @@ ATURAN RESPONS:
         .trim();
     }
   }
-  // Selalu kapital di awal
   if (reply) reply = reply.charAt(0).toUpperCase() + reply.slice(1);
 
   return { reply, articleIdx, newFacts };
@@ -258,7 +284,6 @@ function appendMessage(role, text, animate = false, articleIdx = null) {
     textNode.textContent = text;
     bubble.appendChild(textNode);
 
-    // Artikel rekomendasi
     if (articleIdx !== null && artStore?.[articleIdx]) {
       const art = artStore[articleIdx];
       const artEl = document.createElement('div');
@@ -276,7 +301,6 @@ function appendMessage(role, text, animate = false, articleIdx = null) {
       bubble.appendChild(artEl);
     }
 
-    // Label AI
     const label = document.createElement('div');
     label.innerHTML = `<svg width="8" height="8" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="#c0c0c0" stroke-width="2" stroke-linejoin="round"/></svg>&nbsp;Jawaban diberikan oleh AI`;
     label.style.cssText = 'display:flex;align-items:center;gap:4px;font-size:9px;color:#c0c0c0;font-weight:500;margin-top:10px;padding-top:8px;border-top:1px solid rgba(0,0,0,.08);white-space:nowrap;font-family:inherit';
