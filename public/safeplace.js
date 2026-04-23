@@ -189,68 +189,6 @@ async function fetchSurah(no) {
 }
 
 /* ════════════════
-   DOA LIST
-════════════════ */
-const DOA_LIST = [
-  {
-    emoji: '🌅', name: 'Bangun Tidur',
-    arabic: 'الْحَمْدُ لِلَّهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورُ',
-    latin: 'Alhamdulillaahil ladzii ahyaanaa ba\'da maa amaatanaa wa ilaihin nusyuur',
-    arti: 'Segala puji bagi Allah yang telah menghidupkan kami setelah mematikan kami, dan kepada-Nya kami dikembalikan.',
-    faedah: 'Dibaca sekali setelah bangun tidur',
-  },
-  {
-    emoji: '😴', name: 'Sebelum Tidur',
-    arabic: 'بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا',
-    latin: 'Bismikallaahumma amuutu wa ahyaa',
-    arti: 'Dengan nama-Mu ya Allah, aku mati dan aku hidup.',
-    faedah: 'Dibaca ketika berbaring hendak tidur',
-  },
-  {
-    emoji: '😰', name: 'Ketika Gelisah',
-    arabic: 'حَسْبُنَا اللَّهُ وَنِعْمَ الْوَكِيلُ',
-    latin: 'Hasbunallah wa ni\'mal wakiil',
-    arti: 'Cukuplah Allah menjadi penolong kami dan Allah adalah sebaik-baik pelindung.',
-    faedah: 'Dibaca saat merasa cemas, takut, atau tertekan. Minimal 3x.',
-  },
-  {
-    emoji: '😔', name: 'Ketika Sedih',
-    arabic: 'اللَّهُمَّ إِنِّي عَبْدُكَ، ابْنُ عَبْدِكَ، ابْنُ أَمَتِكَ',
-    latin: 'Allahumma inni abduka, ibnu abdika, ibnu amatika...',
-    arti: 'Ya Allah, sesungguhnya aku adalah hamba-Mu, putra hamba-Mu (laki-laki), putra hamba-Mu (perempuan)...',
-    faedah: 'Doa Nabi ﷺ saat sedih (HR. Ahmad). Dibaca dengan penuh perasaan.',
-  },
-  {
-    emoji: '📚', name: 'Sebelum Belajar',
-    arabic: 'رَبِّ زِدْنِي عِلْمًا',
-    latin: 'Rabbi zidnii ilmaa',
-    arti: 'Ya Tuhanku, tambahkanlah ilmu kepadaku.',
-    faedah: 'QS. Thaha: 114. Dibaca sebelum belajar atau membaca.',
-  },
-  {
-    emoji: '🍽️', name: 'Sebelum Makan',
-    arabic: 'بِسْمِ اللَّهِ وَعَلَى بَرَكَةِ اللَّهِ',
-    latin: 'Bismillaahi wa \'alaa barakatillaah',
-    arti: 'Dengan nama Allah dan atas berkah Allah.',
-    faedah: 'HR. Abu Dawud. Jika lupa di awal, tambahkan: Bismillaahi awwalahu wa aakhirahu.',
-  },
-  {
-    emoji: '🚪', name: 'Keluar Rumah',
-    arabic: 'بِسْمِ اللَّهِ تَوَكَّلْتُ عَلَى اللَّهِ وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ',
-    latin: 'Bismillaah, tawakkaltu \'alallaah, wa laa hawla wa laa quwwata illaa billaah',
-    arti: 'Dengan nama Allah, aku bertawakkal kepada Allah, tiada daya dan kekuatan kecuali dengan pertolongan Allah.',
-    faedah: 'HR. Abu Dawud & Tirmidzi. Dibaca saat keluar rumah.',
-  },
-  {
-    emoji: '🙏', name: 'Istighfar',
-    arabic: 'أَسْتَغْفِرُ اللَّهَ الْعَظِيمَ الَّذِي لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ وَأَتُوبُ إِلَيْهِ',
-    latin: 'Astaghfirullaahal \'adziim alladzii laa ilaaha illaa huwal hayyul qayyuumu wa atuubu ilaih',
-    arti: 'Aku memohon ampun kepada Allah yang Maha Agung, yang tiada tuhan selain Dia, Yang Maha Hidup lagi terus-menerus mengurus makhluk-Nya, dan aku bertobat kepada-Nya.',
-    faedah: 'Istighfar penghapus dosa. Dibaca minimal 3x setiap hari.',
-  },
-];
-
-/* ════════════════
    MAIN INIT
 ════════════════ */
 export function initSafePlace() {
@@ -285,20 +223,6 @@ function renderSafePlace() {
       <div class="sp-greet">${greeting}</div>
       <div class="sp-tagline">Hati yang tenang dimulai dari sini 🤍</div>
 
-      <div class="sp-ayat-box" id="sp-ayat-box">
-        <div class="sp-ayat-ar">وَعَسَىٰ أَن تَكْرَهُوا شَيْئًا وَهُوَ خَيْرٌ لَّكُمْ</div>
-        <div class="sp-ayat-id">"Boleh jadi kamu membenci sesuatu, padahal ia amat baik bagimu"</div>
-        <div class="sp-ayat-src">QS. Al-Baqarah: 216</div>
-      </div>
-    </div>
-
-    <!-- HERO ROHANI -->
-    <div class="sp-hero">
-      <div class="sp-arabic">${arabGreeting}</div>
-      <div class="sp-greet">${greeting}</div>
-      <div class="sp-tagline">Hati yang tenang dimulai dari sini 🤍</div>
-
-      <!-- Ayat of the Day -->
       <div class="sp-ayat-box" id="sp-ayat-box">
         <div class="sp-ayat-ar">وَعَسَىٰ أَن تَكْرَهُوا شَيْئًا وَهُوَ خَيْرٌ لَّكُمْ</div>
         <div class="sp-ayat-id">"Boleh jadi kamu membenci sesuatu, padahal ia amat baik bagimu"</div>
@@ -596,6 +520,67 @@ export function openKajian(id) {
 window._openKajian  = openKajian;
 window._closeKajian = () => document.getElementById('kajian-modal')?.classList.remove('show');
 
+/* ════════════════
+   DOA LIST
+════════════════ */
+const DOA_LIST = [
+  {
+    emoji: '🌅', name: 'Bangun Tidur',
+    arabic: 'الْحَمْدُ لِلَّهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورُ',
+    latin: 'Alhamdulillaahil ladzii ahyaanaa ba\'da maa amaatanaa wa ilaihin nusyuur',
+    arti: 'Segala puji bagi Allah yang telah menghidupkan kami setelah mematikan kami, dan kepada-Nya kami dikembalikan.',
+    faedah: 'Dibaca sekali setelah bangun tidur',
+  },
+  {
+    emoji: '😴', name: 'Sebelum Tidur',
+    arabic: 'بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا',
+    latin: 'Bismikallaahumma amuutu wa ahyaa',
+    arti: 'Dengan nama-Mu ya Allah, aku mati dan aku hidup.',
+    faedah: 'Dibaca ketika berbaring hendak tidur',
+  },
+  {
+    emoji: '😰', name: 'Ketika Gelisah',
+    arabic: 'حَسْبُنَا اللَّهُ وَنِعْمَ الْوَكِيلُ',
+    latin: 'Hasbunallah wa ni\'mal wakiil',
+    arti: 'Cukuplah Allah menjadi penolong kami dan Allah adalah sebaik-baik pelindung.',
+    faedah: 'Dibaca saat merasa cemas, takut, atau tertekan. Minimal 3x.',
+  },
+  {
+    emoji: '😔', name: 'Ketika Sedih',
+    arabic: 'اللَّهُمَّ إِنِّي عَبْدُكَ، ابْنُ عَبْدِكَ، ابْنُ أَمَتِكَ',
+    latin: 'Allahumma inni abduka, ibnu abdika, ibnu amatika...',
+    arti: 'Ya Allah, sesungguhnya aku adalah hamba-Mu, putra hamba-Mu (laki-laki), putra hamba-Mu (perempuan)...',
+    faedah: 'Doa Nabi ﷺ saat sedih (HR. Ahmad). Dibaca dengan penuh perasaan.',
+  },
+  {
+    emoji: '📚', name: 'Sebelum Belajar',
+    arabic: 'رَبِّ زِدْنِي عِلْمًا',
+    latin: 'Rabbi zidnii ilmaa',
+    arti: 'Ya Tuhanku, tambahkanlah ilmu kepadaku.',
+    faedah: 'QS. Thaha: 114. Dibaca sebelum belajar atau membaca.',
+  },
+  {
+    emoji: '🍽️', name: 'Sebelum Makan',
+    arabic: 'بِسْمِ اللَّهِ وَعَلَى بَرَكَةِ اللَّهِ',
+    latin: 'Bismillaahi wa \'alaa barakatillaah',
+    arti: 'Dengan nama Allah dan atas berkah Allah.',
+    faedah: 'HR. Abu Dawud. Jika lupa di awal, tambahkan: Bismillaahi awwalahu wa aakhirahu.',
+  },
+  {
+    emoji: '🚪', name: 'Keluar Rumah',
+    arabic: 'بِسْمِ اللَّهِ تَوَكَّلْتُ عَلَى اللَّهِ وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ',
+    latin: 'Bismillaah, tawakkaltu \'alallaah, wa laa hawla wa laa quwwata illaa billaah',
+    arti: 'Dengan nama Allah, aku bertawakkal kepada Allah, tiada daya dan kekuatan kecuali dengan pertolongan Allah.',
+    faedah: 'HR. Abu Dawud & Tirmidzi. Dibaca saat keluar rumah.',
+  },
+  {
+    emoji: '🙏', name: 'Istighfar',
+    arabic: 'أَسْتَغْفِرُ اللَّهَ الْعَظِيمَ الَّذِي لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ وَأَتُوبُ إِلَيْهِ',
+    latin: 'Astaghfirullaahal \'adziim alladzii laa ilaaha illaa huwal hayyul qayyuumu wa atuubu ilaih',
+    arti: 'Aku memohon ampun kepada Allah yang Maha Agung, yang tiada tuhan selain Dia, Yang Maha Hidup lagi terus-menerus mengurus makhluk-Nya, dan aku bertobat kepada-Nya.',
+    faedah: 'Istighfar penghapus dosa. Dibaca minimal 3x setiap hari.',
+  },
+];
 
 export function showDoa(idx) {
   const doa   = DOA_LIST[idx];
