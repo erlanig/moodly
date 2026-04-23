@@ -1,119 +1,332 @@
 /* ═══════════════════════════════════════
    MOODLY — safeplace.js
    Safe Place: Rohani — Al-Quran, Jadwal Sholat, Kajian
-   Integrasi AI: Ayat of the Day (Groq)
    ═══════════════════════════════════════ */
 
-import { checkConnection } from './firebase.js';
+/* ════════════════
+   KAJIAN ISLAMI
+   Curated local content — no API needed
+════════════════ */
+const KAJIAN_LIST = [
+  {
+    id: 'k1',
+    emoji: '🤲',
+    category: 'Ketenangan Hati',
+    title: 'Ketika Hati Terasa Berat',
+    content: `"Ingatlah, hanya dengan mengingat Allah hati menjadi tenteram." (QS. Ar-Ra'd: 28)
 
-// Konfigurasi API Groq
-const GROQ_API_KEY = "MASUKKAN_API_KEY_GROQ_DISINI"; 
+Perasaan berat, gelisah, atau sedih adalah bagian dari ujian hidup yang Allah berikan. Kamu tidak sendirian merasakan ini. Bahkan para nabi pun pernah menangis dan merasa lelah.
+
+Yang perlu kamu ingat: Allah tidak menguji seorang hamba melebihi kemampuannya. Setiap rasa berat yang kamu rasakan hari ini adalah bukti bahwa Allah percaya kamu mampu melewatinya.
+
+✦ Coba luangkan 5 menit untuk duduk diam, tarik napas dalam, dan ucapkan: "Hasbunallah wa ni'mal wakiil" — Cukuplah Allah sebagai pelindung kami, dan Dia sebaik-baik pelindung.`,
+    source: 'Dari QS. Ar-Ra\'d: 28',
+    readTime: '3 menit',
+  },
+  {
+    id: 'k2',
+    emoji: '🌙',
+    category: 'Doa & Dzikir',
+    title: 'Dzikir Pagi untuk Memulai Hari',
+    content: `Memulai pagi dengan dzikir adalah investasi terbaik untuk harimu. Rasulullah SAW mengajarkan beberapa dzikir singkat namun luar biasa manfaatnya:
+
+📿 "Bismillahilladzii laa yadurru ma'asmihi syai'un fil ardhi wa laa fis samaa'i wa huwas samii'ul 'aliim" (3x)
+— Artinya: Dengan nama Allah yang tidak ada sesuatu pun yang membahayakan bersama nama-Nya, baik di bumi maupun di langit, dan Dia Maha Mendengar lagi Maha Mengetahui.
+
+📿 "Alhamdulillaahilladzi ahyaanaa ba'da maa amaatanaa wa ilaihin nusyuur" (1x)
+— Segala puji bagi Allah yang telah menghidupkan kami setelah mematikan kami, dan kepada-Nya kami dikembalikan.
+
+✦ Konsistensi dzikir pagi lebih baik dari dzikir panjang yang bolong-bolong. 5 menit setiap pagi, cukup.`,
+    source: 'HR. Abu Dawud & Tirmidzi',
+    readTime: '4 menit',
+  },
+  {
+    id: 'k3',
+    emoji: '💪',
+    category: 'Kesabaran',
+    title: 'Sabar Bukan Berarti Diam',
+    content: `Sabar sering disalahpahami sebagai "mendiamkan semua masalah dan pura-pura baik-baik saja." Padahal sabar yang sesungguhnya jauh lebih aktif dari itu.
+
+"Dan bersabarlah kamu bersama orang-orang yang menyeru Tuhannya..." (QS. Al-Kahfi: 28)
+
+Sabar artinya:
+→ Tetap bergerak meski lelah
+→ Tetap berdoa meski belum terkabul
+→ Tetap berbaik sangka pada Allah meski situasi terasa gelap
+
+Yang tidak termasuk sabar: menekan perasaan, pura-pura kuat, tidak mau minta tolong. Itu bukan sabar — itu menyiksa diri.
+
+✦ Menangis, curhat, minta bantuan, istirahat — semua itu boleh dan tidak membatalkan kesabaran kamu.`,
+    source: 'QS. Al-Kahfi: 28',
+    readTime: '3 menit',
+  },
+  {
+    id: 'k4',
+    emoji: '🌟',
+    category: 'Rasa Syukur',
+    title: 'Syukur yang Mengubah Perspektif',
+    content: `"Sesungguhnya jika kamu bersyukur, pasti Kami akan menambah nikmat kepadamu." (QS. Ibrahim: 7)
+
+Syukur bukan tentang pura-pura happy. Syukur adalah kemampuan untuk melihat nikmat di tengah kesulitan — dan itu butuh latihan.
+
+Coba praktik "3 hal kecil" setiap malam sebelum tidur:
+1. Satu hal yang berjalan baik hari ini (sekecil apapun)
+2. Satu orang yang kamu syukuri kehadirannya
+3. Satu kondisi tubuh yang sehat & berfungsi normal
+
+Otak manusia secara alami lebih mudah merekam hal negatif (negativity bias). Latihan syukur ini melatih otak untuk melihat lebih seimbang.
+
+✦ "Alhamdulillah" bukan sekadar kata — ia adalah pernyataan bahwa kamu melihat kebaikan Allah di hari ini.`,
+    source: 'QS. Ibrahim: 7',
+    readTime: '4 menit',
+  },
+  {
+    id: 'k5',
+    emoji: '🤍',
+    category: 'Kesehatan Mental',
+    title: 'Islam dan Kesehatan Mental',
+    content: `Tidak ada dalam Islam yang melarang seseorang mencari bantuan profesional untuk kesehatan mentalnya. Justru sebaliknya.
+
+Imam Al-Ghazali dalam Ihya Ulumuddin menulis panjang tentang penyakit hati (amradul qulub) dan cara penyembuhannya — termasuk muhasabah (introspeksi), mujahadah (perjuangan melawan nafsu), dan muraqabah (kesadaran diri).
+
+Yang perlu kamu pahami:
+→ Depresi bukan lemah iman
+→ Anxiety bukan kurang tawakkal
+→ Burnout bukan hukuman Allah
+
+Rasulullah SAW bersabda: "Berobatlah, karena Allah tidak menciptakan penyakit kecuali menciptakan pula obatnya." (HR. Abu Dawud)
+
+✦ Terapi psikologi, konseling, check-in mood seperti di Moodly — semua termasuk ikhtiar yang dianjurkan Islam.`,
+    source: 'HR. Abu Dawud',
+    readTime: '4 menit',
+  },
+  {
+    id: 'k6',
+    emoji: '🌱',
+    category: 'Tawakkal',
+    title: 'Ikat Untamu, Baru Bertawakkal',
+    content: `Seorang sahabat bertanya kepada Rasulullah: "Apakah aku ikat untaku atau langsung aku tawakkal?" Rasulullah menjawab: "Ikat, kemudian tawakkal." (HR. Tirmidzi)
+
+Tawakkal yang sesungguhnya bukan pasrah tanpa usaha. Ia adalah kombinasi dari:
+1. Usaha semaksimal yang kamu bisa
+2. Doa yang tulus kepada Allah
+3. Penyerahan hasil sepenuhnya kepada-Nya
+
+Kalau kamu lagi merasa stuck — sudah usaha keras tapi belum ada hasilnya — mungkin ini saat yang tepat untuk evaluasi: apakah "ikatan unta"-mu sudah cukup kuat? Atau kamu sudah berusaha dengan baik dan ini memang waktunya untuk bersabar?
+
+✦ Keduanya valid. Yang tidak valid adalah tawakkal tanpa usaha, atau usaha tanpa tawakkal.`,
+    source: 'HR. Tirmidzi',
+    readTime: '3 menit',
+  },
+];
 
 /* ════════════════
-   CONSTANTS & DATA
+   SURAH DATA (mini — 10 popular surahs)
+════════════════ */
+const FEATURED_SURAHS = [
+  { no: 1,   name: 'Al-Fatihah',   ayat: 7,  arti: 'Pembuka',          theme: '🌟' },
+  { no: 2,   name: 'Al-Baqarah',  ayat: 286, arti: 'Sapi Betina',      theme: '📖' },
+  { no: 18,  name: 'Al-Kahfi',    ayat: 110, arti: 'Gua',              theme: '🌿' },
+  { no: 36,  name: 'Ya-Sin',      ayat: 83,  arti: 'Ya Sin',           theme: '💫' },
+  { no: 55,  name: 'Ar-Rahman',   ayat: 78,  arti: 'Yang Maha Penyayang',theme: '🤲' },
+  { no: 56,  name: 'Al-Waqiah',   ayat: 96,  arti: 'Hari Kiamat',      theme: '⭐' },
+  { no: 67,  name: 'Al-Mulk',     ayat: 30,  arti: 'Kerajaan',         theme: '🌙' },
+  { no: 78,  name: 'An-Naba',     ayat: 40,  arti: 'Berita Besar',     theme: '📜' },
+  { no: 112, name: 'Al-Ikhlas',   ayat: 4,   arti: 'Ikhlas',           theme: '🤍' },
+  { no: 114, name: 'An-Nas',      ayat: 6,   arti: 'Manusia',          theme: '🌱' },
+];
+
+/* ════════════════
+   SHOLAT TIMES
+   Using Aladhan API (free, no key needed)
 ════════════════ */
 let prayerCache = null;
 let prayerCacheDate = null;
 
-const FEATURED_SURAHS = [
-  { no: 1,   name: 'Al-Fatihah',  arti: 'Pembuka', theme: '🌟', ayat: 7 },
-  { no: 18,  name: 'Al-Kahfi',    arti: 'Gua',     theme: '🌿', ayat: 110 },
-  { no: 36,  name: 'Ya-Sin',      arti: 'Ya Sin',  theme: '💫', ayat: 83 },
-  { no: 67,  name: 'Al-Mulk',     arti: 'Kerajaan', theme: '🌙', ayat: 30 },
-  { no: 112, name: 'Al-Ikhlas',  arti: 'Ikhlas',   theme: '🤍', ayat: 4 }
-];
-
-const KAJIAN_LIST = [
-  { 
-    id: 'k1', emoji: '🤲', category: 'Ketenangan', title: 'Ketika Hati Terasa Berat', 
-    source: 'QS. Ar-Ra\'d: 28', readTime: '3 menit',
-    content: `"Ingatlah, hanya dengan mengingat Allah hati menjadi tenteram." (QS. Ar-Ra'd: 28)\n\nPerasaan berat adalah bagian dari ujian. Allah tidak membebani hamba-Nya melebihi kemampuannya.\n\n✦ Coba ucapkan: "Hasbunallah wa ni'mal wakiil".`
-  },
-  { 
-    id: 'k5', emoji: '🤍', category: 'Mental Health', title: 'Islam dan Kesehatan Mental', 
-    source: 'HR. Abu Dawud', readTime: '4 menit',
-    content: `Depresi bukan lemah iman. Rasulullah bersabda: "Berobatlah, karena Allah tidak menciptakan penyakit kecuali menciptakan pula obatnya."\n\n✦ Ikhtiar medis dan psikologis adalah bagian dari sunnah.`
-  }
-];
-
-const DOA_LIST = [
-  { emoji: '🌅', name: 'Bangun Tidur', arabic: 'الْحَمْدُ لِلَّهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورُ', latin: 'Alhamdulillaahil ladzii ahyaanaa...', arti: 'Segala puji bagi Allah yang telah menghidupkan kami...', faedah: 'Dibaca saat bangun tidur.' },
-  { emoji: '😴', name: 'Tidur', arabic: 'بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا', latin: 'Bismikallaahumma amuutu wa ahyaa', arti: 'Dengan nama-Mu ya Allah, aku mati dan aku hidup.', faedah: 'Dibaca sebelum tidur.' },
-  { emoji: '😰', name: 'Gelisah', arabic: 'حَسْبُنَا اللَّهُ وَنِعْمَ الْوَكِيلُ', latin: 'Hasbunallah wa ni\'mal wakiil', arti: 'Cukuplah Allah menjadi penolong kami.', faedah: 'Dibaca saat merasa cemas.' },
-  { emoji: '🍽️', name: 'Makan', arabic: 'بِسْمِ اللَّهِ وَعَلَى بَرَكَةِ اللَّهِ', latin: 'Bismillaahi wa \'alaa barakatillaah', arti: 'Dengan nama Allah dan atas berkah Allah.', faedah: 'Dibaca sebelum makan.' }
-];
-
-/* ════════════════
-   AI GENERATOR: AYAT OF THE DAY
-════════════════ */
-async function getAIAyat() {
-  const today = new Date().toISOString().split('T')[0];
-  const cached = JSON.parse(localStorage.getItem('moodly_ayat_ai') || 'null');
-
-  if (cached && cached.date === today) return cached.data;
+async function fetchPrayerTimes(lat, lon) {
+  const today = new Date().toLocaleDateString('en-GB');
+  if (prayerCache && prayerCacheDate === today) return prayerCache;
 
   try {
-    const prompt = `Berikan 1 ayat Al-Quran (teks Arab, terjemahan Indonesia, dan sumber Surah:Ayat) yang bertema ketenangan hati atau motivasi. Format JSON: {"arabic": "...", "id": "...", "src": "..."}`;
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: { "Authorization": `Bearer ${GROQ_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.7,
-        response_format: { type: "json_object" }
-      })
-    });
-    const json = await response.json();
-    const ayatData = JSON.parse(json.choices[0].message.content);
-    localStorage.setItem('moodly_ayat_ai', JSON.stringify({ date: today, data: ayatData }));
-    return ayatData;
-  } catch (e) {
-    return { arabic: "لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا", id: "Allah tidak membebani seseorang melainkan sesuai dengan kesanggupannya.", src: "QS. Al-Baqarah: 286" };
-  }
+    const res = await fetch(
+      `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=20`
+    );
+    const json = await res.json();
+    if (json.code === 200) {
+      prayerCache = json.data.timings;
+      prayerCacheDate = today;
+      localStorage.setItem('moodly_prayer', JSON.stringify({ timings: json.data.timings, date: today, lat, lon }));
+      return prayerCache;
+    }
+  } catch {}
+  // Fallback to cached
+  try {
+    const cached = JSON.parse(localStorage.getItem('moodly_prayer') || 'null');
+    if (cached) return cached.timings;
+  } catch {}
+  return null;
 }
 
 /* ════════════════
-   INIT & RENDER
+   QURAN API
+   Using alquran.cloud (free)
+════════════════ */
+async function fetchSurah(no) {
+  try {
+    const [arRes, idRes] = await Promise.all([
+      fetch(`https://api.alquran.cloud/v1/surah/${no}`),
+      fetch(`https://api.alquran.cloud/v1/surah/${no}/id.indonesian`),
+    ]);
+    const [arJson, idJson] = await Promise.all([arRes.json(), idRes.json()]);
+    if (arJson.code === 200 && idJson.code === 200) {
+      return {
+        arabic: arJson.data,
+        indonesian: idJson.data,
+      };
+    }
+  } catch {}
+  return null;
+}
+
+/* ════════════════
+   DOA LIST
+════════════════ */
+const DOA_LIST = [
+  {
+    emoji: '🌅', name: 'Bangun Tidur',
+    arabic: 'الْحَمْدُ لِلَّهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورُ',
+    latin: 'Alhamdulillaahil ladzii ahyaanaa ba\'da maa amaatanaa wa ilaihin nusyuur',
+    arti: 'Segala puji bagi Allah yang telah menghidupkan kami setelah mematikan kami, dan kepada-Nya kami dikembalikan.',
+    faedah: 'Dibaca sekali setelah bangun tidur',
+  },
+  {
+    emoji: '😴', name: 'Sebelum Tidur',
+    arabic: 'بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا',
+    latin: 'Bismikallaahumma amuutu wa ahyaa',
+    arti: 'Dengan nama-Mu ya Allah, aku mati dan aku hidup.',
+    faedah: 'Dibaca ketika berbaring hendak tidur',
+  },
+  {
+    emoji: '😰', name: 'Ketika Gelisah',
+    arabic: 'حَسْبُنَا اللَّهُ وَنِعْمَ الْوَكِيلُ',
+    latin: 'Hasbunallah wa ni\'mal wakiil',
+    arti: 'Cukuplah Allah menjadi penolong kami dan Allah adalah sebaik-baik pelindung.',
+    faedah: 'Dibaca saat merasa cemas, takut, atau tertekan. Minimal 3x.',
+  },
+  {
+    emoji: '😔', name: 'Ketika Sedih',
+    arabic: 'اللَّهُمَّ إِنِّي عَبْدُكَ، ابْنُ عَبْدِكَ، ابْنُ أَمَتِكَ',
+    latin: 'Allahumma inni abduka, ibnu abdika, ibnu amatika...',
+    arti: 'Ya Allah, sesungguhnya aku adalah hamba-Mu, putra hamba-Mu (laki-laki), putra hamba-Mu (perempuan)...',
+    faedah: 'Doa Nabi ﷺ saat sedih (HR. Ahmad). Dibaca dengan penuh perasaan.',
+  },
+  {
+    emoji: '📚', name: 'Sebelum Belajar',
+    arabic: 'رَبِّ زِدْنِي عِلْمًا',
+    latin: 'Rabbi zidnii ilmaa',
+    arti: 'Ya Tuhanku, tambahkanlah ilmu kepadaku.',
+    faedah: 'QS. Thaha: 114. Dibaca sebelum belajar atau membaca.',
+  },
+  {
+    emoji: '🍽️', name: 'Sebelum Makan',
+    arabic: 'بِسْمِ اللَّهِ وَعَلَى بَرَكَةِ اللَّهِ',
+    latin: 'Bismillaahi wa \'alaa barakatillaah',
+    arti: 'Dengan nama Allah dan atas berkah Allah.',
+    faedah: 'HR. Abu Dawud. Jika lupa di awal, tambahkan: Bismillaahi awwalahu wa aakhirahu.',
+  },
+  {
+    emoji: '🚪', name: 'Keluar Rumah',
+    arabic: 'بِسْمِ اللَّهِ تَوَكَّلْتُ عَلَى اللَّهِ وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ',
+    latin: 'Bismillaah, tawakkaltu \'alallaah, wa laa hawla wa laa quwwata illaa billaah',
+    arti: 'Dengan nama Allah, aku bertawakkal kepada Allah, tiada daya dan kekuatan kecuali dengan pertolongan Allah.',
+    faedah: 'HR. Abu Dawud & Tirmidzi. Dibaca saat keluar rumah.',
+  },
+  {
+    emoji: '🙏', name: 'Istighfar',
+    arabic: 'أَسْتَغْفِرُ اللَّهَ الْعَظِيمَ الَّذِي لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ وَأَتُوبُ إِلَيْهِ',
+    latin: 'Astaghfirullaahal \'adziim alladzii laa ilaaha illaa huwal hayyul qayyuumu wa atuubu ilaih',
+    arti: 'Aku memohon ampun kepada Allah yang Maha Agung, yang tiada tuhan selain Dia, Yang Maha Hidup lagi terus-menerus mengurus makhluk-Nya, dan aku bertobat kepada-Nya.',
+    faedah: 'Istighfar penghapus dosa. Dibaca minimal 3x setiap hari.',
+  },
+];
+
+/* ════════════════
+   MAIN INIT
 ════════════════ */
 export function initSafePlace() {
   renderSafePlace();
 }
 
+/* ════════════════
+   RENDER SAFE PLACE SCREEN
+════════════════ */
 function renderSafePlace() {
   const screen = document.getElementById('safeplace');
   if (!screen) return;
 
+  // Get current greeting
   const h = new Date().getHours();
   const greeting = h < 12 ? 'Selamat Pagi' : h < 15 ? 'Selamat Siang' : h < 18 ? 'Selamat Sore' : 'Selamat Malam';
+  const arabGreeting = h < 12 ? 'صباح الخير' : 'مساء الخير';
 
   screen.innerHTML = `
-    <div class="tb" style="display: flex; justify-content: flex-end; padding: 16px 0;">
-      <div class="sync-dot" style="width:8px;height:8px;border-radius:50%;background:#1db954;flex-shrink:0" title="Rohani Online"></div>
-    </div>
-
-    <div class="sp-hero" style="text-align: left; margin-bottom: 32px; padding-top: 8px;">
-      <div style="font-size: 12px; font-weight: 800; color: #8FA89B; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px;">ROHANI & KETENANGAN</div>
-      <div style="font-size: 44px; font-weight: 900; color: #153223; line-height: 1.05; letter-spacing: -1px; display: flex; align-items: flex-end; gap: 8px;">
-        <div>Safe<br>Place</div>
-        <span style="font-size: 34px; margin-bottom: 4px;">🕌</span>
+    <!-- TOP BAR -->
+    <div class="tb" style="flex-direction: column; align-items: flex-start; padding: 20px 16px;">
+      <div class="tb-subtitle" style="font-size: 11px; font-weight: 800; color: #8ea095; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px;">
+        Rohani & Ketenangan
       </div>
-      <div style="margin-top: 16px; font-size: 15px; color: #666;">${greeting}, hati yang tenang dimulai dari sini 🤍</div>
-
-      <div id="sp-ayat-container" style="margin-top: 24px; min-height: 120px;">
-        <div style="padding: 20px; background: #f0f4f2; border-radius: 16px; border: 1px dashed #ccc; text-align:center;">
-          <div style="font-size: 12px; color: #888;">Mencari ayat untukmu hari ini...</div>
-        </div>
+      <div class="tb-main-title" style="font-size: 28px; font-weight: 800; color: #1a5c40; display: flex; align-items: center; gap: 8px; letter-spacing: -0.5px;">
+        Safe Place <span style="font-size: 24px;">🕌</span>
       </div>
     </div>
 
-    <div class="slbl" style="font-weight: 800; color: #153223; font-size: 18px; margin-top: 32px;">🕐 Jadwal Sholat</div>
+    <div class="sp-hero">
+      <div class="sp-arabic">${arabGreeting}</div>
+      <div class="sp-greet">${greeting}</div>
+      <div class="sp-tagline">Hati yang tenang dimulai dari sini 🤍</div>
+
+      <div class="sp-ayat-box" id="sp-ayat-box">
+        <div class="sp-ayat-ar">وَعَسَىٰ أَن تَكْرَهُوا شَيْئًا وَهُوَ خَيْرٌ لَّكُمْ</div>
+        <div class="sp-ayat-id">"Boleh jadi kamu membenci sesuatu, padahal ia amat baik bagimu"</div>
+        <div class="sp-ayat-src">QS. Al-Baqarah: 216</div>
+      </div>
+    </div>
+
+    <!-- HERO ROHANI -->
+    <div class="sp-hero">
+      <div class="sp-arabic">${arabGreeting}</div>
+      <div class="sp-greet">${greeting}</div>
+      <div class="sp-tagline">Hati yang tenang dimulai dari sini 🤍</div>
+
+      <!-- Ayat of the Day -->
+      <div class="sp-ayat-box" id="sp-ayat-box">
+        <div class="sp-ayat-ar">وَعَسَىٰ أَن تَكْرَهُوا شَيْئًا وَهُوَ خَيْرٌ لَّكُمْ</div>
+        <div class="sp-ayat-id">"Boleh jadi kamu membenci sesuatu, padahal ia amat baik bagimu"</div>
+        <div class="sp-ayat-src">QS. Al-Baqarah: 216</div>
+      </div>
+    </div>
+
+    <!-- SECTION: JADWAL SHOLAT -->
+    <div class="slbl">🕐 Jadwal Sholat</div>
     <div class="sp-prayer-card" id="sp-prayer-card">
-       <div style="padding: 20px; text-align:center; font-size: 12px; color: #888;">Mendeteksi lokasi...</div>
+      <div class="sp-prayer-loading">
+        <div class="sp-prayer-dots">
+          <span></span><span></span><span></span>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-top:8px">Mendeteksi lokasi...</div>
+      </div>
     </div>
 
-    <div class="slbl" style="font-weight: 800; color: #153223; font-size: 18px; margin-top: 32px;">📖 Al-Quran</div>
+    <!-- SECTION: AL-QURAN -->
+    <div class="slbl">📖 Al-Quran</div>
     <div class="sp-quran-card">
+      <div class="sp-quran-header">
+        <div>
+          <div class="sp-quran-title">Baca Al-Quran</div>
+          <div class="sp-quran-sub">Pilih surah untuk mulai membaca</div>
+        </div>
+        <div class="sp-quran-badge">10 Surah</div>
+      </div>
       <div class="sp-surah-grid">
         ${FEATURED_SURAHS.map(s => `
           <button class="sp-surah-btn" onclick="window._openSurah(${s.no})">
@@ -128,7 +341,8 @@ function renderSafePlace() {
       </div>
     </div>
 
-    <div class="slbl" style="font-weight: 800; color: #153223; font-size: 18px; margin-top: 32px;">💡 Kajian Islami</div>
+    <!-- SECTION: KAJIAN -->
+    <div class="slbl">💡 Kajian Islami</div>
     <div class="sp-kajian-list">
       ${KAJIAN_LIST.map(k => `
         <div class="sp-kajian-card" onclick="window._openKajian('${k.id}')">
@@ -138,37 +352,30 @@ function renderSafePlace() {
               <div class="sp-kajian-cat">${k.category}</div>
               <div class="sp-kajian-title">${k.title}</div>
             </div>
+            <div class="sp-kajian-time">${k.readTime}</div>
           </div>
+          <div class="sp-kajian-src">📚 ${k.source}</div>
         </div>
       `).join('')}
     </div>
 
-    <div class="slbl" style="font-weight: 800; color: #153223; font-size: 18px; margin-top: 32px;">🤲 Doa Harian</div>
+    <!-- SECTION: DOA HARIAN -->
+    <div class="slbl">🤲 Doa Harian</div>
     <div class="sp-doa-grid">
       ${DOA_LIST.map((d,i) => `
         <button class="sp-doa-btn" onclick="window._showDoa(${i})">
           <span>${d.emoji}</span>
-          <span style="font-size: 13px;">${d.name}</span>
+          <span>${d.name}</span>
         </button>
       `).join('')}
     </div>
-    <div style="height:40px"></div>
+
+    <!-- Spacer -->
+    <div style="height:8px"></div>
   `;
 
-  renderAIAyat();
+  // Load prayer times
   loadAndRenderPrayer();
-}
-
-async function renderAIAyat() {
-  const container = document.getElementById('sp-ayat-container');
-  if (!container) return;
-  const data = await getAIAyat();
-  container.innerHTML = `
-    <div class="sp-ayat-box" style="padding: 20px; background: #f8faf9; border-radius: 16px; border: 1px solid #e2e8e4;">
-      <div style="font-size: 24px; font-weight: bold; text-align: right; margin-bottom: 12px; color: #153223; line-height: 1.8; font-family: serif;">${data.arabic}</div>
-      <div style="font-size: 14px; font-style: italic; color: #4a5c52; margin-bottom: 8px;">"${data.id}"</div>
-      <div style="font-size: 11px; font-weight: 700; color: #8FA89B; text-transform: uppercase;">— ${data.src}</div>
-    </div>`;
 }
 
 /* ════════════════
@@ -177,84 +384,232 @@ async function renderAIAyat() {
 async function loadAndRenderPrayer() {
   const card = document.getElementById('sp-prayer-card');
   if (!card) return;
+
+  let lat, lon, cityName = 'Lokasi kamu';
+
+  // Try cache first
+  try {
+    const cached = JSON.parse(localStorage.getItem('moodly_prayer') || 'null');
+    if (cached && cached.timings) {
+      lat = cached.lat; lon = cached.lon;
+      renderPrayerTimes(cached.timings, cityName);
+    }
+  } catch {}
+
+  // Get geolocation
   if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(async (pos) => {
-      const timings = await fetchPrayerTimes(pos.coords.latitude, pos.coords.longitude);
-      if (timings) renderPrayerTimes(timings, "Lokasi Anda");
-    }, () => {
-      fetchPrayerTimes(-6.2088, 106.8456).then(t => renderPrayerTimes(t, "Jakarta"));
-    });
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        lat = pos.coords.latitude;
+        lon = pos.coords.longitude;
+
+        // Reverse geocode for city name (optional)
+        try {
+          const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
+          const geoJson = await geoRes.json();
+          cityName = geoJson.address?.city || geoJson.address?.county || geoJson.address?.state || 'Lokasi kamu';
+        } catch {}
+
+        const timings = await fetchPrayerTimes(lat, lon);
+        if (timings) renderPrayerTimes(timings, cityName);
+      },
+      () => {
+        // Denied: use default WIB (Jakarta)
+        fetchPrayerTimes(-6.2088, 106.8456).then(t => {
+          if (t) renderPrayerTimes(t, 'Jakarta (default)');
+          else renderPrayerError();
+        });
+      }
+    );
+  } else {
+    renderPrayerError();
   }
 }
 
-async function fetchPrayerTimes(lat, lon) {
-  try {
-    const res = await fetch(`https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=20`);
-    const json = await res.json();
-    return json.data.timings;
-  } catch { return null; }
+const PRAYER_NAMES = {
+  Fajr: { label: 'Subuh', emoji: '🌅' },
+  Dhuhr: { label: 'Dzuhur', emoji: '☀️' },
+  Asr: { label: 'Ashar', emoji: '🌤️' },
+  Maghrib: { label: 'Maghrib', emoji: '🌇' },
+  Isha: { label: 'Isya', emoji: '🌙' },
+};
+
+function renderPrayerTimes(timings, cityName) {
+  const card = document.getElementById('sp-prayer-card');
+  if (!card) return;
+
+  const now = new Date();
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+  function timeToMinutes(str) {
+    const [h, m] = str.split(':').map(Number);
+    return h * 60 + m;
+  }
+
+  // Find next prayer
+  const prayers = Object.entries(PRAYER_NAMES).map(([key, info]) => ({
+    key,
+    ...info,
+    time: timings[key],
+    minutes: timeToMinutes(timings[key]),
+  }));
+
+  const nextPrayer = prayers.find(p => p.minutes > nowMinutes) || prayers[0];
+  const minutesLeft = nextPrayer.minutes - nowMinutes;
+  const hoursLeft = Math.floor(minutesLeft / 60);
+  const minsLeft  = minutesLeft % 60;
+  const countdownStr = minutesLeft > 0
+    ? (hoursLeft > 0 ? `${hoursLeft}j ${minsLeft}m lagi` : `${minsLeft} menit lagi`)
+    : 'Sekarang!';
+
+  card.innerHTML = `
+    <div class="sp-prayer-city">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="2"/></svg>
+      ${cityName}
+    </div>
+
+    <!-- Next prayer highlight -->
+    <div class="sp-next-prayer">
+      <div>
+        <div class="sp-next-label">Sholat Berikutnya</div>
+        <div class="sp-next-name">${nextPrayer.emoji} ${nextPrayer.label}</div>
+        <div class="sp-next-time">${nextPrayer.time} WIB</div>
+      </div>
+      <div class="sp-next-countdown">${countdownStr}</div>
+    </div>
+
+    <!-- All prayers -->
+    <div class="sp-prayer-row">
+      ${prayers.map(p => {
+        const isPast = p.minutes < nowMinutes;
+        const isNext = p.key === nextPrayer.key;
+        return `<div class="sp-prayer-item ${isNext ? 'sp-prayer-next' : ''} ${isPast ? 'sp-prayer-past' : ''}">
+          <span class="sp-pi-em">${p.emoji}</span>
+          <div class="sp-pi-name">${p.label}</div>
+          <div class="sp-pi-time">${p.time}</div>
+          ${isPast ? '<div class="sp-pi-done">✓</div>' : ''}
+        </div>`;
+      }).join('')}
+    </div>
+  `;
 }
 
-function renderPrayerTimes(timings, city) {
+function renderPrayerError() {
   const card = document.getElementById('sp-prayer-card');
-  if (!card || !timings) return;
-  const list = [ {n:'Subuh',t:timings.Fajr}, {n:'Dzuhur',t:timings.Dhuhr}, {n:'Ashar',t:timings.Asr}, {n:'Maghrib',t:timings.Maghrib}, {n:'Isya',t:timings.Isha} ];
+  if (!card) return;
   card.innerHTML = `
-    <div style="font-size: 11px; color: #8FA89B; margin-bottom: 12px; font-weight: 700;">📍 ${city.toUpperCase()}</div>
-    <div style="display: flex; justify-content: space-between; gap: 8px;">
-      ${list.map(p => `<div style="flex: 1; text-align: center; background: #fff; padding: 10px 4px; border-radius: 12px; border: 1px solid #f0f0f0;">
-          <div style="font-size: 10px; color: #888; margin-bottom: 4px;">${p.n}</div>
-          <div style="font-size: 13px; font-weight: 800; color: #153223;">${p.t}</div>
-        </div>`).join('')}
+    <div style="padding:16px;text-align:center;">
+      <div style="font-size:24px;margin-bottom:8px">📍</div>
+      <div style="font-size:13px;color:var(--text);font-weight:600;margin-bottom:4px">Lokasi tidak bisa diakses</div>
+      <div style="font-size:12px;color:var(--muted)">Aktifkan izin lokasi di browser untuk melihat jadwal sholat akurat</div>
+      <button onclick="window._retryPrayer()" style="margin-top:10px;padding:7px 14px;border-radius:100px;background:var(--gl);border:1.5px solid var(--border);font-size:12px;font-weight:600;color:var(--g2);cursor:pointer;font-family:inherit">Coba Lagi</button>
     </div>`;
 }
 
+window._retryPrayer = loadAndRenderPrayer;
+
 /* ════════════════
-   MODAL ACTIONS
+   SURAH READER
 ════════════════ */
 export async function openSurah(no) {
   const modal = document.getElementById('surah-modal');
   if (!modal) return;
+
+  const surahInfo = FEATURED_SURAHS.find(s => s.no === no);
   modal.classList.add('show');
-  document.getElementById('surah-modal-content').innerHTML = '<p style="text-align:center; padding:20px;">Memuat Surah...</p>';
-  
-  try {
-    const res = await fetch(`https://api.alquran.cloud/v1/surah/${no}/id.indonesian`);
-    const json = await res.json();
-    const s = json.data;
-    document.getElementById('surah-modal-title').textContent = s.name + " (" + s.englishName + ")";
-    document.getElementById('surah-modal-content').innerHTML = s.ayahs.map(a => `
-      <div style="margin-bottom:20px; border-bottom:1px solid #eee; padding-bottom:10px;">
-        <div style="font-size:22px; text-align:right; margin-bottom:10px; line-height:1.8;">${a.text} <span style="font-size:14px; color:#888;">(${a.numberInSurah})</span></div>
-        <div style="font-size:14px; color:#445;">${a.text}</div>
-      </div>`).join('');
-  } catch (e) { document.getElementById('surah-modal-content').innerHTML = 'Gagal memuat surah.'; }
+
+  document.getElementById('surah-modal-title').textContent = surahInfo?.name || 'Memuat...';
+  document.getElementById('surah-modal-content').innerHTML = `
+    <div style="text-align:center;padding:32px;color:var(--muted)">
+      <div style="font-size:24px;margin-bottom:8px">📖</div>
+      <div>Memuat surah...</div>
+    </div>`;
+
+  const data = await fetchSurah(no);
+  if (!data) {
+    document.getElementById('surah-modal-content').innerHTML = `
+      <div style="padding:20px;text-align:center;color:var(--muted)">
+        Gagal memuat. Cek koneksi internet kamu.
+      </div>`;
+    return;
+  }
+
+  const { arabic, indonesian } = data;
+  const ayahs = arabic.ayahs;
+  const translations = indonesian.ayahs;
+
+  document.getElementById('surah-modal-title').textContent = `${surahInfo?.theme || '📖'} ${arabic.name} — ${arabic.englishName}`;
+
+  document.getElementById('surah-modal-content').innerHTML = `
+    <div class="surah-meta-row">
+      <span class="surah-meta-badge">${arabic.revelationType === 'Meccan' ? '🕋 Makkiyah' : '🕌 Madaniyah'}</span>
+      <span class="surah-meta-badge">${arabic.numberOfAyahs} Ayat</span>
+      <span class="surah-meta-badge">${arabic.englishNameTranslation}</span>
+    </div>
+    ${no !== 9 ? `<div class="surah-bismillah">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>` : ''}
+    ${ayahs.map((a, i) => `
+      <div class="surah-ayah">
+        <div class="surah-ar">${a.text} <span class="surah-num">﴿${a.numberInSurah}﴾</span></div>
+        <div class="surah-id">${translations[i]?.text || ''}</div>
+      </div>
+    `).join('')}
+  `;
 }
 
+window._openSurah   = openSurah;
+window._closeSurah  = () => document.getElementById('surah-modal')?.classList.remove('show');
+
+/* ════════════════
+   KAJIAN READER
+════════════════ */
 export function openKajian(id) {
-  const k = KAJIAN_LIST.find(x => x.id === id);
+  const kajian = KAJIAN_LIST.find(k => k.id === id);
+  if (!kajian) return;
+
   const modal = document.getElementById('kajian-modal');
-  if (!modal || !k) return;
-  document.getElementById('kajian-modal-title').textContent = k.title;
-  document.getElementById('kajian-modal-content').innerHTML = `<p style="white-space:pre-wrap;">${k.content}</p><br><small>Sumber: ${k.source}</small>`;
+  if (!modal) return;
+
+  document.getElementById('kajian-modal-emoji').textContent   = kajian.emoji;
+  document.getElementById('kajian-modal-cat').textContent     = kajian.category;
+  document.getElementById('kajian-modal-title').textContent   = kajian.title;
+  document.getElementById('kajian-modal-src').textContent     = kajian.source;
+  document.getElementById('kajian-modal-time').textContent    = kajian.readTime;
+
+  // Render content with formatting
+  const contentEl = document.getElementById('kajian-modal-content');
+  contentEl.innerHTML = kajian.content
+    .split('\n')
+    .map(line => {
+      if (line.startsWith('→')) return `<div class="kjm-arrow">${line}</div>`;
+      if (line.startsWith('📿')) return `<div class="kjm-dzikir">${line}</div>`;
+      if (line.startsWith('✦')) return `<div class="kjm-tip">${line}</div>`;
+      if (line.match(/^\d\./)) return `<div class="kjm-num">${line}</div>`;
+      if (line.startsWith('"') || line.startsWith('"')) return `<div class="kjm-quote">${line}</div>`;
+      if (!line.trim()) return '<div style="height:8px"></div>';
+      return `<p class="kjm-p">${line}</p>`;
+    })
+    .join('');
+
   modal.classList.add('show');
 }
+
+window._openKajian  = openKajian;
+window._closeKajian = () => document.getElementById('kajian-modal')?.classList.remove('show');
+
 
 export function showDoa(idx) {
-  const d = DOA_LIST[idx];
+  const doa   = DOA_LIST[idx];
   const modal = document.getElementById('doa-modal');
-  if (!modal || !d) return;
-  document.getElementById('doa-modal-name').textContent = d.name;
-  document.getElementById('doa-modal-ar').textContent = d.arabic;
-  document.getElementById('doa-modal-lat').textContent = d.latin;
-  document.getElementById('doa-modal-arti').textContent = d.arti;
+  if (!modal || !doa) return;
+
+  document.getElementById('doa-modal-emoji').textContent  = doa.emoji;
+  document.getElementById('doa-modal-name').textContent   = doa.name;
+  document.getElementById('doa-modal-ar').textContent     = doa.arabic;
+  document.getElementById('doa-modal-lat').textContent    = doa.latin;
+  document.getElementById('doa-modal-arti').textContent   = doa.arti;
+  document.getElementById('doa-modal-faedah').textContent = doa.faedah;
   modal.classList.add('show');
 }
 
-// Global Bindings
-window._openSurah = openSurah;
-window._openKajian = openKajian;
-window._showDoa = showDoa;
-window._closeSurah = () => document.getElementById('surah-modal')?.classList.remove('show');
-window._closeKajian = () => document.getElementById('kajian-modal')?.classList.remove('show');
+window._showDoa  = showDoa;
 window._closeDoa = () => document.getElementById('doa-modal')?.classList.remove('show');
