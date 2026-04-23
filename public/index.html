@@ -373,6 +373,8 @@
 
 </div><!-- /app -->
 
+<section class="screen" id="safeplace"></section>
+
 <!-- ═══════════════ BOTTOM NAV ═══════════════ -->
 <nav id="nav">
   <button class="ni on" id="ni-home" onclick="window._showScreen('home')">
@@ -549,6 +551,10 @@
   color: #8aab97; cursor: pointer; transition: background .15s;
 }
 .mm-btn-cancel:active { background: #e0f0e8; }
+
+.nav-inner {
+  grid-template-columns: repeat(6, 1fr); /* dari 5 */
+}
 </style>
 
 <script>
