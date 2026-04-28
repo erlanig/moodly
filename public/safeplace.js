@@ -208,25 +208,67 @@ function renderSafePlace() {
   const arabGreeting = h < 12 ? 'صباح الخير' : 'مساء الخير';
 
   screen.innerHTML = `
-    <!-- TOP BAR -->
-    <div class="tb" style="flex-direction: column; align-items: flex-start; padding: 20px 16px;">
-      <div class="tb-subtitle" style="font-size: 11px; font-weight: 800; color: #8ea095; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px;">
-        Rohani & Ketenangan
-      </div>
-      <div class="tb-main-title" style="font-size: 28px; font-weight: 800; color: #1a5c40; display: flex; align-items: center; gap: 8px; letter-spacing: -0.5px;">
-        Safe Place <span style="font-size: 24px;">🕌</span>
+    <!-- TOP BAR — pakai class .tb standar tanpa override padding/direction -->
+    <div class="tb">
+      <div style="display:flex; flex-direction:column; gap:1px;">
+        <div style="font-size:10px; font-weight:800; color:#8ea095; letter-spacing:1.2px; text-transform:uppercase; line-height:1;">
+          Rohani & Ketenangan
+        </div>
+        <div style="font-size:22px; font-weight:800; color:#1a5c40; display:flex; align-items:center; gap:6px; letter-spacing:-0.5px; line-height:1.2;">
+          Safe Place <span style="font-size:20px; line-height:1;">🕌</span>
+        </div>
       </div>
     </div>
 
-    <div class="sp-hero">
-      <div class="sp-arabic">${arabGreeting}</div>
-      <div class="sp-greet">${greeting}</div>
-      <div class="sp-tagline">Hati yang tenang dimulai dari sini 🤍</div>
+    <!-- HERO: Greeting + Kalimat Motivasi -->
+    <div style="
+      margin: 12px 16px 4px;
+      padding: 18px 16px;
+      background: linear-gradient(135deg, #1a5c40 0%, #2e7d55 100%);
+      border-radius: 20px;
+      color: #fff;
+    ">
+      <!-- Salam -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <div>
+          <div style="font-size:11px; opacity:0.7; font-weight:500; margin-bottom:2px;">${greeting}</div>
+          <div style="font-size:22px; font-weight:700; font-family:serif; direction:rtl;">${arabGreeting}</div>
+        </div>
+        <div style="font-size:32px; opacity:0.85;">🕌</div>
+      </div>
 
-      <div class="sp-ayat-box" id="sp-ayat-box">
-        <div class="sp-ayat-ar">وَعَسَىٰ أَن تَكْرَهُوا شَيْئًا وَهُوَ خَيْرٌ لَّكُمْ</div>
-        <div class="sp-ayat-id">"Boleh jadi kamu membenci sesuatu, padahal ia amat baik bagimu"</div>
-        <div class="sp-ayat-src">QS. Al-Baqarah: 216</div>
+      <div style="font-size:12px; opacity:0.75; margin-bottom:14px;">Hati yang tenang dimulai dari sini 🤍</div>
+
+      <!-- Kalimat Motivasi / Ayat -->
+      <div style="
+        background: rgba(255,255,255,0.12);
+        border-radius: 12px;
+        padding: 14px;
+        border: 1px solid rgba(255,255,255,0.18);
+      ">
+        <div style="
+          font-size: 18px;
+          font-weight: 600;
+          text-align: right;
+          direction: rtl;
+          line-height: 1.7;
+          margin-bottom: 8px;
+          font-family: serif;
+          opacity: 0.95;
+        ">وَعَسَىٰ أَن تَكْرَهُوا شَيْئًا وَهُوَ خَيْرٌ لَّكُمْ</div>
+        <div style="
+          font-size: 13px;
+          font-style: italic;
+          opacity: 0.88;
+          line-height: 1.5;
+          margin-bottom: 6px;
+        ">"Boleh jadi kamu membenci sesuatu, padahal ia amat baik bagimu"</div>
+        <div style="
+          font-size: 11px;
+          opacity: 0.65;
+          font-weight: 600;
+          letter-spacing: 0.3px;
+        ">📖 QS. Al-Baqarah: 216</div>
       </div>
     </div>
 
