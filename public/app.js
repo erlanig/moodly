@@ -27,10 +27,19 @@ import { initSafePlace } from './safeplace.js';
 ════════════════ */
 let entries = [];
 let uname   = '';
-let configuredPasscode = DEFAULT_PASSCODE || '241026';
+let configuredPasscode = DEFAULT_PASSCODE || '261004';
 let isPasscodeEnabled = true;
 let enteredPin = '';
 let isSessionUnlocked = false;
+
+window.addEventListener('storage', (e) => {
+  if (e.key === 'moodly_app_passcode' && e.newValue) {
+    configuredPasscode = e.newValue;
+  }
+  if (e.key === 'moodly_passcode_enabled') {
+    isPasscodeEnabled = e.newValue !== 'false';
+  }
+});
 
 /* ════════════════
    BOOT
@@ -65,7 +74,7 @@ async function boot() {
 
   // Load passcode settings from Firestore / local
   const passConfig = await loadAppPasscode();
-  configuredPasscode = String(passConfig.passcode || '241026').trim();
+  configuredPasscode = String(passConfig.passcode || '261004').trim();
   isPasscodeEnabled = passConfig.enabled !== false;
 
   if (isPasscodeEnabled && !isSessionUnlocked) {
@@ -95,21 +104,22 @@ async function boot() {
 export function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
 
-  // nav highlight
+  // nav highlight — iOS Clean Pink & Neutral Gray
   document.querySelectorAll('.ni').forEach(b => {
     b.classList.remove('on','on-pink');
-    b.querySelector('svg').setAttribute('stroke','#8aab97');
-    b.querySelector('.ni-lbl').style.color = '';
+    b.querySelectorAll('svg, path, circle, rect').forEach(el => el.setAttribute('stroke','#8e8e93'));
+    const lbl = b.querySelector('.ni-lbl');
+    if (lbl) lbl.style.color = '#8e8e93';
   });
 
   document.getElementById(id).classList.add('active');
 
   const nb = document.getElementById(`ni-${id}`);
   if (nb) {
-    const pink = id === 'cycle';
-    nb.classList.add(pink ? 'on-pink' : 'on');
-    nb.querySelector('svg').setAttribute('stroke','white');
-    nb.querySelector('.ni-lbl').style.color = 'white';
+    nb.classList.add('on');
+    nb.querySelectorAll('svg, path, circle, rect').forEach(el => el.setAttribute('stroke','#ffffff'));
+    const lbl = nb.querySelector('.ni-lbl');
+    if (lbl) lbl.style.color = '#ffffff';
   }
 
   if (id === 'home')       updateHome();

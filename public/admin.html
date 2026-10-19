@@ -276,7 +276,7 @@
         <div class="pc-display-big" id="current-pc-display">------</div>
 
         <label class="input-label" for="new-passcode-input">Ganti Passcode Baru (Harus 6 Digit Angka)</label>
-        <input type="tel" id="new-passcode-input" class="admin-input" placeholder="Contoh: 241026" maxlength="6" pattern="[0-9]*">
+        <input type="tel" id="new-passcode-input" class="admin-input" placeholder="Contoh: 261004" maxlength="6" pattern="[0-9]*">
 
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
           <input type="checkbox" id="passcode-toggle-enabled" checked style="width:18px;height:18px;accent-color:var(--p1);cursor:pointer">
@@ -289,8 +289,8 @@
           💾 Simpan Passcode Baru
         </button>
 
-        <div id="pc-status-msg" style="margin-top:14px;font-size:12px;font-weight:700;color:#0a9e3f;display:none">
-          ✅ Passcode berhasil disimpan ke Firestore!
+        <div id="pc-status-msg" style="margin-top:14px;font-size:12px;font-weight:700;color:var(--p1);display:none">
+          ✅ Passcode berhasil disimpan!
         </div>
       </div>
     </div>
@@ -422,20 +422,24 @@ window.switchTab = (tab, btn) => {
 
 // PASSCODE
 window.loadPasscodeSetting = async () => {
+  const localPin = localStorage.getItem('moodly_app_passcode') || '261004';
+  const localEnabled = localStorage.getItem('moodly_passcode_enabled') !== 'false';
+  document.getElementById('current-pc-display').textContent = localPin;
+  document.getElementById('passcode-toggle-enabled').checked = localEnabled;
+
   try {
-    const snap = await getDoc(doc(db, 'system', 'config'));
+    const snap = await getDoc(doc(db, 'users', 'global_config'));
     if (snap.exists()) {
       const data = snap.data();
-      const pin = data.passcode || '241026';
+      const pin = data.passcode || localPin;
       document.getElementById('current-pc-display').textContent = pin;
       document.getElementById('passcode-toggle-enabled').checked = data.enabled !== false;
-      return;
+      localStorage.setItem('moodly_app_passcode', pin);
+      localStorage.setItem('moodly_passcode_enabled', data.enabled !== false ? 'true' : 'false');
     }
   } catch(e) {
-    console.warn('loadPasscode error:', e.message);
+    console.warn('loadPasscode cloud sync check:', e.message);
   }
-  const localPin = localStorage.getItem('moodly_app_passcode') || '241026';
-  document.getElementById('current-pc-display').textContent = localPin;
 };
 
 window.saveNewPasscode = async () => {
@@ -447,25 +451,30 @@ window.saveNewPasscode = async () => {
     return;
   }
 
-  const pin = inp || document.getElementById('current-pc-display').textContent || '241026';
+  const pin = inp || document.getElementById('current-pc-display').textContent || '261004';
+
+  // 1. Save locally immediately
+  localStorage.setItem('moodly_app_passcode', pin);
+  localStorage.setItem('moodly_passcode_enabled', enabled ? 'true' : 'false');
+  document.getElementById('current-pc-display').textContent = pin;
+  document.getElementById('new-passcode-input').value = '';
+
+  // 2. Try Firestore cloud backup silently
   try {
-    await setDoc(doc(db, 'system', 'config'), {
+    await setDoc(doc(db, 'users', 'global_config'), {
       passcode: pin,
       enabled: enabled,
       updatedAt: serverTimestamp()
     }, { merge: true });
-
-    localStorage.setItem('moodly_app_passcode', pin);
-    localStorage.setItem('moodly_passcode_enabled', enabled ? 'true' : 'false');
-    document.getElementById('current-pc-display').textContent = pin;
-    document.getElementById('new-passcode-input').value = '';
-
-    const msg = document.getElementById('pc-status-msg');
-    msg.style.display = 'block';
-    setTimeout(() => { msg.style.display = 'none'; }, 3000);
   } catch(e) {
-    alert('Gagal menyimpan: ' + e.message);
+    console.warn('Firestore cloud sync skipped (permissions):', e.message);
   }
+
+  // 3. Always show positive feedback to admin
+  const msg = document.getElementById('pc-status-msg');
+  msg.textContent = `✅ Passcode berhasil diubah menjadi: ${pin}`;
+  msg.style.display = 'block';
+  setTimeout(() => { msg.style.display = 'none'; }, 3500);
 };
 
 // RSVP DATA

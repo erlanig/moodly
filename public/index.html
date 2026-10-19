@@ -75,8 +75,8 @@
     <div class="scard">
       <div class="scard-ic g">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
-          <path d="M9 11l3 3L22 4" stroke="#1db954" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" stroke="#1db954" stroke-width="2" stroke-linecap="round"/>
+          <path d="M9 11l3 3L22 4" stroke="var(--p1, #ff2d55)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" stroke="var(--p1, #ff2d55)" stroke-width="2" stroke-linecap="round"/>
         </svg>
       </div>
       <div><div class="scard-val" id="s-total">0</div><div class="scard-lbl">Total Check-in</div></div>
@@ -96,15 +96,15 @@
   <!-- Chat banner -->
   <div class="home-chat-banner" onclick="window._openChatDirect()">
     <div class="hcb-left">
-      <div class="hcb-avatar">🌱</div>
+      <img src="img/jes-memoji.svg" alt="Jes" class="memoji-avatar hcb-avatar">
       <div>
         <div class="hcb-title">Moodly AI</div>
-        <div class="hcb-sub">Hai! Aku Jes, mau dengerin kamu 💚</div>
+        <div class="hcb-sub">Teman curhatmu, siap mendengarkan</div>
       </div>
     </div>
     <div class="hcb-arrow">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-        <path d="M5 12h14M12 5l7 7-7 7" stroke="#1db954" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M5 12h14M12 5l7 7-7 7" stroke="var(--p1, #ff2d55)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </div>
   </div>
@@ -112,8 +112,8 @@
   <!-- Nearby mental health services -->
   <div class="slbl">
     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" style="vertical-align:middle;margin-right:4px">
-      <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z" stroke="#1db954" stroke-width="2"/>
-      <circle cx="12" cy="10" r="3" stroke="#1db954" stroke-width="2"/>
+      <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z" stroke="var(--p1, #ff2d55)" stroke-width="2"/>
+      <circle cx="12" cy="10" r="3" stroke="var(--p1, #ff2d55)" stroke-width="2"/>
     </svg>
     Layanan Terdekat
   </div>
@@ -352,14 +352,14 @@
   <div class="tb">
     <button class="chat-back" onclick="window._showScreen('home')">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-        <path d="M19 12H5M12 19l-7-7 7-7" stroke="#3a5c46" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M19 12H5M12 19l-7-7 7-7" stroke="#1c1c1e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </button>
     <div class="chat-hd-info">
-      <div class="chat-avatar">🌱</div>
+      <img src="img/jes-memoji.svg" alt="Jes" class="memoji-avatar chat-avatar">
       <div>
         <div class="chat-hd-name">Jes</div>
-        <div class="chat-hd-sub">Teman curhatmu di Moodly 💚</div>
+        <div class="chat-hd-sub">Teman curhatmu di Moodly</div>
       </div>
     </div>
     <div style="width:32px"></div>
@@ -395,40 +395,40 @@
 <!-- ═══════════════ BOTTOM NAV ═══════════════ -->
 <nav id="nav">
   <button class="ni on" id="ni-home" onclick="window._showScreen('home')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#ff2d55" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/>
       <path d="M9 21V12h6v9"/>
     </svg>
-    <span class="ni-lbl" style="color:white">Home</span>
+    <span class="ni-lbl" style="color:#ff2d55">Home</span>
   </button>
   <button class="ni" id="ni-checkin" onclick="window._startCheckin()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="#8aab97" stroke-width="2" stroke-linecap="round">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#8e8e93" stroke-width="2" stroke-linecap="round">
       <circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>
     </svg>
     <span class="ni-lbl">Check</span>
   </button>
   <button class="ni" id="ni-cycle" onclick="window._showScreen('cycle')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="#8aab97" stroke-width="2" stroke-linecap="round">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#8e8e93" stroke-width="2" stroke-linecap="round">
       <circle cx="12" cy="12" r="9"/>
       <path d="M12 7v5l3 3"/>
     </svg>
     <span class="ni-lbl">Siklus</span>
   </button>
   <button class="ni" id="ni-insight" onclick="window._showScreen('insight')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="#8aab97" stroke-width="2" stroke-linecap="round">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#8e8e93" stroke-width="2" stroke-linecap="round">
       <path d="M18 20V10M12 20V4M6 20v-6"/>
     </svg>
     <span class="ni-lbl">Insight</span>
   </button>
   <button class="ni" id="ni-news" onclick="window._showScreen('news')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="#8aab97" stroke-width="2" stroke-linecap="round">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#8e8e93" stroke-width="2" stroke-linecap="round">
       <path d="M4 22h16a2 2 0 002-2V4a2 2 0 00-2-2H8a2 2 0 00-2 2v16a2 2 0 01-2 2zm0 0a2 2 0 01-2-2V8"/>
       <path d="M10 10h6M10 14h6M10 18h4"/>
     </svg>
     <span class="ni-lbl">Artikel</span>
   </button>
   <button class="ni ni-safeplace" id="ni-safeplace" onclick="window._showScreen('safeplace')">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8aab97" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8e8e93" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
       <path d="M3 21h18"/>
       <path d="M5 21V10l7-7 7 7v11"/>
       <path d="M9 21v-6h6v6"/>
@@ -764,24 +764,24 @@
   animation: mm-pop .35s cubic-bezier(.34,1.56,.64,1);
 }
 @keyframes mm-pop { from{transform:scale(.2);opacity:0} to{transform:scale(1);opacity:1} }
-.mm-title { font-size: 17px; font-weight: 800; color: #0f2419; margin-bottom: 6px; letter-spacing: -.02em; }
-.mm-msg   { font-size: 13px; color: #8aab97; line-height: 1.6; margin-bottom: 18px; }
+.mm-title { font-size: 17px; font-weight: 700; color: #1c1c1e; margin-bottom: 6px; letter-spacing: -.02em; }
+.mm-msg   { font-size: 13px; color: #8e8e93; line-height: 1.5; margin-bottom: 18px; }
 .mm-btns  { display: flex; flex-direction: column; gap: 8px; }
 .mm-btn-confirm {
   padding: 13px; border-radius: 14px; border: none; width: 100%;
-  font-family: inherit; font-size: 14px; font-weight: 700;
-  background: linear-gradient(135deg, #1db954, #0a9e3f); color: #fff;
+  font-family: inherit; font-size: 14px; font-weight: 600;
+  background: var(--p1, #ff2d55); color: #fff;
   cursor: pointer; transition: transform .12s, opacity .12s;
 }
-.mm-btn-confirm.danger { background: linear-gradient(135deg, #ef4444, #c62828); }
-.mm-btn-confirm:active { transform: scale(.96); opacity: .9; }
+.mm-btn-confirm.danger { background: #ff3b30; }
+.mm-btn-confirm:active { transform: scale(.97); opacity: .9; }
 .mm-btn-cancel {
   padding: 12px; border-radius: 14px; width: 100%;
-  border: 1.5px solid #e0f0e8; background: #f4faf7;
+  border: 1px solid rgba(0, 0, 0, 0.08); background: #f2f2f7;
   font-family: inherit; font-size: 14px; font-weight: 600;
-  color: #8aab97; cursor: pointer; transition: background .15s;
+  color: #1c1c1e; cursor: pointer; transition: background .15s;
 }
-.mm-btn-cancel:active { background: #e0f0e8; }
+.mm-btn-cancel:active { background: #e5e5ea; }
 
 .nav-inner {
   grid-template-columns: repeat(6, 1fr); /* dari 5 */
@@ -836,7 +836,7 @@
     if (!t) {
       t = document.createElement('div');
       t.id = 'moodly-toast';
-      t.style.cssText = 'position:fixed;bottom:96px;left:50%;transform:translateX(-50%) translateY(20px);background:#0f2419;color:#fff;padding:10px 20px;border-radius:100px;font-size:13px;font-weight:600;font-family:inherit;z-index:800;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap;max-width:calc(100% - 40px);text-align:center';
+      t.style.cssText = 'position:fixed;bottom:96px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(28,28,30,0.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);color:#fff;padding:11px 22px;border-radius:100px;font-size:13px;font-weight:600;font-family:inherit;z-index:800;opacity:0;transition:all .25s cubic-bezier(0.16,1,0.3,1);pointer-events:none;white-space:nowrap;max-width:calc(100% - 40px);text-align:center;box-shadow:0 8px 24px rgba(0,0,0,0.18)';
       document.body.appendChild(t);
     }
     t.textContent = msg;

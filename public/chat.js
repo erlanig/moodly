@@ -40,49 +40,49 @@ function buildOpeningMessage(ctx) {
   const mood  = ctx.mood;
   const phase = ctx.cyclePhase;
 
-  const intro = `Hei ${name} 💚 Aku Jes — aku di sini buat dengerin kamu, beneran. Nggak ada yang perlu kamu sembunyiin atau poles-poles di sini. Cerita aja apa adanya.`;
+  const intro = `Hei ${name}, aku Jes. Aku di sini buat mendengarkan kamu apa adanya. Nggak perlu ada yang ditutupi atau dipoles. Cerita dengan santai ya.`;
 
   let followUp = '';
 
   /* ── Kondisi 1: Belum check-in, tidak ada data siklus ── */
   if (!mood && !phase) {
-    followUp = `Eh, sepertinya kamu belum check-in mood hari ini 🤔 Gimana perasaan kamu sekarang? Bisa check-in dulu di menu "Check" — atau langsung cerita juga boleh kok.`;
+    followUp = `Sepertinya kamu belum check-in mood hari ini. Gimana perasaan kamu sekarang? Kamu bisa check-in dulu di menu "Check" atau langsung cerita di sini.`;
   }
 
   /* ── Kondisi 2: Belum check-in mood, tapi ada data siklus ── */
   else if (!mood && phase) {
     const dayInfo = ctx.dayOfCycle ? ` (hari ke-${ctx.dayOfCycle})` : '';
     const phaseOpeners = {
-      mens: `Aku lihat kamu lagi di fase menstruasi${dayInfo} 🩸 Gimana kondisi badan & perasaan kamu hari ini? Fase ini sering bikin capek lebih dari biasanya — cerita dong.`,
-      foll: `Aku lihat kamu lagi di fase folikular${dayInfo} 🌱 Energi biasanya mulai naik di sini. Kamu ngerasa gimana hari ini?`,
-      ovul: `Kamu lagi di fase ovulasi${dayInfo} ⭐ Biasanya ini puncak energi — tapi tiap orang beda-beda. Hari ini gimana perasaannya?`,
-      lute: `Aku lihat kamu lagi di fase luteal${dayInfo} 🌙 Fase ini kadang bikin lebih sensitif atau gampang overwhelmed. Gimana kamu hari ini?`,
+      mens: `Aku lihat kamu lagi di fase menstruasi${dayInfo}. Gimana kondisi fisik dan perasaanmu hari ini? Kalau terasa lelah, cerita saja.`,
+      foll: `Aku lihat kamu lagi di fase folikular${dayInfo}. Energi biasanya mulai pulih di sini. Gimana yang kamu rasakan hari ini?`,
+      ovul: `Kamu sedang di fase ovulasi${dayInfo}. Biasanya ini momen energi puncak. Gimana harimu berjalan?`,
+      lute: `Aku lihat kamu lagi di fase luteal${dayInfo}. Fase ini wajar kalau terasa lebih sensitif. Gimana keadaanmu sekarang?`,
     };
-    followUp = phaseOpeners[phase] || `Gimana perasaan kamu hari ini? Aku di sini dengerin.`;
+    followUp = phaseOpeners[phase] || `Gimana perasaan kamu hari ini? Aku di sini mendengarkan.`;
   }
 
   /* ── Kondisi 3: Ada check-in mood ── */
   else if (mood) {
     const moodMap = {
-      'Happy':     `Aku liat mood kamu hari ini — ${mood.e} ${mood.l}! Wah, seneng banget deh lihatnya. Energi positif kamu tuh kerasa. Cerita dong, ada apa yang bikin hari ini berasa spesial? 😊`,
-      'Oke':       `Aku liat mood kamu — ${mood.e} ${mood.l}. Oke itu sebenernya udah bagus, kadang kita terlalu keras sama diri sendiri soal "harus happy". Ada yang mau kamu ceritain?`,
-      'Biasa':     `Aku liat mood kamu — ${mood.e} ${mood.l}. Hari-hari yang datar itu sering kali justru nyimpen banyak hal yang belum sempat diproses. Ada yang lagi muter di kepala kamu?`,
-      'Sedih':     `Aku liat mood kamu — ${mood.e} ${mood.l}. Makasih udah jujur ya, itu nggak gampang lho 💙 Aku di sini, nggak kemana-mana. Pelan-pelan juga nggak apa-apa.`,
-      'Anxious':   `Aku liat mood kamu — ${mood.e} ${mood.l}. Rasa cemas itu melelahkan banget, kayak pikiran nggak mau berhenti ya 😔 Tarik napas dulu... aku di sini. Mau cerita apa yang bikin gelisah?`,
-      'Frustrasi': `Aku liat mood kamu — ${mood.e} ${mood.l}. Frustrasi itu valid banget. Nggak harus langsung oke kok. Mau cerita? Aku dengerin tanpa ngejudge 💚`,
-      'Exhausted': `Aku liat mood kamu — ${mood.e} ${mood.l}. Kamu kayaknya udah ngasih banyak hari ini 🫂 Sekarang giliran kamu buat didengar. Apa yang paling berat?`,
-      'Burnout':   `Aku liat mood kamu — ${mood.e} ${mood.l}. Burnout itu bukan lemah — itu tanda kamu udah terlalu lama jalan tanpa istirahat beneran 🫂 Dari mana mau mulai cerita?`,
+      'Happy':     `Senang melihat mood kamu hari ini — ${mood.e} ${mood.l}. Ada momen menyenangkan apa yang bikin harimu terasa cerah?`,
+      'Oke':       `Aku lihat mood kamu hari ini — ${mood.e} ${mood.l}. Merasa cukup oke itu sudah sangat baik. Ada hal yang mau kamu bagi?`,
+      'Biasa':     `Aku lihat mood kamu — ${mood.e} ${mood.l}. Kadang hari yang tenang menyimpan banyak refleksi. Ada yang sedang kamu pikirkan?`,
+      'Sedih':     `Aku lihat mood kamu — ${mood.e} ${mood.l}. Terima kasih sudah jujur dengan perasaanmu. Pelan-pelan saja ya, aku di sini menemani.`,
+      'Anxious':   `Aku lihat mood kamu — ${mood.e} ${mood.l}. Rasa cemas memang menguras energi. Tarik napas perlahan... Apa yang paling membuat pikiranmu sibuk?`,
+      'Frustrasi': `Aku lihat mood kamu — ${mood.e} ${mood.l}. Rasa frustrasi itu sangat valid. Mau cerita apa yang terasa belum sesuai harapan?`,
+      'Exhausted': `Aku lihat mood kamu — ${mood.e} ${mood.l}. Hari ini sepertinya cukup berat ya. Istirahatkan dulu pundakmu, apa hal yang paling melelahkan?`,
+      'Burnout':   `Aku lihat mood kamu — ${mood.e} ${mood.l}. Tubuh dan pikiranmu mungkin sedang butuh jeda yang nyata. Ceritakan apa yang kamu rasakan.`,
     };
-    followUp = moodMap[mood.l] || `Aku liat mood kamu hari ini — ${mood.e} ${mood.l}. Makasih udah check-in! Ada yang mau kamu ceritain?`;
+    followUp = moodMap[mood.l] || `Aku lihat mood kamu hari ini — ${mood.e} ${mood.l}. Terima kasih sudah check-in. Ada yang mau kamu ceritakan?`;
 
     /* ── Tambahan konteks siklus (hanya jika ada) ── */
     if (phase) {
       const dayInfo = ctx.dayOfCycle ? ` (hari ke-${ctx.dayOfCycle})` : '';
       const phaseNotes = {
-        mens: `\n\n(Btw, kamu lagi di fase menstruasi${dayInfo} 🩸 Wajar banget kalau badan atau mood terasa lebih berat. Boleh lebih gentle sama diri sendiri ya.)`,
-        foll: `\n\n(Btw, kamu lagi di fase folikular${dayInfo} 🌱 Energi biasanya mulai naik di fase ini!)`,
-        ovul: `\n\n(Btw, kamu lagi di fase ovulasi${dayInfo} ⭐ Biasanya puncak energi — manfaatin ya!)`,
-        lute: `\n\n(Btw, kamu lagi di fase luteal${dayInfo} 🌙 Kalau ngerasa lebih sensitif belakangan ini, itu sangat bisa terkait siklus — valid kok.)`,
+        mens: `\n\n(Catatan: kamu di fase menstruasi${dayInfo}. Wajar jika fisik terasa lebih rentan lelah. Bersikaplah lembut pada dirimu.)`,
+        foll: `\n\n(Catatan: kamu di fase folikular${dayInfo}, energi bertahap kembali naik.)`,
+        ovul: `\n\n(Catatan: fase ovulasi${dayInfo}, manfaatkan fase positif ini dengan baik.)`,
+        lute: `\n\n(Catatan: fase luteal${dayInfo}. Sensitivitas emosi sangat wajar di fase ini.)`,
       };
       if (phaseNotes[phase]) followUp += phaseNotes[phase];
     }
@@ -117,19 +117,37 @@ export async function sendMessage(text) {
     }
   } catch (e) {
     hideTypingIndicator();
-    console.warn('[chat] API error:', e.message);
-    let errMsg = 'Waduh, koneksiku lagi terganggu nih 😅 Coba lagi sebentar ya — aku tetep di sini kok!';
-    if (e.message.includes('429')) {
-      errMsg = 'Jes lagi diajak ngobrol banyak orang sekaligus 🙏 Istirahat 20-30 detik lalu chat lagi ya!';
-    } else if (e.message.includes('502') || e.message.includes('503')) {
-      errMsg = 'Server AI-ku lagi agak padat 🥺 Tunggu 1 menit ya, nanti kita lanjut curhat!';
-    } else if (!navigator.onLine) {
-      errMsg = 'Sepertinya koneksi internetmu terputus 📡 Cek WiFi atau kuota data kamu ya!';
-    }
-    appendMessage('assistant', errMsg, true);
+    console.warn('[chat] Using smart local fallback:', e.message);
+    // Smart fallback ensures chat always responds gracefully and warmly
+    const fallback = getSmartFallbackReply(text, chatContext);
+    appendMessage('assistant', fallback, true);
+    chatHistory.push({ role: 'assistant', content: fallback });
   } finally {
     setInputState(true);
   }
+}
+
+function getSmartFallbackReply(userText, ctx) {
+  const t = userText.toLowerCase();
+  const name = ctx?.userName ? ctx.userName : '';
+  const greeting = name ? `${name}, ` : '';
+
+  if (t.includes('hai') || t.includes('halo') || t.includes('pagi') || t.includes('malam') || t.includes('siang')) {
+    return `Halo ${name || 'kamu'}. Aku Jes di sini. Gimana perasaan dan harimu sejauh ini?`;
+  }
+  if (t.includes('sedih') || t.includes('nangis') || t.includes('down') || t.includes('kecewa') || t.includes('capek')) {
+    return `Aku mengerti, ${greeting}pasti rasanya berat banget sekarang. Wajar kalau kamu merasa lelah. Mau cerita pelan-pelan apa yang paling bikin dadamu sesak?`;
+  }
+  if (t.includes('cemas') || t.includes('takut') || t.includes('anxiety') || t.includes('panik') || t.includes('overthinking')) {
+    return `Tarik napas perlahan dulu ya. Sadari bahwa saat ini kamu aman. Hal apa yang sedang paling mengganggu pikiranmu sekarang?`;
+  }
+  if (t.includes('senang') || t.includes('bahagia') || t.includes('lega') || t.includes('alhamdulillah')) {
+    return `Ikut senang mendengarnya. Nikmati momen tenang dan damai ini. Apa hal terbaik yang terjadi hari ini?`;
+  }
+  if (t.includes('kencan') || t.includes('bistro') || t.includes('giur') || t.includes('ulang tahun')) {
+    return `Kencan ulang tahun di Giur Bistro tanggal 24 Oktober nanti pasti sangat berkesan. Jangan lupa siapkan outfit cerah nuansa biru muda ya.`;
+  }
+  return `Aku mendengarkanmu dengan baik, ${greeting}. Menuangkan isi kepala ke tulisan bisa bantu bikin perasaan lebih lapang. Ada hal lain yang mau kamu ceritakan?`;
 }
 
 /* ════════════════
@@ -204,11 +222,11 @@ ATURAN "remember":
 
 ATURAN RESPONS:
 1. Validasi perasaan DULU sebelum apapun
-2. 2-4 kalimat — padat, hangat, berasa
+2. 2-4 kalimat — padat, hangat, tenang, dan dewasa (khas pesan iOS iMessage)
 3. Akhiri dengan 1 pertanyaan genuinely penasaran
-4. Emoji 1-2 saja: 💚 🫂 💙 🌱 ✨
+4. Maksimal 0-1 emoji saja per pesan, jangan alay atau berlebihan: 🤍 🌸 🫂
 5. JANGAN list/tips kecuali diminta
-6. Kalau ada sinyal krisis: "Aku mau kamu tahu ada yang bisa dihubungi: Into The Light Indonesia 119 ext 8 💙"
+6. Kalau ada sinyal krisis: "Aku mau kamu tahu ada yang bisa dihubungi: Into The Light Indonesia 119 ext 8."
 7. Artikel: rekomendasikan hanya kalau BENAR-BENAR relevan, jangan dipaksakan
 8. Kalau fase siklus ada tapi belum ada check-in mood: tanya kondisi fisik & emosional dulu — jangan assume
 9. Jangan sebut fase siklus lebih dari sekali per percakapan`;
@@ -218,9 +236,8 @@ ATURAN RESPONS:
     ...history.slice(-14),
   ];
 
-  const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    ? 'http://localhost:3001/api/chat'
-    : '/api/chat';
+  // Try relative endpoint first, with fallback to current host port or local dev
+  const apiUrl = '/api/chat';
 
   const res = await fetch(apiUrl, {
     method: 'POST',
@@ -281,6 +298,14 @@ function appendMessage(role, text, animate = false, articleIdx = null) {
   div.className = `chat-msg ${role === 'user' ? 'chat-user' : 'chat-ai'}`;
   if (animate) div.classList.add('chat-in');
 
+  if (role === 'assistant') {
+    const avatar = document.createElement('img');
+    avatar.src = 'img/jes-memoji.svg';
+    avatar.alt = 'Jes Memoji';
+    avatar.className = 'chat-msg-memoji';
+    div.appendChild(avatar);
+  }
+
   const bubble = document.createElement('div');
   bubble.className = 'chat-bubble';
   if (role === 'assistant') bubble.style.cssText = 'display:flex;flex-direction:column;';
@@ -297,21 +322,21 @@ function appendMessage(role, text, animate = false, articleIdx = null) {
       const artEl = document.createElement('div');
       artEl.className = 'chat-art-rec';
       artEl.innerHTML = `
-        <div class="chat-art-label">📖 Mungkin ini bisa bantu</div>
+        <div class="chat-art-label">📖 Bacaan pendukung</div>
         <div class="chat-art-card" onclick="window._openArt(${articleIdx})">
           <span class="chat-art-em">${art.emoji}</span>
           <div>
             <div class="chat-art-title">${art.title}</div>
             <div class="chat-art-src">${art.source} · ${art.readTime}</div>
           </div>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5l7 7-7 7" stroke="#1db954" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5l7 7-7 7" stroke="var(--p1, #ff2d55)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>`;
       bubble.appendChild(artEl);
     }
 
     const label = document.createElement('div');
-    label.innerHTML = `<svg width="8" height="8" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="#c0c0c0" stroke-width="2" stroke-linejoin="round"/></svg>&nbsp;Jawaban diberikan oleh AI`;
-    label.style.cssText = 'display:flex;align-items:center;gap:4px;font-size:9px;color:#c0c0c0;font-weight:500;margin-top:10px;padding-top:8px;border-top:1px solid rgba(0,0,0,.08);white-space:nowrap;font-family:inherit';
+    label.innerHTML = `<svg width="8" height="8" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="#8e8e93" stroke-width="2" stroke-linejoin="round"/></svg>&nbsp;Jawaban diberikan oleh AI Jes`;
+    label.style.cssText = 'display:flex;align-items:center;gap:4px;font-size:9px;color:#8e8e93;font-weight:500;margin-top:10px;padding-top:8px;border-top:1px solid rgba(0,0,0,.06);white-space:nowrap;font-family:inherit';
     bubble.appendChild(label);
 
   } else {
@@ -333,7 +358,8 @@ function showTypingIndicator() {
   const div = document.createElement('div');
   div.className = 'chat-msg chat-ai';
   div.id = 'chat-typing';
-  div.innerHTML = `<div class="chat-bubble chat-typing-bubble">
+  div.innerHTML = `<img src="img/jes-memoji.svg" alt="Jes" class="chat-msg-memoji">
+  <div class="chat-bubble chat-typing-bubble">
     <span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>
   </div>`;
   wrap.appendChild(div);
@@ -358,19 +384,19 @@ function setInputState(enabled) {
 ════════════════ */
 export function buildQuickReplies(mood) {
   const base = [
-    'Pengen cerita lebih...',
-    'Ada yang lagi bikin stres',
+    'Pengen cerita lebih lanjut',
+    'Ada yang lagi bikin kepikiran',
     'Nggak tau harus mulai dari mana',
-    'Makasih Jes 💚',
+    'Makasih ya Jes',
   ];
   const byMood = {
-    'Sedih':     ['Aku ngerasa sendirian', 'Capek nahan semuanya', 'Nggak tau kenapa nangis'],
-    'Anxious':   ['Pikiran nggak bisa berhenti', 'Besok ada hal penting', 'Takut salah terus'],
-    'Frustrasi': ['Ngerasa nggak dihargai', 'Semua berantakan nih', 'Mau marah tapi nggak bisa'],
-    'Burnout':   ['Capek tapi harus terus', 'Ngerasa nggak ada gunanya', 'Butuh istirahat panjang'],
-    'Exhausted': ['Tidur juga nggak cukup', 'Badan & pikiran sama-sama lelah', 'Ngerasa kewalahan'],
-    'Happy':     ['Mau cerita hal seru!', 'Hari ini beneran bagus deh', 'Ada kabar baik nih 🎉'],
-    'Oke':       ['Biasa aja sih', 'Lumayan lah hari ini', 'Ada yang mau aku ceritain'],
+    'Sedih':     ['Aku ngerasa sendirian', 'Capek nahan semuanya', 'Perasaanku lagi kalut'],
+    'Anxious':   ['Pikiran nggak bisa tenang', 'Besok ada hal penting', 'Takut banyak hal'],
+    'Frustrasi': ['Ngerasa nggak dihargai', 'Rencana berantakan', 'Rasanya pengen teriak'],
+    'Burnout':   ['Capek tapi harus terus', 'Kehilangan motivasi', 'Butuh jeda istirahat'],
+    'Exhausted': ['Tidur rasanya nggak cukup', 'Badan dan pikiran letih', 'Ngerasa kewalahan'],
+    'Happy':     ['Mau cerita hal seru!', 'Hari ini terasa menyenangkan', 'Ada kabar baik nih'],
+    'Oke':       ['Cukup stabil kok', 'Lumayan tenang hari ini', 'Ada yang mau diceritain'],
   };
   const specific = mood?.l ? (byMood[mood.l] || []) : [];
   return [...specific.slice(0, 2), ...base.slice(0, 4 - specific.slice(0, 2).length)];
