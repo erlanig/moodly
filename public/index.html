@@ -79,20 +79,105 @@
     </div>
   </div>
 
-  <!-- Special Birthday Date Reminder Banner (Apple Pass / Ticket style) -->
-  <div id="home-date-pill" onclick="window._openDateInvitation()">
-    <div class="hdp-left">
-      <div class="hdp-icon-tile">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff2d55" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+  <!-- ═══════════════ SPECIAL BIRTHDAY DATE INVITATION MODAL ═══════════════ -->
+  <div id="birthday-date-modal" onclick="if(event.target===this)window._closeDateInvitation()">
+    <div class="bday-card">
+      <div class="bday-hero-img-box">
+        <!-- Ilustrasi Animasi Giur Bistro yang Di-update -->
+        <div class="giur-bistro-art">
+          <div class="night-sky">
+            <div class="stars-particle"></div>
+            <div class="glow-particle"></div>
+            <div class="festive-streamers"></div>
+          </div>
+          <div class="bday-decor-balloons">🎈🎈</div>
+          <div class="giur-art-building">
+            <!-- Menggunakan sketsa dari image_0.png yang kini diwarnai & hidup -->
+            <img src="img/giur.png" alt="Giur Bistro Bandung" class="giur-facade">
+            <div class="neon-giur">GIUR</div>
+            <div class="warm-window-lights"></div>
+          </div>
+        </div>
+        <div class="bday-badge-top">✨ Special Invitation</div>
+        <button class="bday-close-btn" onclick="window._closeDateInvitation()">✕</button>
       </div>
-      <div>
-        <div class="hdp-title">Undangan Kencan Ulang Tahun</div>
-        <div class="hdp-sub">Sabtu, 24 Okt 2026 · Giur Bistro, Bandung</div>
+
+      <div class="bday-body">
+        <div class="bday-title">
+          Kencan Spesial & <span>Ulang Tahunmu</span>
+        </div>
+
+        <div class="bday-intro">
+          "Untuk naikin mood kamu, developer Moodly mau ngajak kamu kencan dan makan spesial ngerayain ulang tahunmu! Siapkan kebahagiaanmu sepuasnya ya"
+        </div>
+
+        <!-- Live Countdown -->
+        <div class="bday-countdown-box">
+          <div class="bday-cd-label">Menghitung Waktu Menuju Kencan</div>
+          <div class="bday-cd-digits" id="bday-countdown">
+            <div class="bday-cd-seg"><span class="bday-cd-num" id="cd-days">--</span><span class="bday-cd-txt">Hari</span></div>
+            <span class="bday-cd-sep">:</span>
+            <div class="bday-cd-seg"><span class="bday-cd-num" id="cd-hours">--</span><span class="bday-cd-txt">Jam</span></div>
+            <span class="bday-cd-sep">:</span>
+            <div class="bday-cd-seg"><span class="bday-cd-num" id="cd-mins">--</span><span class="bday-cd-txt">Menit</span></div>
+            <span class="bday-cd-sep">:</span>
+            <div class="bday-cd-seg"><span class="bday-cd-num" id="cd-secs">--</span><span class="bday-cd-txt">Detik</span></div>
+          </div>
+        </div>
+
+        <!-- Details -->
+        <div class="bday-detail-card">
+          <div class="bday-detail-ic-custom">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ff2d55" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </div>
+          <div class="bday-detail-info">
+            <div class="bday-detail-h">Waktu & Tanggal</div>
+            <div class="bday-detail-sub">Sabtu, 24 Oktober 2026 · Pukul 15.00 WIB</div>
+          </div>
+        </div>
+
+        <div class="bday-detail-card">
+          <div class="bday-detail-ic-custom">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ff2d55" stroke-width="2"><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/><circle cx="12" cy="10" r="3"/></svg>
+          </div>
+          <div class="bday-detail-info">
+            <div class="bday-detail-h">Giur Bistro</div>
+            <div class="bday-detail-sub">Jl. Aria Jipang No. 1-3, Citarum, Kec. Bandung Wetan, Kota Bandung, Jawa Barat 40115 (Dekat Gedung Sate)</div>
+          </div>
+        </div>
+
+        <!-- Dress Code -->
+        <div class="bday-dresscode">
+          <div class="dress-icon-box">
+            <!-- Ilustrasi Gaun Vektor Sederhana -->
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2"><path d="M6 3h12l1 5-4 2v11H9V10L5 8z"/></svg>
+          </div>
+          <div class="bday-dress-info">
+            <h4>Dress Code Spesial</h4>
+            <p>Gunakan outfit cerah dengan sentuhan nuansa biru muda ya!</p>
+          </div>
+        </div>
+
+        <!-- Map Link Card -->
+        <div class="bday-map-preview">
+          <div class="bday-map-banner">
+            <div class="bday-map-addr">Lokasi: Giur Bistro, Jl. Aria Jipang Bandung</div>
+            <a href="https://www.google.com/maps/search/?api=1&query=Giur+Bistro+Bandung" target="_blank" class="bday-map-link-btn">
+              Buka Maps ↗
+            </a>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="bday-rsvp-actions">
+          <button class="bday-rsvp-btn primary" onclick="window._acceptDateInvite()">
+            Aku Pasti Datang! 💖🥰
+          </button>
+          <button class="bday-rsvp-btn secondary" onclick="window._closeDateInvitation()">
+            Siap, Masuk ke Moodly ✨
+          </button>
+        </div>
       </div>
-    </div>
-    <div class="hdp-badge">
-      Buka
-      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
     </div>
   </div>
 

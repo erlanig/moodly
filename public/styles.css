@@ -2148,16 +2148,16 @@ html, body {
 }
 
 /* ════════════════════════════════════════
-   SPECIAL BIRTHDAY DATE INVITATION GIMMICK
+   UPDATE SPECIAL BIRTHDAY DATE INVITATION GIMMICK
 ════════════════════════════════════════ */
 #birthday-date-modal {
   position: fixed; inset: 0; z-index: 9999;
-  background: rgba(38, 12, 24, 0.6);
-  backdrop-filter: blur(14px);
+  background: rgba(28, 12, 24, 0.65);
+  backdrop-filter: blur(16px);
   display: flex; align-items: center; justify-content: center;
   padding: 20px 16px;
   opacity: 0; pointer-events: none; visibility: hidden;
-  transition: all .32s cubic-bezier(.22, 1, .36, 1);
+  transition: all .35s cubic-bezier(.22, 1, .36, 1);
 }
 #birthday-date-modal.show {
   opacity: 1; pointer-events: auto; visibility: visible;
@@ -2168,137 +2168,179 @@ html, body {
   width: 100%; max-width: 380px; max-height: 88dvh;
   overflow-y: auto; overflow-x: hidden;
   position: relative;
-  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.16), 0 0 0 1px rgba(0, 0, 0, 0.04);
-  transform: translateY(24px) scale(0.94);
-  transition: transform .36s cubic-bezier(.34, 1.56, .64, 1);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  transform: translateY(32px) scale(0.93);
+  transition: transform .4s cubic-bezier(.34, 1.56, .64, 1);
 }
 #birthday-date-modal.show .bday-card {
   transform: none;
 }
 .bday-hero-img-box {
-  height: 160px; width: 100%;
+  height: 190px; width: 100%;
   position: relative; overflow: hidden;
-  background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 50%, #70a6ff 100%);
-  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(180deg, #1e1b4b 0%, #311b92 100%); /* Langit malam yang dalam */
+  display: flex; align-items: flex-end; justify-content: center;
 }
-.bday-hero-decor {
+
+/* Animasi Giur Bistro yang Hidup & Berwarna */
+.giur-bistro-art {
+  width: 100%; height: 100%;
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+}
+.giur-facade {
+  width: auto; height: 120px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
+  animation: floatArt 4s ease-in-out infinite;
+  z-index: 2;
+}
+.neon-giur {
+  position: absolute; top: 78px; left: 50%; transform: translateX(-50%);
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 16px; font-weight: 900; color: #fff5eb;
+  text-shadow: 0 0 4px #ff9800, 0 0 10px #ff5722;
+  z-index: 3;
+  animation: flicker 1.8s infinite alternate;
+}
+@keyframes flicker {
+  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 0.99; }
+  20%, 24%, 55% { opacity: 0.7; }
+}
+@keyframes floatArt {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+/* Keadaan Malam & Dekorasi Interaktif */
+.night-sky {
   position: absolute; inset: 0;
-  background: radial-gradient(circle at 80% 20%, rgba(255,255,255,0.4) 0%, transparent 50%);
+  background: radial-gradient(circle at 50% 30%, rgba(255, 235, 240, 0.1) 0%, transparent 70%);
 }
+.stars-particle {
+  position: absolute; inset: 0;
+  background-image: radial-gradient(#ffffff 1px, transparent 1px);
+  background-size: 24px 24px;
+  opacity: 0.4;
+}
+/* Efek Glow & Sparkles Melayang di Udara */
+.glow-particle {
+  position: absolute; inset: 0;
+  background: radial-gradient(4px 4px at 20% 40%, #ffeb3b, transparent),
+              radial-gradient(3px 3px at 70% 30%, #ffd54f, transparent),
+              radial-gradient(4px 4px at 40% 70%, #ff80ab, transparent),
+              radial-gradient(5px 5px at 85% 50%, #80deea, transparent);
+  animation: particleShift 8s infinite ease-in-out alternate;
+  z-index: 1;
+}
+@keyframes particleShift {
+  0% { transform: translateY(0) scale(1); opacity: 0.3; }
+  50% { transform: translateY(-8px) scale(1.1); opacity: 0.75; }
+  100% { transform: translateY(2px) scale(0.9); opacity: 0.4; }
+}
+
+.bday-decor-balloons {
+  position: absolute; top: 18px; right: 20px;
+  font-size: 24px; opacity: 0.8;
+  animation: floatBalloons 5s ease-in-out infinite alternate;
+}
+@keyframes floatBalloons {
+  0% { transform: translateY(0) rotate(0deg); }
+  100% { transform: translateY(-8px) rotate(4deg); }
+}
+
+/* Detail UI & Countdown */
 .bday-badge-top {
   position: absolute; top: 14px; left: 14px;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(8px);
-  padding: 5px 12px; border-radius: 100px;
-  font-size: 11px; font-weight: 800; color: var(--p1);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  display: flex; align-items: center; gap: 4px;
+  padding: 4px 10px; border-radius: 100px;
+  font-size: 10px; font-weight: 800; color: #ff2d55;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 .bday-close-btn {
   position: absolute; top: 12px; right: 12px;
-  width: 32px; height: 32px; border-radius: 50%;
-  background: rgba(255, 255, 255, 0.85);
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(255, 255, 255, 0.88);
   border: none; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  font-size: 15px; font-weight: 700; color: var(--text);
-  box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+  font-size: 14px; font-weight: 700; color: var(--text);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.12);
   transition: transform .12s;
 }
 .bday-close-btn:active { transform: scale(0.9); }
 
-/* Giur Bistro Illustration */
-.giur-bistro-art {
-  width: 100%; height: 100%;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  position: relative;
-}
-.giur-art-building {
-  font-size: 60px; filter: drop-shadow(0 6px 14px rgba(0,0,0,0.18));
-  animation: floatArt 3.5s ease-in-out infinite;
-}
-@keyframes floatArt {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
-}
-
 .bday-body {
-  padding: 22px 20px 24px;
+  padding: 24px 20px 24px;
   display: flex; flex-direction: column; gap: 14px;
 }
 .bday-title {
   font-size: 21px; font-weight: 800; color: var(--text);
   line-height: 1.3; letter-spacing: -.02em; text-align: center;
 }
-.bday-title span {
-  color: var(--p1);
-}
+.bday-title span { color: var(--p1); }
 .bday-intro {
-  font-size: 13px; line-height: 1.6; color: var(--text2);
-  text-align: center; background: #fff5f8; border: 1.5px dashed #ffccd7;
+  font-size: 12.5px; line-height: 1.6; color: var(--text2);
+  text-align: center; background: #fff5f8; border: 1.5px dashed #ffb8cc;
   border-radius: 16px; padding: 12px 14px;
 }
 
-/* Countdown Box */
+/* Countdown Box Baru */
 .bday-countdown-box {
   background: linear-gradient(135deg, #fff0f4 0%, #ffe6ee 100%);
   border: 1px solid #ffd0dc;
-  border-radius: 18px; padding: 12px 14px;
+  border-radius: 18px; padding: 12px;
   text-align: center;
 }
 .bday-cd-label {
-  font-size: 11px; font-weight: 700; color: var(--muted);
-  text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;
+  font-size: 10.5px; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px;
 }
 .bday-cd-digits {
-  display: flex; align-items: center; justify-content: center; gap: 8px;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
 }
-.bday-cd-seg {
-  display: flex; flex-direction: column; align-items: center;
-}
-.bday-cd-num {
-  font-size: 20px; font-weight: 800; color: var(--p1); line-height: 1;
-}
-.bday-cd-txt {
-  font-size: 9px; font-weight: 700; color: var(--text2); text-transform: uppercase; margin-top: 3px;
-}
-.bday-cd-sep {
-  font-size: 16px; font-weight: 800; color: var(--p1); margin-top: -6px;
-}
+.bday-cd-seg { display: flex; flex-direction: column; align-items: center; }
+.bday-cd-num { font-size: 19px; font-weight: 800; color: var(--p1); line-height: 1; }
+.bday-cd-txt { font-size: 8px; font-weight: 700; color: var(--text2); text-transform: uppercase; margin-top: 3px; }
+.bday-cd-sep { font-size: 15px; font-weight: 800; color: var(--p1); margin-top: -5px; }
 
-/* Detail Card Items */
+/* Detail Items with Custom SVG */
 .bday-detail-card {
   background: #ffffff;
   border: 1.5px solid var(--border);
   border-radius: 16px; padding: 12px 14px;
-  display: flex; align-items: flex-start; gap: 12px;
+  display: flex; align-items: center; gap: 12px;
   box-shadow: 0 4px 14px rgba(255, 45, 85, 0.04);
 }
-.bday-detail-ic {
-  font-size: 24px; line-height: 1; flex-shrink: 0; margin-top: 2px;
+.bday-detail-ic-custom {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: #fff0f3; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
 }
 .bday-detail-info { flex: 1; min-width: 0; }
 .bday-detail-h { font-size: 13px; font-weight: 800; color: var(--text); }
-.bday-detail-sub { font-size: 12px; color: var(--text2); line-height: 1.45; margin-top: 2px; }
+.bday-detail-sub { font-size: 11.5px; color: var(--text2); line-height: 1.45; margin-top: 1px; }
 
-/* Dress Code Special Badge */
+/* Dress Code Card */
 .bday-dresscode {
-  background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
-  border: 1.5px solid #7dd3fc;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 1.5px solid #bae6fd;
   border-radius: 16px; padding: 12px 14px;
   display: flex; align-items: center; gap: 12px;
 }
-.bday-dress-info h4 {
-  font-size: 13px; font-weight: 800; color: #0369a1;
+.dress-icon-box {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: #e0f2fe; border: 1.5px solid #7dd3fc;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
 }
-.bday-dress-info p {
-  font-size: 11px; color: #0c4a6e; font-weight: 600; line-height: 1.4; margin-top: 1px;
-}
+.bday-dress-info h4 { font-size: 12.5px; font-weight: 800; color: #0369a1; }
+.bday-dress-info p { font-size: 11px; color: #0c4a6e; font-weight: 600; line-height: 1.4; margin-top: 2px; }
 
 /* Map Card */
 .bday-map-preview {
   border-radius: 16px; overflow: hidden;
   border: 1.5px solid var(--border);
-  position: relative; background: #f8fafc;
 }
 .bday-map-banner {
   padding: 10px 14px;
@@ -2306,33 +2348,30 @@ html, body {
   display: flex; align-items: center; justify-content: space-between;
 }
 .bday-map-addr {
-  font-size: 11px; color: var(--muted); font-weight: 600;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 210px;
+  font-size: 10.5px; color: var(--muted); font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;
 }
 .bday-map-link-btn {
-  display: inline-flex; align-items: center; gap: 5px;
   background: linear-gradient(135deg, #ff2d55, #ff5e8a);
   color: #fff; text-decoration: none;
-  font-size: 11px; font-weight: 700;
+  font-size: 10.5px; font-weight: 700;
   padding: 6px 12px; border-radius: 100px;
-  box-shadow: 0 3px 10px rgba(255, 45, 85, 0.25);
-  transition: transform .12s;
+  box-shadow: 0 3px 10px rgba(255, 45, 85, 0.22);
 }
-.bday-map-link-btn:active { transform: scale(0.95); }
 
-/* RSVP Action Buttons */
+/* Actions RSVP */
 .bday-rsvp-actions {
-  display: flex; flex-direction: column; gap: 9px; margin-top: 6px;
+  display: flex; flex-direction: column; gap: 8px; margin-top: 4px;
 }
 .bday-rsvp-btn {
   width: 100%; padding: 14px 18px; border-radius: 16px; border: none;
-  font-family: inherit; font-size: 14px; font-weight: 800; cursor: pointer;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  transition: transform .14s, box-shadow .14s;
+  font-family: inherit; font-size: 13.5px; font-weight: 800; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: transform .12s, opacity .12s;
 }
 .bday-rsvp-btn.primary {
   background: var(--grad); color: #fff;
-  box-shadow: 0 8px 24px rgba(255, 45, 85, 0.35);
+  box-shadow: 0 8px 20px rgba(255, 45, 85, 0.3);
 }
 .bday-rsvp-btn.primary:active { transform: scale(0.97); }
 .bday-rsvp-btn.secondary {
@@ -2544,4 +2583,4 @@ html, body {
   position: absolute; bottom: 0; left: 0; height: 3px;
   background: var(--p1); width: 0%;
   transition: width .1s ease;
-}
+}
