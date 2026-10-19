@@ -463,12 +463,12 @@ async function acceptDateInvite() {
   await saveSpecialDateRsvp('accepted', 'Siap datang & bawa kebahagiaan');
   if (window._moodlyAlert) {
     window._moodlyAlert({
-      icon: '💖',
-      title: 'Yeay! Janji Ketemu! 🥰',
-      msg: 'Sampai jumpa di Giur Bistro, Sabtu 24 Oktober 2026 jam 15.00! Jangan lupa outfit cerah nuansa biru mudanya ya Cantik! 👗🩵'
+      icon: '💌',
+      title: 'Konfirmasi Diterima',
+      msg: 'Sampai jumpa di Giur Bistro, Sabtu 24 Oktober 2026 pukul 15.00 WIB. Jangan lupa kenakan pakaian cerah dengan nuansa biru muda ya.'
     });
   } else if (window._moodlyToast) {
-    window._moodlyToast('Konfirmasi tersimpan! Sampai jumpa di Giur Bistro ya 💖');
+    window._moodlyToast('Konfirmasi tersimpan. Sampai jumpa di Giur Bistro.');
   }
   closeDateInvitation();
 }
