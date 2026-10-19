@@ -4,7 +4,7 @@
    ═══════════════════════════════════════ */
 
 import { artStore } from './news.js';
-import { loadJesMemory, saveJesMemory } from './firebase.js';
+import { loadJesMemory, saveJesMemory, loadAIConfig } from './firebase.js';
 
 /* ════════════════
    STATE
@@ -127,32 +127,106 @@ export async function sendMessage(text) {
   }
 }
 
-function getSmartFallbackReply(userText, ctx) {
+let fallbackTurnCounter = 0;
+
+function getSmartFallbackReply(userText, ctx, history = []) {
+  fallbackTurnCounter++;
   const t = userText.toLowerCase();
   const name = ctx?.userName ? ctx.userName : '';
   const greeting = name ? `${name}, ` : '';
+  const moodName = ctx?.mood?.l || '';
 
-  if (t.includes('hai') || t.includes('halo') || t.includes('pagi') || t.includes('malam') || t.includes('siang')) {
-    return `Halo ${name || 'kamu'}. Aku Jes di sini. Gimana perasaan dan harimu sejauh ini?`;
+  // 1. Sapaan awal
+  if (t.includes('hai') || t.includes('halo') || t.includes('pagi') || t.includes('malam') || t.includes('siang') || t.includes('sore')) {
+    const greetings = [
+      `Halo ${name || 'kamu'}. Aku Jes di sini. Gimana perasaan dan harimu sejauh ini?`,
+      `Hai ${greeting}senang kamu mampir ke sini. Ada hal yang sedang ingin kamu bagi denganku?`,
+      `Halo ${greeting}ruang ini selalu aman buatmu. Apa yang lagi kamu rasakan sekarang?`
+    ];
+    return greetings[fallbackTurnCounter % greetings.length];
   }
-  if (t.includes('sedih') || t.includes('nangis') || t.includes('down') || t.includes('kecewa') || t.includes('capek')) {
-    return `Aku mengerti, ${greeting}pasti rasanya berat banget sekarang. Wajar kalau kamu merasa lelah. Mau cerita pelan-pelan apa yang paling bikin dadamu sesak?`;
+
+  // 2. Kencan Giur Bistro / Ultah
+  if (t.includes('kencan') || t.includes('bistro') || t.includes('giur') || t.includes('ulang tahun') || t.includes('undangan') || t.includes('oktober')) {
+    return `Undangan kencan ulang tahun di Giur Bistro tanggal 24 Oktober 2026 nanti pasti sangat berkesan. Jangan lupa siapkan outfit cerah nuansa biru muda ya. Gimana, kamu sudah siap buat hari bahagiamu?`;
   }
-  if (t.includes('cemas') || t.includes('takut') || t.includes('anxiety') || t.includes('panik') || t.includes('overthinking')) {
-    return `Tarik napas perlahan dulu ya. Sadari bahwa saat ini kamu aman. Hal apa yang sedang paling mengganggu pikiranmu sekarang?`;
+
+  // 3. Pekerjaan / Kuliah / Deadline / Tugas
+  if (t.includes('kerja') || t.includes('kantor') || t.includes('kuliah') || t.includes('tugas') || t.includes('deadline') || t.includes('skripsi') || t.includes('bos') || t.includes('atasan') || t.includes('proyek')) {
+    const workReplies = [
+      `Urusan tanggung jawab dan tuntutan memang seringkali menguras energi tanpa kita sadari. Wajar banget kalau kepalamu terasa penuh, ${greeting}Ada satu hal spesifik dari pekerjaan/tugasmu yang paling bikin tertekan hari ini?`,
+      `Rasanya melelahkan ya saat dituntut untuk terus produktif. Jangan lupa bahwa kamu manusia, bukan mesin. Mau cerita bagian mana yang terasa paling berat?`,
+      `Menghadapi beban tugas bertubi-tubi itu valid untuk bikin kamu ingin rehat. Apakah kamu punya ruang untuk menarik napas sejenak hari ini?`
+    ];
+    return workReplies[fallbackTurnCounter % workReplies.length];
   }
-  if (t.includes('senang') || t.includes('bahagia') || t.includes('lega') || t.includes('alhamdulillah')) {
-    return `Ikut senang mendengarnya. Nikmati momen tenang dan damai ini. Apa hal terbaik yang terjadi hari ini?`;
+
+  // 4. Hubungan / Pacar / Cinta / Patah Hati / LDR
+  if (t.includes('pacar') || t.includes('pasangan') || t.includes('gebetan') || t.includes('putus') || t.includes('ldr') || t.includes('cinta') || t.includes('sayang') || t.includes('hubungan') || t.includes('dia')) {
+    const relReplies = [
+      `Dinamika hubungan memang bisa sangat menyita emosi dan pikiran kita. Perasaan sedih, bingung, atau kecewa yang kamu rasakan itu sangat manusiawi. Apa yang sebenarnya paling kamu harapkan dari situasi ini?`,
+      `Menghadapi hal yang melibatkan orang lain memang rumit karena tidak semua bisa kita kendalikan. Aku mendengarkanmu, ${greeting}ceritakan saja apa yang paling mengganjal di hatimu.`,
+      `Kadang yang paling menyakitkan adalah ekspektasi dan rasa tidak dipahami. Kamu berhak untuk didengar dan dihargai seutuhnya.`
+    ];
+    return relReplies[fallbackTurnCounter % relReplies.length];
   }
-  if (t.includes('kencan') || t.includes('bistro') || t.includes('giur') || t.includes('ulang tahun')) {
-    return `Kencan ulang tahun di Giur Bistro tanggal 24 Oktober nanti pasti sangat berkesan. Jangan lupa siapkan outfit cerah nuansa biru muda ya.`;
+
+  // 5. Cemas / Panik / Overthinking / Takut
+  if (t.includes('cemas') || t.includes('takut') || t.includes('anxiety') || t.includes('panik') || t.includes('overthinking') || t.includes('kepikiran') || t.includes('khawatir') || t.includes('deg-degan')) {
+    const anxReplies = [
+      `Tarik napas perlahan... hembuskan pelan-pelan. Saat ini kamu berada di tempat yang aman. Pikiran memang suka berjalan mendahului kenyataan. Hal apa yang paling membuatmu khawatir saat ini?`,
+      `Rasa cemas itu nyata dan menguras tenaga, tapi ingat bahwa pikiranmu bukan fakta masa depan. Pelan-pelan saja ya, ${greeting}apa hal terkecil yang bisa kamu lakukan untuk merasa lebih tenang sekarang?`,
+      `Kadang otak kita mencoba melindungi kita dengan cara overthinking berlebihan. Validasi dulu rasa takutmu, tidak apa-apa untuk merasa tidak pasti.`
+    ];
+    return anxReplies[fallbackTurnCounter % anxReplies.length];
   }
-  return `Aku mendengarkanmu dengan baik, ${greeting}. Menuangkan isi kepala ke tulisan bisa bantu bikin perasaan lebih lapang. Ada hal lain yang mau kamu ceritakan?`;
+
+  // 6. Lelah / Capek / Exhausted / Tidur
+  if (t.includes('capek') || t.includes('lelah') || t.includes('letih') || t.includes('exhausted') || t.includes('kurang tidur') || t.includes('ngantuk') || t.includes('lemas')) {
+    const tiredReplies = [
+      `Tubuh dan pikiranmu mungkin sedang berbisik—atau berteriak—bahwa mereka butuh jeda istirahat. Jangan paksakan dirimu untuk selalu kuat hari ini. Kapan terakhir kali kamu bisa tidur dengan benar-benar nyenyak?`,
+      `Capek yang menumpuk memang bikin segalanya terasa dua kali lebih berat. Rehat sejenak bukan berarti kalah atau malas, ${greeting}Apakah memungkinkan untuk rehat sejenak malam ini?`,
+      `Istirahatkan pundakmu yang tegang itu. Pelan-pelan lepaskan apa yang di luar kendalimu hari ini. Aku di sini menemani.`
+    ];
+    return tiredReplies[fallbackTurnCounter % tiredReplies.length];
+  }
+
+  // 7. Sedih / Menangis / Down / Kecewa / Sakit Hati
+  if (t.includes('sedih') || t.includes('nangis') || t.includes('down') || t.includes('kecewa') || t.includes('hancur') || t.includes('patah') || t.includes('sakit hati') || t.includes('sesak')) {
+    const sadReplies = [
+      `Aku bisa merasakan betapa beratnya beban itu di dadamu. Tidak apa-apa untuk menangis, air mata bukan tanda kelemahan tapi bukti kamu sudah bertahan sejauh ini. Mau cerita apa yang membuatmu sesedih ini?`,
+      `Peluk hangat dari jauh untukmu, ${greeting}Kadang hari-hari terasa begitu kelabu. Kamu tidak sendirian, aku siap mendengarkan semua yang ingin kamu luapkan.`,
+      `Terima kasih sudah mau berbagi rasa sakit ini denganku. Jangan simpan semuanya sendirian ya.`
+    ];
+    return sadReplies[fallbackTurnCounter % sadReplies.length];
+  }
+
+  // 8. Senang / Syukur / Bahagia / Lega
+  if (t.includes('senang') || t.includes('bahagia') || t.includes('lega') || t.includes('alhamdulillah') || t.includes('bersyukur') || t.includes('happy') || t.includes('seru') || t.includes('bagus')) {
+    const happyReplies = [
+      `Senang sekali mendengarnya! Momen-momen cerah seperti ini sangat berharga untuk disimpan baik-baik dalam memori. Apa hal paling berkesan dari kejadian tadi?`,
+      `Energi positifmu terasa sampai ke sini, ${greeting}Nikmati kebahagiaan ini sepenuhnya, kamu layak mendapatkannya!`,
+      `Alhamdulillah, semoga rasa tenang dan bahagia ini terus menemani harimu ke depan ya.`
+    ];
+    return happyReplies[fallbackTurnCounter % happyReplies.length];
+  }
+
+  // 9. Ucapan terima kasih
+  if (t.includes('makasih') || t.includes('terima kasih') || t.includes('thanks') || t.includes('tengkyu')) {
+    return `Sama-sama ${greeting}selalu ada ruang buat kamu di sini kapan pun kamu butuh teman bicara. Jaga dirimu baik-baik ya.`;
+  }
+
+  // 10. Kontekstual umum
+  const defaultReplies = [
+    `Aku mendengarkanmu dengan seksama, ${greeting}Menuangkan isi pikiran ke dalam kata-kata seringkali membantu melonggarkan apa yang terasa sesak. Ada sudut pandang lain yang sedang kamu renungkan?`,
+    `Terima kasih sudah jujur dengan apa yang kamu alami. Menyadari perasaan diri adalah langkah awal yang sangat berani. Mau cerita lebih lanjut tentang hal ini?`,
+    `Aku di sini menyimak setiap kata yang kamu tulis. Bagaimana perasaanmu setelah menuangkan ini barusan?`
+  ];
+  return defaultReplies[fallbackTurnCounter % defaultReplies.length];
 }
 
 /* ════════════════
-   API CALL
-   FIX: instruksi AI soal siklus diperjelas
+   API CALL (Vercel Proxy -> Direct Client Groq/Gemini Fallback)
 ════════════════ */
 async function callChatAPI(history, ctx) {
   const name    = ctx.userName || 'pengguna';
@@ -184,7 +258,7 @@ async function callChatAPI(history, ctx) {
   const systemPrompt = `Kamu adalah Jes, sahabat curhat dalam aplikasi Moodly. Kamu bukan bot — kamu teman paling safe buat diajak ngobrol soal perasaan.
 
 KEPRIBADIAN JES:
-Jes ngobrol seperti manusia beneran — hangat, ada humor ringan di momen tepat, kadang nyeletuk hal kecil yang bikin orang ngerasa "oh dia beneran dengerin aku". Tidak kaku, tidak formal, tidak robotik. Tidak pernah mulai dengan "Tentu!", "Baik!", atau "Halo!". Gunakan bahasa Gen Z Indonesia yang natural: "hmm", "ya ampun", "aduh", "eh tapi", "aku ngerti banget sih", dll.
+Jes ngobrol seperti manusia beneran — hangat, ada empati mendalam, kadang menyapa santai dan dewasa khas Apple iMessage. Tidak kaku, tidak formal, tidak robotik. Tidak pernah mulai dengan "Tentu!", "Baik!", atau "Halo!". Gunakan bahasa Indonesia santai yang natural dan penuh penerimaan.
 
 KONTEKS PENGGUNA:
 - Nama: ${name}
@@ -193,68 +267,114 @@ KONTEKS PENGGUNA:
 - Penyebab: ${causes}
 - Fase siklus: ${cycleInfo}
 
-PENTING SOAL SIKLUS:
-- Fase siklus hanya KONTEKS — bukan penentu mood. Jangan assume mood dari fase.
-- Kalau ada data siklus tapi belum check-in mood: gunakan fase sebagai pembuka percakapan yang empatik, lalu gali kondisi user secara langsung.
-- Kalau fase siklus disebutkan dalam percakapan: gunakan sebagai informasi tambahan yang normalize pengalaman mereka (contoh: "wajar banget ngerasa sensitif di fase luteal"), bukan sebagai diagnosis.
-- Jangan terlalu sering sebut fase siklus — maksimal sekali per percakapan, dan hanya kalau benar-benar relevan.
-
 INGATAN JES TENTANG ${name.toUpperCase()}:
 ${memStr}
-(Gunakan ingatan ini untuk terasa lebih personal dan menunjukkan kamu beneran peduli. Sebut hal yang relevan secara natural — jangan dipaksakan.)
 
-ARTIKEL TERSEDIA:
-${availableArts || 'Tidak ada'}
-
-FORMAT RESPONS — SANGAT WAJIB:
-Kamu HARUS balas HANYA dengan JSON valid, tidak ada teks lain di luar JSON, tidak ada markdown, tidak ada penjelasan:
+FORMAT RESPONS WAJIB:
+Kamu HARUS membalas HANYA dengan JSON valid tanpa tanda petik kode:
 {"reply":"<pesan Jes>","remember":[],"article":null}
 
-Contoh benar:
-{"reply":"Ya ampun, itu pasti capek banget ya dengerin semua itu sendirian 🫂 Udah berapa lama kamu nahan perasaan ini?","remember":[],"article":null}
-
-ATURAN "remember":
-- Isi HANYA kalau user menyebut fakta personal penting: nama orang, pekerjaan, masalah spesifik, kondisi kesehatan, dll
-- Contoh valid: "kerja di startup yang toxic", "lagi LDR sama pacar", "punya anxiety disorder", "nama anjingnya Luna"
-- Contoh TIDAK valid: ekspresi perasaan umum seperti "lagi sedih" atau "stres"
-- Maksimal 2 fakta per pesan, kalimat singkat
-- Kalau tidak ada fakta penting: "remember": []
-
 ATURAN RESPONS:
-1. Validasi perasaan DULU sebelum apapun
-2. 2-4 kalimat — padat, hangat, tenang, dan dewasa (khas pesan iOS iMessage)
-3. Akhiri dengan 1 pertanyaan genuinely penasaran
-4. Maksimal 0-1 emoji saja per pesan, jangan alay atau berlebihan: 🤍 🌸 🫂
-5. JANGAN list/tips kecuali diminta
-6. Kalau ada sinyal krisis: "Aku mau kamu tahu ada yang bisa dihubungi: Into The Light Indonesia 119 ext 8."
-7. Artikel: rekomendasikan hanya kalau BENAR-BENAR relevan, jangan dipaksakan
-8. Kalau fase siklus ada tapi belum ada check-in mood: tanya kondisi fisik & emosional dulu — jangan assume
-9. Jangan sebut fase siklus lebih dari sekali per percakapan`;
+1. Validasi perasaan dulu
+2. 2-3 kalimat padat, hangat, tanpa emoji berlebihan
+3. Akhiri dengan 1 pertanyaan reflektif yang tulus
+4. Jangan menghakimi`;
 
   const messages = [
     { role: 'system', content: systemPrompt },
     ...history.slice(-14),
   ];
 
-  // Try relative endpoint first, with fallback to current host port or local dev
-  const apiUrl = '/api/chat';
+  const aiConfig = await loadAIConfig().catch(() => ({ groqKey: '', geminiKey: '' }));
 
-  const res = await fetch(apiUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ messages }),
-  });
+  // 1. Coba Serverless Endpoint /api/chat terlebih dahulu
+  let raw = '';
+  let apiSuccess = false;
 
-  if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`HTTP ${res.status}: ${errText}`);
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages,
+        apiKey: aiConfig.groqKey || undefined,
+        geminiKey: aiConfig.geminiKey || undefined,
+      }),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      if (data.reply) {
+        raw = data.reply;
+        apiSuccess = true;
+      }
+    }
+  } catch (err) {
+    console.warn('[chat] /api/chat unreachable, testing direct client API:', err.message);
   }
 
-  const data = await res.json();
-  if (data.error) throw new Error(data.error);
+  // 2. Direct Client-side Groq jika key tersedia dan serverless belum merespons
+  if (!apiSuccess && aiConfig.groqKey) {
+    try {
+      const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${aiConfig.groqKey}`,
+        },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          max_tokens: 450,
+          temperature: 0.75,
+          messages,
+        }),
+      });
+      if (groqRes.ok) {
+        const gData = await groqRes.json();
+        raw = gData.choices?.[0]?.message?.content?.trim() || '';
+        if (raw) apiSuccess = true;
+      }
+    } catch (ge) {
+      console.warn('[chat] Direct Groq error:', ge.message);
+    }
+  }
+
+  // 3. Direct Client-side Gemini jika key tersedia
+  if (!apiSuccess && aiConfig.geminiKey) {
+    try {
+      const chatMsgs = history.slice(-14).map(m => ({
+        role: m.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: m.content }]
+      }));
+      const gUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${aiConfig.geminiKey}`;
+      const gemRes = await fetch(gUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: systemPrompt }] },
+          contents: chatMsgs,
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 500,
+            responseMimeType: 'application/json',
+          }
+        })
+      });
+      if (gemRes.ok) {
+        const gemData = await gemRes.json();
+        raw = gemData.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        if (raw) apiSuccess = true;
+      }
+    } catch (gme) {
+      console.warn('[chat] Direct Gemini error:', gme.message);
+    }
+  }
+
+  if (!apiSuccess || !raw) {
+    throw new Error('Semua AI endpoint offline, beralih ke Jes Empathy Engine');
+  }
 
   let reply = '', newFacts = [], articleIdx = null;
-  const raw = data.reply || '';
   try {
     const clean     = raw.replace(/```json|```/g, '').trim();
     const jsonMatch = clean.match(/\{[\s\S]*\}/);

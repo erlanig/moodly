@@ -335,4 +335,41 @@ export async function fetchUserPeriods(deviceId) {
   }
 }
 
+/* ════════════════ AI CONFIG ════════════════ */
+export async function loadAIConfig() {
+  const localGroq = localStorage.getItem('moodly_groq_key') || '';
+  const localGemini = localStorage.getItem('moodly_gemini_key') || '';
+  try {
+    const snap = await getDoc(doc(db, 'users', 'global_ai_config'));
+    if (snap.exists()) {
+      const data = snap.data();
+      if (data.groqKey) localStorage.setItem('moodly_groq_key', data.groqKey);
+      if (data.geminiKey) localStorage.setItem('moodly_gemini_key', data.geminiKey);
+      return {
+        groqKey: data.groqKey || localGroq,
+        geminiKey: data.geminiKey || localGemini
+      };
+    }
+  } catch (e) {
+    // Offline or fallback to local
+  }
+  return { groqKey: localGroq, geminiKey: localGemini };
+}
+
+export async function saveAIConfig({ groqKey, geminiKey }) {
+  if (groqKey !== undefined) localStorage.setItem('moodly_groq_key', String(groqKey).trim());
+  if (geminiKey !== undefined) localStorage.setItem('moodly_gemini_key', String(geminiKey).trim());
+  try {
+    await setDoc(doc(db, 'users', 'global_ai_config'), {
+      groqKey: String(groqKey || '').trim(),
+      geminiKey: String(geminiKey || '').trim(),
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+    return true;
+  } catch (e) {
+    console.warn('[FB] saveAIConfig cloud sync skipped:', e.message);
+    return true;
+  }
+}
+
 export { db, DEVICE_ID, DEFAULT_PASSCODE };

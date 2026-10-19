@@ -59,8 +59,9 @@ let dailyLogSymptoms = [];
 let editingDayDate   = null;
 let editingPeriodId  = null;
 
-let backfillOpen   = false;   // form "catat periode sebelumnya"
-let endPickerOpen  = false;   // pilih tanggal selesai manual
+let backfillOpen    = false;   // form "catat periode sebelumnya"
+let endPickerOpen   = false;   // pilih tanggal selesai manual
+let startPickerOpen = false;   // pilihan tanggal mulai mundur
 
 let aiPredCache  = null;
 let aiPredLoading= false;
@@ -213,18 +214,18 @@ function refreshAll() {
 /* ══════════════════════════════
    ACTIONS: MULAI / SELESAI
 ══════════════════════════════ */
-export async function startPeriod() {
+export async function startPeriod(customStartDate = null) {
   if (getActivePeriod()) {
     window._moodlyToast?.('Periode aktif sudah ada! Tap Selesai dulu.');
     return;
   }
-  const today = fmtDateInput(new Date());
-  if (overlapsExisting(today, today)) {
-    window._moodlyToast?.('Tanggal hari ini sudah masuk ke periode lain.');
+  const startDate = customStartDate || fmtDateInput(new Date());
+  if (overlapsExisting(startDate, startDate)) {
+    window._moodlyToast?.('Tanggal tersebut sudah masuk ke periode lain.');
     return;
   }
-  const id = await addPeriod({ startDate: today, endDate: null });
-  periods.unshift({ id, startDate: today, endDate: null });
+  const id = await addPeriod({ startDate, endDate: null });
+  periods.unshift({ id, startDate, endDate: null });
   periodDays[id] = [];
 
   backfillOpen = false;
@@ -232,8 +233,9 @@ export async function startPeriod() {
   renderDailyLogBanner();
   renderPeriodHistory();
 
-  // Langsung buka daily log hari pertama
-  setTimeout(() => openDailyLog(), 250);
+  window._moodlyToast?.(`Periode baru dimulai (${fmtDate(startDate)}) 🌸`);
+  // Langsung buka daily log untuk tanggal mulai
+  setTimeout(() => openDailyLog(id, startDate), 250);
 }
 
 export async function stopPeriod() {
@@ -242,12 +244,17 @@ export async function stopPeriod() {
 
   const dayNum = getDayOfPeriod(active);
   window._moodlyConfirm({
-    icon: '✅',
+    icon: '🌸',
     title: 'Menstruasi selesai?',
-    msg: `Periode hari ke-${dayNum} (mulai ${fmtDate(active.startDate)}). Konfirmasi selesai hari ini?`,
-    confirmTxt: 'Ya, Selesai 🌸',
+    msg: `Periode hari ke-${dayNum} (mulai ${fmtDate(active.startDate)}). Kapan menstruasimu selesai?`,
+    confirmTxt: 'Selesai Hari Ini ✓',
+    cancelTxt: 'Pilih Tanggal Lain',
     onConfirm: async () => {
       await setPeriodEnd(active.id, fmtDateInput(new Date()), true);
+    },
+    onCancel: () => {
+      endPickerOpen = true;
+      renderMensActionButton();
     }
   });
 }
@@ -388,19 +395,36 @@ function renderMensActionButton() {
   const todayStr = fmtDateInput(new Date());
 
   if (active) {
-    const dayNum   = getDayOfPeriod(active);
-    const todayLog = getTodayLog(active.id);
-    const needsLog = !todayLog;
+    const dayNum       = getDayOfPeriod(active);
+    const todayLog     = getTodayLog(active.id);
+    const needsLog     = !todayLog;
+    const missingDates = getMissingDates(active);
+
+    const overdueAlert = dayNum >= 7 ? `
+      <div class="bf-overdue-box">
+        <div class="bf-overdue-title">⚠️ Periode sudah berjalan ${dayNum} hari</div>
+        <div class="bf-overdue-desc">Sudah selesai kemarin atau beberapa hari lalu? Langsung selesaikan di sini:</div>
+        <div class="bf-quick-btns">
+          <button type="button" class="bf-qbtn" onclick="window._stopPeriodYesterday()">Selesai Kemarin</button>
+          <button type="button" class="bf-qbtn" onclick="window._toggleEndPicker()">Pilih Tanggal Selesai</button>
+        </div>
+      </div>
+    ` : '';
 
     const endPicker = endPickerOpen ? `
       <div class="bf-form">
-        <label class="bf-lbl">Tanggal selesai</label>
+        <label class="bf-lbl">Pilih tanggal selesai menstruasi:</label>
         <input type="date" id="end-date-input" class="bf-input"
                min="${active.startDate}" max="${todayStr}" value="${todayStr}">
-        <button class="bf-save" onclick="window._submitEndDate()">Simpan</button>
+        <div class="bf-quick-btns" style="margin-top:6px">
+          <button type="button" class="bf-qbtn" onclick="document.getElementById('end-date-input').value='${todayStr}'">Hari Ini</button>
+          <button type="button" class="bf-qbtn" onclick="window._setEndDateInputYesterday()">Kemarin</button>
+        </div>
+        <button class="bf-save" onclick="window._submitEndDate()">Simpan Tanggal Selesai</button>
       </div>` : '';
 
     el.innerHTML = `
+      ${overdueAlert}
       <div class="mens-active-row">
         <div class="mar-info">
           <div class="mar-badge">🩸 Menstruasi Hari ke-${dayNum}</div>
@@ -412,28 +436,56 @@ function renderMensActionButton() {
           ✓ Selesai
         </button>
       </div>
-      <div class="bf-link" onclick="window._toggleEndPicker()">
-        ${endPickerOpen ? '✕ Tutup' : 'Sudah selesai kemarin / lupa tekan Selesai? Pilih tanggal'}
+      <div class="bf-actions-row">
+        <button class="bf-sub-btn" onclick="window._toggleEndPicker()">
+          ${endPickerOpen ? '✕ Tutup Picker' : '📅 Lupa Selesai? Pilih Tanggal Selesai'}
+        </button>
+        ${missingDates.length ? `
+          <button class="bf-sub-btn missing-btn" onclick="window._openDailyLogDate('${active.id}', '${missingDates[0]}')">
+            📝 Isi Hari Terlewat (${missingDates.length} hari)
+          </button>
+        ` : ''}
       </div>
       ${endPicker}`;
   } else {
-    const form = backfillOpen ? `
+    const startPicker = startPickerOpen ? `
       <div class="bf-form">
-        <label class="bf-lbl">Tanggal mulai</label>
+        <label class="bf-lbl">Kapan menstruasimu mulai?</label>
+        <input type="date" id="start-date-input" class="bf-input" max="${todayStr}" value="${todayStr}">
+        <div class="bf-quick-btns" style="margin-top:6px">
+          <button type="button" class="bf-qbtn" onclick="window._quickStartPeriod(0)">Hari Ini</button>
+          <button type="button" class="bf-qbtn" onclick="window._quickStartPeriod(1)">Kemarin</button>
+          <button type="button" class="bf-qbtn" onclick="window._quickStartPeriod(2)">2 Hari Lalu</button>
+          <button type="button" class="bf-qbtn" onclick="window._quickStartPeriod(3)">3 Hari Lalu</button>
+        </div>
+        <button class="bf-save" onclick="window._submitCustomStart()">Mulai Periode Sekarang</button>
+      </div>` : '';
+
+    const backfillForm = backfillOpen ? `
+      <div class="bf-form">
+        <label class="bf-lbl"><b>Catat Periode Lampau yang Terlewat</b></label>
+        <label class="bf-lbl" style="margin-top:4px">Tanggal mulai</label>
         <input type="date" id="bf-start" class="bf-input" max="${todayStr}">
         <label class="bf-lbl">Tanggal selesai <span style="opacity:.6">(kosongkan jika masih berlangsung)</span></label>
         <input type="date" id="bf-end" class="bf-input" max="${todayStr}">
-        <button class="bf-save" onclick="window._submitBackfill()">Simpan periode</button>
+        <div class="bf-quick-btns" style="margin-top:6px">
+          <button type="button" class="bf-qbtn" onclick="window._quickPresetBackfill(7, 5)">1 Minggu Lalu (5 Hari)</button>
+          <button type="button" class="bf-qbtn" onclick="window._quickPresetBackfill(14, 5)">2 Minggu Lalu (5 Hari)</button>
+        </div>
+        <button class="bf-save" onclick="window._submitBackfill()">Simpan & Lengkapi Data</button>
       </div>` : '';
 
     el.innerHTML = `
-      <button class="mens-start-btn" onclick="window._startPeriod()">
-        🩸 Mulai Menstruasi
-      </button>
-      <div class="bf-link" onclick="window._toggleBackfill()">
-        ${backfillOpen ? '✕ Tutup' : '＋ Lupa catat? Isi periode sebelumnya'}
+      <div class="mens-action-group">
+        <button class="mens-start-btn" onclick="window._promptStartPeriod()">
+          🩸 Mulai Menstruasi
+        </button>
+        <button class="mens-backfill-btn" onclick="window._toggleBackfill()">
+          📅 Catat Mundur / Kelewat
+        </button>
       </div>
-      ${form}`;
+      ${startPicker}
+      ${backfillForm}`;
   }
 }
 
@@ -1276,7 +1328,56 @@ window._toggleDailySym  = (i) => {
 window._editPeriodDay = (periodId) => openDailyLog(periodId);
 
 // Pengisian mundur: periode lampau & tanggal selesai manual
-window._toggleBackfill  = () => { backfillOpen = !backfillOpen; renderMensActionButton(); };
+window._promptStartPeriod = () => {
+  startPickerOpen = !startPickerOpen;
+  backfillOpen = false;
+  renderMensActionButton();
+};
+window._quickStartPeriod = (daysAgo) => {
+  const d = new Date();
+  d.setDate(d.getDate() - daysAgo);
+  startPeriod(fmtDateInput(d));
+};
+window._submitCustomStart = () => {
+  const val = document.getElementById('start-date-input')?.value;
+  if (!val) { window._moodlyToast?.('Pilih tanggal mulai dulu'); return; }
+  startPeriod(val);
+};
+window._stopPeriodYesterday = async () => {
+  const active = getActivePeriod();
+  if (!active) return;
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  const yestStr = fmtDateInput(d);
+  if (yestStr < active.startDate) {
+    window._moodlyToast?.('Periode baru mulai hari ini, tidak bisa selesai kemarin.');
+    return;
+  }
+  await setPeriodEnd(active.id, yestStr, false);
+};
+window._setEndDateInputYesterday = () => {
+  const inp = document.getElementById('end-date-input');
+  if (!inp) return;
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  inp.value = fmtDateInput(d);
+};
+window._quickPresetBackfill = (daysAgoStart, duration) => {
+  const sInp = document.getElementById('bf-start');
+  const eInp = document.getElementById('bf-end');
+  if (!sInp || !eInp) return;
+  const dStart = new Date();
+  dStart.setDate(dStart.getDate() - daysAgoStart);
+  const dEnd = new Date(dStart);
+  dEnd.setDate(dEnd.getDate() + (duration - 1));
+  sInp.value = fmtDateInput(dStart);
+  eInp.value = fmtDateInput(dEnd);
+};
+window._toggleBackfill  = () => {
+  backfillOpen = !backfillOpen;
+  startPickerOpen = false;
+  renderMensActionButton();
+};
 window._toggleEndPicker = () => { endPickerOpen = !endPickerOpen; renderMensActionButton(); };
 window._submitBackfill  = submitBackfillPeriod;
 window._submitEndDate   = async () => {
@@ -1322,6 +1423,25 @@ function ensureStyles() {
   const st = document.createElement('style');
   st.id = 'cycle-backfill-styles';
   st.textContent = `
+    /* Action group tombol mulai & catat mundur */
+    .mens-action-group { display: flex; gap: 8px; margin-bottom: 4px; }
+    .mens-start-btn { flex: 1.2; padding: 14px; border-radius: 16px; border: none; background: #ff2d55; color: #fff; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(255, 45, 85, 0.25); transition: transform .12s; }
+    .mens-start-btn:active { transform: scale(0.97); }
+    .mens-backfill-btn { flex: 1; padding: 14px 10px; border-radius: 16px; border: 1.5px solid rgba(255, 45, 85, 0.2); background: #fff0f4; color: #ff2d55; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; transition: transform .12s; }
+    .mens-backfill-btn:active { transform: scale(0.97); }
+
+    .bf-quick-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+    .bf-qbtn { padding: 5px 10px; border-radius: 8px; border: 1px solid rgba(255, 45, 85, 0.25); background: #ffffff; color: #ff2d55; font-size: 11px; font-weight: 600; cursor: pointer; transition: all .12s; }
+    .bf-qbtn:hover, .bf-qbtn:active { background: #ff2d55; color: #ffffff; }
+
+    .bf-actions-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .bf-sub-btn { flex: 1; padding: 9px 12px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.08); background: #ffffff; color: #48484a; font-size: 11.5px; font-weight: 600; cursor: pointer; text-align: center; }
+    .bf-sub-btn.missing-btn { border-color: rgba(255, 45, 85, 0.3); background: #fff0f4; color: #ff2d55; font-weight: 700; }
+
+    .bf-overdue-box { background: #fff7ed; border: 1px solid rgba(249, 115, 22, 0.25); border-radius: 14px; padding: 12px; margin-bottom: 10px; }
+    .bf-overdue-title { font-size: 12.5px; font-weight: 800; color: #c2410c; }
+    .bf-overdue-desc { font-size: 11px; color: #9a3412; margin: 3px 0 8px; }
+
     /* strip tanggal di modal log */
     .dls-wrap{margin:0 0 14px}
     .dls-row{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 8px;scrollbar-width:none}

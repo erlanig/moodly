@@ -231,6 +231,7 @@
   <nav class="admin-nav">
     <button class="admin-nav-btn active" onclick="switchTab('users', this)">👥 Pengguna</button>
     <button class="admin-nav-btn" onclick="switchTab('passcode', this)">🔐 Passcode 6-Digit</button>
+    <button class="admin-nav-btn" onclick="switchTab('ai', this)">🤖 AI & Chatbot</button>
     <button class="admin-nav-btn" onclick="switchTab('rsvp', this)">💌 Respon Kencan (RSVP)</button>
     <button class="admin-nav-btn" onclick="switchTab('analytics', this)">📊 Analitik</button>
     <button class="admin-nav-btn" onclick="switchTab('cache', this)">📰 Cache Artikel</button>
@@ -292,6 +293,31 @@
         <div id="pc-status-msg" style="margin-top:14px;font-size:12px;font-weight:700;color:var(--p1);display:none">
           ✅ Passcode berhasil disimpan!
         </div>
+      </div>
+    </div>
+
+    <!-- 2.5. TAB: AI & CHATBOT SETTING -->
+    <div id="tab-ai" class="admin-view">
+      <div class="card-box" style="max-width:650px">
+        <div class="card-title">🤖 Pengaturan AI Chatbot (Jes)</div>
+        <div class="card-desc">
+          Konfigurasikan API Key AI agar Jes bisa merespons curhat secara interaktif dan real-time menggunakan model tercanggih (Groq Llama 3.3 / Google Gemini 1.5/2.0 Flash).
+        </div>
+
+        <label class="input-label" for="admin-groq-key">Groq API Key (Rekomendasi Utama: Cepat &amp; Gratis)</label>
+        <input type="password" id="admin-groq-key" class="admin-input" placeholder="gsk_..." style="font-family:monospace">
+        <div style="font-size:11px;color:var(--muted);margin:-8px 0 14px">Dapatkan gratis di <a href="https://console.groq.com/keys" target="_blank" style="color:var(--p1)">console.groq.com/keys</a></div>
+
+        <label class="input-label" for="admin-gemini-key">Google Gemini API Key (Alternatif)</label>
+        <input type="password" id="admin-gemini-key" class="admin-input" placeholder="AIzaSy..." style="font-family:monospace">
+        <div style="font-size:11px;color:var(--muted);margin:-8px 0 16px">Dapatkan gratis di <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--p1)">aistudio.google.com</a></div>
+
+        <div style="display:flex;gap:10px">
+          <button class="admin-btn" onclick="saveAIKeys()">💾 Simpan Konfigurasi AI</button>
+          <button class="admin-btn secondary" onclick="testAIConnection()">🧪 Uji Koneksi AI</button>
+        </div>
+
+        <div id="ai-status-msg" style="margin-top:14px;font-size:12px;font-weight:700;display:none"></div>
       </div>
     </div>
 
@@ -416,6 +442,7 @@ window.switchTab = (tab, btn) => {
   if (sidebar) sidebar.style.display = tab === 'users' ? 'flex' : 'none';
 
   if (tab === 'passcode') loadPasscodeSetting();
+  if (tab === 'ai') loadAIKeys();
   if (tab === 'rsvp') loadRsvpData();
   if (tab === 'analytics') calculateAnalytics();
 };
@@ -475,6 +502,93 @@ window.saveNewPasscode = async () => {
   msg.textContent = `✅ Passcode berhasil diubah menjadi: ${pin}`;
   msg.style.display = 'block';
   setTimeout(() => { msg.style.display = 'none'; }, 3500);
+};
+
+// AI SETTINGS
+window.loadAIKeys = async () => {
+  const localGroq = localStorage.getItem('moodly_groq_key') || '';
+  const localGemini = localStorage.getItem('moodly_gemini_key') || '';
+  const groqIn = document.getElementById('admin-groq-key');
+  const geminiIn = document.getElementById('admin-gemini-key');
+  if (groqIn && localGroq) groqIn.value = localGroq;
+  if (geminiIn && localGemini) geminiIn.value = localGemini;
+
+  try {
+    const snap = await getDoc(doc(db, 'users', 'global_ai_config'));
+    if (snap.exists()) {
+      const d = snap.data();
+      if (d.groqKey && groqIn) groqIn.value = d.groqKey;
+      if (d.geminiKey && geminiIn) geminiIn.value = d.geminiKey;
+    }
+  } catch (e) {}
+};
+
+window.saveAIKeys = async () => {
+  const groq = document.getElementById('admin-groq-key').value.trim();
+  const gemini = document.getElementById('admin-gemini-key').value.trim();
+  localStorage.setItem('moodly_groq_key', groq);
+  localStorage.setItem('moodly_gemini_key', gemini);
+
+  try {
+    await setDoc(doc(db, 'users', 'global_ai_config'), {
+      groqKey: groq,
+      geminiKey: gemini,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+  } catch (e) {
+    console.warn('Firestore cloud sync skipped (permissions):', e.message);
+  }
+
+  const msg = document.getElementById('ai-status-msg');
+  msg.textContent = '✅ Konfigurasi API Key AI berhasil disimpan!';
+  msg.style.color = 'var(--p1)';
+  msg.style.display = 'block';
+  setTimeout(() => { msg.style.display = 'none'; }, 3500);
+};
+
+window.testAIConnection = async () => {
+  const groq = document.getElementById('admin-groq-key').value.trim() || localStorage.getItem('moodly_groq_key');
+  const gemini = document.getElementById('admin-gemini-key').value.trim() || localStorage.getItem('moodly_gemini_key');
+  const msg = document.getElementById('ai-status-msg');
+  msg.textContent = '⏳ Menguji koneksi AI...';
+  msg.style.color = '#f59e0b';
+  msg.style.display = 'block';
+
+  try {
+    if (groq) {
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${groq}` },
+        body: JSON.stringify({
+          model: 'llama-3.1-8b-instant',
+          max_tokens: 30,
+          messages: [{ role: 'user', content: 'Halo Jes test' }]
+        })
+      });
+      if (res.ok) {
+        msg.textContent = '✅ Koneksi Groq AI Berhasil & Aktif!';
+        msg.style.color = '#10b981';
+        return;
+      }
+    }
+    if (gemini) {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${gemini}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: 'Halo test' }] }] })
+      });
+      if (res.ok) {
+        msg.textContent = '✅ Koneksi Gemini AI Berhasil & Aktif!';
+        msg.style.color = '#10b981';
+        return;
+      }
+    }
+    msg.textContent = '⚠️ API Key belum valid atau kuota habis. Jes akan menggunakan Offline Empathy Engine.';
+    msg.style.color = '#ef4444';
+  } catch (e) {
+    msg.textContent = `❌ Gagal menguji koneksi: ${e.message}`;
+    msg.style.color = '#ef4444';
+  }
 };
 
 // RSVP DATA

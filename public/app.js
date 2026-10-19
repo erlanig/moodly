@@ -181,7 +181,14 @@ function updateHome() {
   if (entries.length) {
     const avg = entries.reduce((s,e) => s + (e.mood?.s||3), 0) / entries.length;
     const m   = MOODS.find(x => x.s === Math.round(avg)) || MOODS[2];
-    document.getElementById('s-avg').textContent = m.e;
+    const sAvgEl = document.getElementById('s-avg');
+    if (sAvgEl) {
+      if (m?.img) {
+        sAvgEl.innerHTML = `<img src="${m.img}" alt="${m.l}" class="stat-3d-icon">`;
+      } else {
+        sAvgEl.textContent = m.e;
+      }
+    }
   } else {
     document.getElementById('s-avg').textContent = '—';
   }
@@ -192,8 +199,11 @@ function updateHome() {
     const last = entries[entries.length - 1];
     const d = new Date(last.ts);
     const t = d.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+    const moodIconHtml = last.mood?.img
+      ? `<img src="${last.mood.img}" alt="${last.mood.l}" class="lcard-3d-img">`
+      : (last.mood?.e || '😐');
     el.innerHTML = `<div class="lcard">
-      <div class="lcard-em">${last.mood?.e||'😐'}</div>
+      <div class="lcard-em">${moodIconHtml}</div>
       <div>
         <div class="lcard-tag">Terakhir Check-in</div>
         <div class="lcard-name">${last.mood?.l||'—'}${last.intensity?' · '+last.intensity:''}</div>

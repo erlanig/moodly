@@ -9,14 +9,14 @@ import { addEntry } from './firebase.js';
    DATA
 ════════════════ */
 export const MOODS = [
-  {e:'😄',l:'Happy',   s:5, c:'#22c55e'},
-  {e:'😊',l:'Oke',     s:4, c:'#4ade80'},
-  {e:'😐',l:'Biasa',   s:3, c:'#fbbf24'},
-  {e:'😔',l:'Sedih',   s:2, c:'#fb923c'},
-  {e:'😰',l:'Anxious', s:2, c:'#f472b6'},
-  {e:'😤',l:'Frustrasi',s:1,c:'#f87171'},
-  {e:'😴',l:'Exhausted',s:1,c:'#a78bfa'},
-  {e:'🫠',l:'Burnout', s:1, c:'#60a5fa'},
+  {e:'😄', img:'img/3d/mood-happy.png',     l:'Happy',    s:5, c:'#ff2d55'},
+  {e:'😊', img:'img/3d/mood-oke.png',       l:'Oke',      s:4, c:'#ff5e8a'},
+  {e:'😐', img:'img/3d/mood-biasa.png',     l:'Biasa',    s:3, c:'#f59e0b'},
+  {e:'😔', img:'img/3d/mood-sedih.png',     l:'Sedih',    s:2, c:'#6366f1'},
+  {e:'😰', img:'img/3d/mood-anxious.png',   l:'Anxious',  s:2, c:'#ec4899'},
+  {e:'😤', img:'img/3d/mood-frustrasi.png', l:'Frustrasi',s:1, c:'#ef4444'},
+  {e:'😴', img:'img/3d/mood-exhausted.png', l:'Exhausted',s:1, c:'#8b5cf6'},
+  {e:'🫠', img:'img/3d/mood-burnout.png',   l:'Burnout',  s:1, c:'#0284c7'},
 ];
 
 export const CAUSES = [
@@ -53,7 +53,12 @@ export function buildCheckinUI() {
   mg.innerHTML = '';
   MOODS.forEach(m => {
     const el = document.createElement('div'); el.className = 'mood-btn';
-    el.innerHTML = `<span class="em">${m.e}</span><span class="lb">${m.l}</span>`;
+    el.innerHTML = `
+      <div class="mood-3d-box">
+        <img src="${m.img}" alt="${m.l}" class="mood-3d-icon" loading="lazy" onerror="this.outerHTML='<span class=\\'em\\'>${m.e}</span>'">
+      </div>
+      <span class="lb">${m.l}</span>
+    `;
     el.onclick = () => {
       document.querySelectorAll('.mood-btn').forEach(x => x.classList.remove('sel'));
       el.classList.add('sel'); cur.mood = m;
@@ -133,14 +138,24 @@ export async function submitCheckin(entries) {
   entries.push(entry);
 
   const msgs = [
-    'Proud of you buat check-in hari ini 🫂',
-    'Udah jujur sama diri sendiri, keren! ✨',
-    'Satu langkah kecil yang berarti besar 🌱',
-    'You doing great, keep going! 💚',
-    'Tiap check-in itu bentuk self-love 💚',
+    'Terima kasih sudah jujur dengan perasaanmu hari ini.',
+    'Satu langkah refleksi yang sangat berharga untuk dirimu.',
+    'Perasaanmu valid. Luangkan waktu untuk bernapas sejenak.',
+    'Kamu sudah melakukan yang terbaik hari ini.',
+    'Setiap check-in adalah bentuk kepedulian pada dirimu sendiri.',
   ];
-  document.getElementById('suc-em').textContent = cur.mood.e;
-  document.getElementById('suc-s').textContent  = msgs[Math.floor(Math.random()*5)];
+  const sucEm = document.getElementById('suc-em');
+  if (sucEm) {
+    if (cur.mood?.img) {
+      sucEm.innerHTML = `<img src="${cur.mood.img}" alt="${cur.mood.l}" class="suc-3d-img">`;
+    } else {
+      sucEm.textContent = cur.mood?.e || '✨';
+    }
+  }
+  const sucSub = document.getElementById('suc-s');
+  if (sucSub) {
+    sucSub.textContent = msgs[Math.floor(Math.random() * msgs.length)];
+  }
 
   const s = document.getElementById('success');
   s.classList.add('show');
