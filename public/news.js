@@ -13,58 +13,73 @@ export let artStore = [];
 let curFilter = 'semua';
 
 /* ════════════════
-   TOPIC ROTATION — 20 set, tiap 6 jam beda
+   BOOKMARKS
+════════════════ */
+export function getBookmarks() {
+  try { return JSON.parse(localStorage.getItem('moodly_bookmarks') || '[]'); }
+  catch { return []; }
+}
+
+export function toggleBookmark(idx) {
+  const a = artStore[idx];
+  if (!a) return;
+  let bms = getBookmarks();
+  const exists = bms.some(b => b.title === a.title);
+  if (exists) {
+    bms = bms.filter(b => b.title !== a.title);
+    if (window._moodlyToast) window._moodlyToast('Bookmark dihapus 🔖');
+  } else {
+    bms.unshift(a);
+    if (window._moodlyToast) window._moodlyToast('Disimpan ke Bookmark! ⭐');
+  }
+  localStorage.setItem('moodly_bookmarks', JSON.stringify(bms));
+  updateBookmarkButton(idx);
+  if (curFilter === 'bookmark') {
+    renderNews(bms, 'bookmark');
+  }
+}
+window._toggleBookmark = toggleBookmark;
+
+function updateBookmarkButton(idx) {
+  const btn = document.getElementById('art-bm-btn');
+  if (!btn) return;
+  const a = artStore[idx];
+  const bms = getBookmarks();
+  const isBm = a && bms.some(b => b.title === a.title);
+  btn.innerHTML = isBm ? '★' : '☆';
+  btn.title = isBm ? 'Hapus bookmark' : 'Simpan bookmark';
+}
+
+/* ════════════════
+   TOPIC ROTATION
 ════════════════ */
 const TOPICS = [
   ['meningkatkan mood pagi hari alami','teknik grounding kecemasan panik','sleep hygiene tidur berkualitas','self-care realistis sehari-hari','bangkit setelah hari berat','makanan pengaruhi mood','journaling manfaat mental','olahraga dan kesehatan jiwa','mengelola stres kerja','dopamin kebiasaan positif'],
   ['mengatasi overthinking efektif','sindrom impostor cara atasi','screen time kesehatan mental','gratitude dan kebahagiaan','burnout tanda dan pulih','kecemasan sosial tips','self-compassion pentingnya','cara tenang saat panik','kebiasaan pagi positif','digital detox manfaat'],
   ['terapi CBT manfaat cara kerja','mindful eating hubungan makanan','inner child healing pengantar','afirmasi positif cara kerja','peer support kesehatan mental','rutinitas malam tidur berkualitas','batas sehat dalam hubungan','cara kerja hormon stres','manfaat alam untuk jiwa','emotional regulation dasar'],
-  ['pola pikir growth mindset','cara kerja anxiety di otak','kekuatan bercerita untuk healing','istirahat aktif vs pasif','regulasi emosi anak muda','self-esteem membangun kembali','nutrisi otak dan emosi','melepaskan perfeksionisme','mengatasi kesepian kota besar','produktivitas tanpa burnout'],
+  ['pola pikir growth mindset','cara kerja anxiety di otak','sabar dan resiliensi psikologi islami','istirahat aktif vs pasif','regulasi emosi anak muda','self-esteem membangun kembali','nutrisi otak dan emosi','melepaskan perfeksionisme','mengatasi kesepian kota besar','produktivitas tanpa burnout'],
   ['hubungan toxic cara kenali','cara minta bantuan psikolog','musik dan kesehatan mental','tertawa manfaat psikologis','kreativitas sebagai healing','menulis diary manfaat ilmiah','meditasi body scan panduan','napas dalam teknik efektif','alam dan stress reduction','sleep debt cara bayar'],
-  ['attachment style hubungan','cara kerja trauma di otak','mindfulness untuk pemula','acceptance commitment therapy','polyvagal theory sederhana','window of tolerance explained','co-regulation dengan orang lain','neuroception dan rasa aman','interoception latihan kesadaran','vagus nerve stimulasi alami'],
-  ['morning routine kesehatan mental','evening routine winding down','exercise dopamine serotonin','cold shower mental health','sunlight circadian rhythm','social connection loneliness','purpose meaning life psychology','flow state cara mencapai','awe experience manfaat mental','nature deficit disorder solusi'],
-  ['gaslighting cara kenali','people pleasing cara berhenti','emotional labor yang melelahkan','hypervigilance cara tenangkan','fawn response trauma healing','dissociation grounding teknik','intrusive thoughts cara hadapi','rumination vs reflection beda','catastrophizing cara hentikan','mind reading cognitive distortion'],
-  ['self-worth vs self-esteem','inner critic cara reframe','shame vs guilt perbedaan','vulnerability kekuatan bukan lemah','boundaries setting cara praktis','assertiveness communication skills','emotional intelligence meningkatkan','empathy vs sympathy beda','active listening cara benar','nonviolent communication dasar'],
-  ['hormonal mood changes wanita','pms pmdd perbedaan dan solusi','siklus menstruasi dan emosi','ovulasi dan energi puncak','luteal phase mood support','menstruasi self-care terbaik','cycle syncing produktivitas','estrogen progesterone mood','cortisol dan stress wanita','iron deficiency mood perempuan'],
-  ['diet mediterranean mental health','gut microbiome dan depresi','omega 3 otak dan mood','magnesium stress dan tidur','vitamin d deficiency mood','fermented food mental health','blood sugar mood stability','hydration brain function','caffeine anxiety hubungan','alcohol dan depresi faktanya'],
-  ['toxic positivity bahayanya','bypass spiritual apa itu','self-help trap cara hindari','hustle culture bahaya mental','comparison social media efek','doomscrolling cara berhenti','FOMO cara atasi','cancel culture mental toll','information overload solusi','news consumption batas sehat'],
-  ['grief stages cara hadapi','kehilangan pekerjaan mental health','relationship ending healing','moving to new city loneliness','identity crisis quarter life','midlife transition cara hadapi','retirement mental health','chronic illness mental support','caregiver burnout cara pulih','empty nest syndrome solusi'],
-  ['workplace anxiety cara atasi','imposter syndrome remote work','meeting fatigue zoom solusi','work life balance nyata','toxic boss cara survive','micromanagement dampak mental','praise seeking validation kerja','perfectionisme di tempat kerja','career change anxiety normal','promotion anxiety cara hadapi'],
-  ['childhood emotional neglect','reparenting diri sendiri cara','inner child work panduan','generational trauma cara putus','family dynamics dan mental health','sibling rivalry dampak dewasa','enmeshment vs closeness keluarga','parentification dan healing','critical parents cara hadapi','healthy family communication'],
-  ['introvert recharge cara efektif','extrovert kebutuhan sosial','ambivert memahami diri','highly sensitive person tips','ADHD emotional dysregulation','autism masking kelelahan','anxiety vs intuition beda','depression vs sadness beda','bipolar mood tracking tips','OCD intrusive thoughts hadapi'],
-  ['insomnia cognitive behavioral','sleep apnea dan mental health','hypnagogic hallucinations normal','lucid dreaming dan kesehatan','sleep paralysis cara atasi','napping power nap efektif','chronotype dan produktivitas','jet lag mental recovery','shift work mental health','screen sebelum tidur efek'],
-  ['social anxiety party survival','public speaking fear atasi','first date anxiety tips','job interview anxiety hilangkan','doctor visit anxiety hadapi','phone call anxiety tips','crowded place anxiety grounding','performance anxiety olahraga','test anxiety cara atasi','driving anxiety cara hilangkan'],
-  ['anger management teknik efektif','jealousy dan insecurity atasi','loneliness vs solitude beda','boredom dan kreativitas','guilt productive vs toxic','regret cara hadapi sehat','envy cara transformasi positif','fear of failure reframe','rejection sensitivity cara atasi','disappointment recovery cepat'],
-  ['self-sabotage cara kenali','procrastination psikologi dalam','decision fatigue cara kurangi','analysis paralysis cara keluar','comfort zone expansion gradual','learned helplessness cara balik','avoidance behavior cara hadapi','safety behavior anxiety','reassurance seeking cara stop','body dysmorphia awal kenali'],
+  ['attachment style hubungan','cara kerja trauma di otak','mindfulness untuk pemula','tawakkal dan kesehatan mental','polyvagal theory sederhana','window of tolerance explained','co-regulation dengan orang lain','neuroception dan rasa aman','interoception latihan kesadaran','vagus nerve stimulasi alami']
 ];
 
 const CATMAP = [
-  'mood','stres','tidur','self-care','motivasi','mood','stres','tidur','self-care','motivasi',
+  'mood','stres','tidur','self-care','motivasi','islam','stres','tidur','self-care','motivasi',
 ];
 
 /* ════════════════
-   DATE / TIME HELPERS
+   DATE / TIME HELPERS (Daily key)
 ════════════════ */
-function slotKey() {
-  const d    = new Date();
-  const slot = Math.floor(d.getHours() / 6);
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}-s${slot}`;
+export function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
 function todayLabel() {
-  return new Date().toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long' });
-}
-
-function slotLabel() {
-  const h = new Date().getHours();
-  if (h < 6)  return 'Dini Hari';
-  if (h < 12) return 'Pagi';
-  if (h < 18) return 'Siang';
-  return 'Malam';
+  return new Date().toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
 }
 
 function getTopicIndex() {
-  const key  = slotKey();
+  const key = todayKey();
   let hash = 0;
   for (let i = 0; i < key.length; i++) hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
   return hash % TOPICS.length;
@@ -74,15 +89,16 @@ function getTopicIndex() {
    INIT
 ════════════════ */
 export async function initNews() {
-  const slot = slotLabel();
-  document.getElementById('date-pill').innerHTML = `
-    <svg width="9" height="9" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="#0a9e3f" stroke-width="2"/><path d="M3 10h18M8 2v4M16 2v4" stroke="#0a9e3f" stroke-width="2"/></svg>
-    ${todayLabel()} · ${slot}`;
+  const datePill = document.getElementById('date-pill');
+  if (datePill) {
+    datePill.innerHTML = `
+      <svg width="9" height="9" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="#ff2d55" stroke-width="2"/><path d="M3 10h18M8 2v4M16 2v4" stroke="#ff2d55" stroke-width="2"/></svg>
+      ${todayLabel()} · Edisi Hari Ini`;
+  }
 
-  const currentKey = slotKey();
+  const currentKey = todayKey();
   const cached     = await loadNewsCache();
 
-  // ✅ FIXED: bandingkan key slot secara eksplisit
   const cacheValid = cached && cached.key === currentKey && Array.isArray(cached.arts) && cached.arts.length >= 1;
 
   if (cacheValid) {
@@ -151,14 +167,13 @@ Kategori tiap artikel berurutan: ${cats.join(', ')}`;
 
     const arts = JSON.parse(raw.replace(/```json|```/g,'').trim());
     artStore = arts;
-    // ✅ FIXED: simpan dengan key slot yang benar
-    await saveNewsCache(slotKey(), arts);
+    await saveNewsCache(todayKey(), arts);
     renderNews(arts, curFilter);
     buildHomePreview();
   } catch (e) {
     console.warn('[news] fetch failed, using fallback', e.message);
     artStore = fallbackArticles();
-    await saveNewsCache(slotKey(), artStore);
+    await saveNewsCache(todayKey(), artStore);
     renderNews(artStore, curFilter);
     buildHomePreview();
   }
@@ -166,10 +181,11 @@ Kategori tiap artikel berurutan: ${cats.join(', ')}`;
 
 export async function forceRefresh() {
   const ic = document.getElementById('rf-ic');
-  ic.style.transition = 'transform .45s';
-  ic.style.transform  = 'rotate(360deg)';
-  setTimeout(() => { ic.style.transition=''; ic.style.transform=''; }, 460);
-  // ✅ FIXED: hapus cache dengan key kosong agar pasti invalid
+  if (ic) {
+    ic.style.transition = 'transform .45s';
+    ic.style.transform  = 'rotate(360deg)';
+    setTimeout(() => { ic.style.transition=''; ic.style.transform=''; }, 460);
+  }
   await saveNewsCache('__invalidated__', []);
   artStore = [];
   await loadArticles();
@@ -181,34 +197,48 @@ export async function forceRefresh() {
 export function filterNews(cat, btn) {
   curFilter = cat;
   document.querySelectorAll('.ftab').forEach(b => b.classList.remove('on'));
-  btn.classList.add('on');
-  if (artStore.length) renderNews(artStore, cat);
+  if (btn) btn.classList.add('on');
+  if (cat === 'bookmark') {
+    renderNews(getBookmarks(), 'bookmark');
+  } else if (artStore.length) {
+    renderNews(artStore, cat);
+  }
 }
 
 /* ════════════════
    RENDER LIST
 ════════════════ */
 export function renderNews(arts, filter) {
-  const list = filter === 'semua' ? arts : arts.filter(a => a.cat === filter);
+  const list = (filter === 'semua' || !filter)
+    ? arts
+    : (filter === 'bookmark' ? arts : arts.filter(a => a.cat === filter));
   const wrap = document.getElementById('news-wrap');
+  if (!wrap) return;
   if (!list.length) {
-    wrap.innerHTML = `<div style="text-align:center;padding:40px 0;color:var(--muted);font-size:14px">Tidak ada artikel untuk kategori ini.</div>`;
+    wrap.innerHTML = `<div style="text-align:center;padding:40px 0;color:var(--muted);font-size:14px">${filter === 'bookmark' ? 'Belum ada artikel yang kamu bookmark. Klik ⭐ di artikel untuk menyimpannya!' : 'Tidak ada artikel untuk kategori ini.'}</div>`;
     return;
   }
+  const bms = getBookmarks();
   wrap.innerHTML = `<div class="nlist">${list.map(a => {
-    const idx = artStore.indexOf(a);
-    return `<div class="ncard" onclick="window._openArt(${idx})">
+    const idx = artStore.findIndex(item => item.title === a.title);
+    const isBookmarked = bms.some(b => b.title === a.title);
+    return `<div class="ncard card-enter" onclick="window._openArt(${idx >= 0 ? idx : 0})">
       <div class="ncard-top">
         <div class="ncard-thumb">${a.emoji}</div>
         <div class="ncard-body">
-          <div class="ncard-src-row"><div class="ncard-dot"></div><div class="ncard-src">${a.source}</div></div>
+          <div class="ncard-src-row">
+            <div class="ncard-dot"></div>
+            <div class="ncard-src">${a.source}</div>
+            <span class="nbadge-new">Baru hari ini</span>
+            ${isBookmarked ? '<span style="margin-left:auto;font-size:12px;">⭐</span>' : ''}
+          </div>
           <div class="ncard-title">${a.title}</div>
           <div class="ncard-snip">${a.preview}</div>
         </div>
       </div>
       <div class="ncard-bot">
         <div class="ncard-read">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5l7 7-7 7" stroke="#1db954" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5l7 7-7 7" stroke="var(--p1)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           Baca · ${a.readTime}
         </div>
         <div class="ncard-tags">${(a.tags||[]).slice(0,2).map(t => `<span class="ntag">${t}</span>`).join('')}</div>
@@ -226,7 +256,7 @@ export function buildHomePreview() {
   if (!artStore.length) {
     el.innerHTML = `<div class="prev-card" onclick="window._showScreen('news')">
       <div class="prev-em">📰</div>
-      <div><div class="prev-src">Artikel Harian</div><div class="prev-title">10 tips kesehatan mental berganti tiap 6 jam →</div></div>
+      <div><div class="prev-src">Artikel Harian</div><div class="prev-title">10 tips kesehatan mental update setiap hari →</div></div>
     </div>`;
     return;
   }
@@ -247,10 +277,23 @@ export function openArt(idx) {
   const a = artStore[idx]; if (!a) return;
   document.getElementById('art-tb-src').textContent = a.source;
   document.getElementById('art-tb-ttl').textContent = a.title;
-  const cats = { mood:'Mood & Emosi', stres:'Stres & Kecemasan', tidur:'Kualitas Tidur', 'self-care':'Self-Care', motivasi:'Motivasi & Resiliensi' };
+  const cats = {
+    mood:'Mood & Emosi',
+    stres:'Stres & Kecemasan',
+    tidur:'Kualitas Tidur',
+    'self-care':'Self-Care',
+    motivasi:'Motivasi & Resiliensi',
+    islam:'Islam & Psikologi'
+  };
   const dateStr = new Date().toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  const bms = getBookmarks();
+  const isBm = bms.some(b => b.title === a.title);
+
   document.getElementById('art-body').innerHTML = `
-    <div class="art-cat">${cats[a.cat] || 'Kesehatan Mental'}</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div class="art-cat">${cats[a.cat] || 'Kesehatan Mental'}</div>
+      <button id="art-bm-btn" onclick="window._toggleBookmark(${idx})" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--p1);padding:4px 8px">${isBm ? '★' : '☆'}</button>
+    </div>
     <div class="art-title">${a.title}</div>
     <div class="art-meta">
       <span class="art-src">${a.source}</span>
@@ -263,7 +306,19 @@ export function openArt(idx) {
   `;
   const ov = document.getElementById('art-ov');
   const sc = document.querySelector('.art-scroll');
-  ov.style.display = 'flex'; sc.scrollTop = 0;
+  const bar = document.getElementById('art-progress');
+  if (bar) bar.style.width = '0%';
+
+  if (sc && bar) {
+    sc.onscroll = () => {
+      const max = sc.scrollHeight - sc.clientHeight;
+      const pct = max > 0 ? (sc.scrollTop / max) * 100 : 0;
+      bar.style.width = `${Math.min(100, Math.max(0, pct))}%`;
+    };
+  }
+
+  ov.style.display = 'flex';
+  if (sc) sc.scrollTop = 0;
   ov.getBoundingClientRect();
   ov.classList.add('open');
   history.pushState({ art: true }, '');
@@ -271,6 +326,7 @@ export function openArt(idx) {
 
 export function closeArt() {
   const ov = document.getElementById('art-ov');
+  if (!ov) return;
   ov.classList.remove('open');
   setTimeout(() => ov.style.display = '', 320);
 }

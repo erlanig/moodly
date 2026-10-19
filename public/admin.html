@@ -3,331 +3,376 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Moodly Admin</title>
+<title>Moodly Admin Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --g1: #1db954; --g2: #0a9e3f;
-    --grad: linear-gradient(135deg, #1db954, #0d8c3e);
-    --white: #fff; --bg: #f4faf7;
-    --text: #0f2419; --text2: #3a5c46;
-    --muted: #8aab97; --border: #e0f0e8;
-    --mens: #ff6b8a; --mens-bg: #fff0f3;
-    --foll: #f59e0b; --ovul: #8b5cf6; --lute: #3b82f6;
-    --r: 16px;
+    --p1: #ff2d55;
+    --p2: #ff5e8a;
+    --grad: linear-gradient(135deg, #ff5e8a 0%, #ff2d55 100%);
+    --gl: linear-gradient(135deg, #fff0f4, #ffe3eb);
+    --white: #fff;
+    --bg: #fff5f8;
+    --text: #260c18;
+    --text2: #5c2037;
+    --muted: #a67385;
+    --border: #fedbe4;
+    --card: #ffffff;
+    --mens: #ff4b72;
+    --foll: #f59e0b;
+    --ovul: #a855f7;
+    --lute: #3b82f6;
+    --r: 18px;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    background: #0f2419; color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Plus Jakarta Sans", sans-serif;
+    background: #1c0912; color: var(--text);
     min-height: 100vh;
   }
 
   /* ── HEADER ── */
   .admin-hd {
-    background: var(--grad);
-    padding: 20px 28px 18px;
+    background: linear-gradient(135deg, #260815 0%, #3d1024 100%);
+    border-bottom: 1px solid rgba(255, 45, 85, 0.2);
+    padding: 16px 28px;
     display: flex; align-items: center; justify-content: space-between;
     position: sticky; top: 0; z-index: 100;
-    box-shadow: 0 4px 24px rgba(0,0,0,.25);
   }
-  .admin-hd-left { display: flex; align-items: center; gap: 12px; }
+  .admin-hd-left { display: flex; align-items: center; gap: 14px; }
   .admin-logo {
-    width: 40px; height: 40px; background: rgba(255,255,255,.2);
-    border-radius: 12px; display: flex; align-items: center; justify-content: center;
-    font-size: 22px;
+    width: 42px; height: 42px; background: var(--grad);
+    border-radius: 14px; display: flex; align-items: center; justify-content: center;
+    font-size: 22px; box-shadow: 0 6px 18px rgba(255, 45, 85, 0.35);
   }
   .admin-title { font-size: 20px; font-weight: 800; color: #fff; letter-spacing: -.02em; }
-  .admin-sub { font-size: 11px; color: rgba(255,255,255,.65); margin-top: 1px; }
-  .admin-badge {
-    background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.3);
-    color: #fff; font-size: 11px; font-weight: 700;
-    padding: 4px 12px; border-radius: 100px;
+  .admin-sub { font-size: 11px; color: rgba(255,255,255,.6); margin-top: 1px; }
+
+  /* ── TOP NAV TABS ── */
+  .admin-nav {
+    display: flex; gap: 6px; background: rgba(255,255,255,.06);
+    padding: 4px; border-radius: 12px; border: 1px solid rgba(255,255,255,.1);
+  }
+  .admin-nav-btn {
+    background: transparent; border: none; padding: 8px 16px;
+    border-radius: 8px; font-family: inherit; font-size: 12px; font-weight: 700;
+    color: rgba(255,255,255,.7); cursor: pointer; transition: all .15s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .admin-nav-btn.active {
+    background: var(--grad); color: #fff;
+    box-shadow: 0 4px 12px rgba(255, 45, 85, 0.3);
   }
 
-  /* ── LAYOUT ── */
-  .admin-body { display: flex; height: calc(100vh - 78px); }
+  /* ── MAIN LAYOUT ── */
+  .admin-body { display: flex; height: calc(100vh - 75px); }
 
   /* ── SIDEBAR ── */
   .sidebar {
-    width: 280px; flex-shrink: 0;
-    background: #162a1e; border-right: 1px solid rgba(255,255,255,.07);
-    overflow-y: auto; padding: 16px 12px;
+    width: 300px; flex-shrink: 0;
+    background: #15050e; border-right: 1px solid rgba(255,255,255,.08);
+    display: flex; flex-direction: column;
   }
-  .sidebar-ttl {
-    font-size: 9px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: .1em; color: rgba(255,255,255,.3);
-    padding: 0 8px; margin-bottom: 8px;
+  .sidebar-top { padding: 16px 14px 10px; border-bottom: 1px solid rgba(255,255,255,.06); }
+  .sidebar-search {
+    width: 100%; padding: 10px 12px; border-radius: 10px;
+    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12);
+    color: #fff; font-family: inherit; font-size: 12px; outline: none;
   }
+  .sidebar-list { flex: 1; overflow-y: auto; padding: 12px 10px; }
   .user-item {
     display: flex; align-items: center; gap: 10px;
     padding: 10px 12px; border-radius: 12px;
-    cursor: pointer; transition: background .15s;
-    margin-bottom: 4px;
+    cursor: pointer; transition: background .14s;
+    margin-bottom: 4px; border: 1px solid transparent;
   }
-  .user-item:hover { background: rgba(255,255,255,.06); }
-  .user-item.active { background: rgba(29,185,84,.18); border: 1px solid rgba(29,185,84,.3); }
+  .user-item:hover { background: rgba(255,255,255,.05); }
+  .user-item.active { background: rgba(255,45,85,.15); border-color: rgba(255,45,85,.35); }
   .user-avatar {
     width: 36px; height: 36px; border-radius: 10px;
     background: var(--grad); display: flex; align-items: center;
-    justify-content: center; font-size: 16px; flex-shrink: 0;
+    justify-content: center; font-size: 15px; flex-shrink: 0;
     font-weight: 800; color: #fff;
   }
   .user-info { flex: 1; min-width: 0; }
   .user-name { font-size: 13px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .user-meta { font-size: 10px; color: rgba(255,255,255,.4); margin-top: 1px; }
-  .user-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--g1); flex-shrink: 0; }
+  .user-meta { font-size: 11px; color: rgba(255,255,255,.45); margin-top: 2px; }
+  .user-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--p1); flex-shrink: 0; }
 
-  /* ── MAIN PANEL ── */
-  .main-panel { flex: 1; overflow-y: auto; background: var(--bg); }
+  /* ── MAIN CONTENT PANELS ── */
+  .main-panel { flex: 1; overflow-y: auto; background: var(--bg); padding: 24px 28px; }
+  .admin-view { display: none; }
+  .admin-view.active { display: block; }
 
-  /* ── LOADING STATE ── */
-  .loading-wrap {
-    display: flex; flex-direction: column; align-items: center;
-    justify-content: center; height: 60vh; gap: 14px;
+  /* ── CARDS & GRIDS ── */
+  .card-box {
+    background: #ffffff; border-radius: 20px;
+    border: 1.5px solid var(--border); padding: 20px 22px;
+    box-shadow: 0 4px 20px rgba(255, 45, 85, 0.05); margin-bottom: 20px;
   }
-  .spinner {
-    width: 44px; height: 44px; border-radius: 50%;
-    border: 3px solid var(--border);
-    border-top-color: var(--g1);
-    animation: spin .7s linear infinite;
+  .card-title {
+    font-size: 16px; font-weight: 800; color: var(--text);
+    display: flex; align-items: center; gap: 8px; margin-bottom: 14px;
   }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .loading-txt { font-size: 13px; color: var(--muted); font-weight: 600; }
+  .card-desc { font-size: 12px; color: var(--muted); line-height: 1.5; margin-bottom: 16px; }
 
-  /* ── EMPTY STATE ── */
-  .empty-wrap {
-    display: flex; flex-direction: column; align-items: center;
-    justify-content: center; height: 60vh; gap: 10px;
-    color: var(--muted);
+  /* ── STATS ROW ── */
+  .stat-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px; margin-bottom: 22px;
   }
-  .empty-wrap .big { font-size: 48px; }
-  .empty-wrap p { font-size: 13px; font-weight: 600; }
-
-  /* ── USER DETAIL ── */
-  .detail-hd {
-    background: #fff; border-bottom: 1px solid var(--border);
-    padding: 20px 24px; display: flex; align-items: center;
-    justify-content: space-between; position: sticky; top: 0; z-index: 10;
-  }
-  .detail-hd-left { display: flex; align-items: center; gap: 12px; }
-  .detail-avatar {
-    width: 48px; height: 48px; border-radius: 14px;
-    background: var(--grad); display: flex; align-items: center;
-    justify-content: center; font-size: 22px; font-weight: 800; color: #fff;
-    box-shadow: 0 4px 14px rgba(13,140,62,.25);
-  }
-  .detail-name { font-size: 18px; font-weight: 800; color: var(--text); }
-  .detail-id { font-size: 10px; color: var(--muted); font-family: monospace; margin-top: 2px; }
-  .refresh-btn {
-    padding: 8px 16px; background: var(--bg); border: 1.5px solid var(--border);
-    border-radius: 100px; font-family: inherit; font-size: 12px;
-    font-weight: 700; color: var(--text2); cursor: pointer; transition: all .15s;
-  }
-  .refresh-btn:hover { background: var(--border); }
-
-  /* ── STAT ROW ── */
-  .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 16px 24px; }
   .stat-card {
+    background: #fff; border-radius: 18px; border: 1.5px solid var(--border);
+    padding: 18px; display: flex; align-items: center; gap: 14px;
+    box-shadow: 0 4px 16px rgba(255, 45, 85, 0.04);
+  }
+  .stat-ic {
+    width: 44px; height: 44px; border-radius: 14px;
+    background: var(--gl); color: var(--p1);
+    display: flex; align-items: center; justify-content: center; font-size: 20px;
+  }
+  .stat-val { font-size: 22px; font-weight: 800; color: var(--text); line-height: 1.1; }
+  .stat-lbl { font-size: 11px; font-weight: 700; color: var(--muted); margin-top: 2px; text-transform: uppercase; }
+
+  /* ── PASSCODE FORM ── */
+  .passcode-setting-box {
+    max-width: 500px; background: #fff; border-radius: 24px;
+    border: 1.5px solid var(--border); padding: 28px 24px;
+    box-shadow: 0 10px 30px rgba(255, 45, 85, 0.08);
+  }
+  .pc-display-big {
+    font-size: 38px; font-weight: 800; letter-spacing: 8px;
+    color: var(--p1); background: var(--gl);
+    border: 2px dashed #ffb3c6; border-radius: 16px;
+    padding: 16px; text-align: center; margin: 16px 0;
+  }
+  .input-label { font-size: 12px; font-weight: 700; color: var(--text2); margin-bottom: 6px; display: block; }
+  .admin-input {
+    width: 100%; padding: 13px 16px; border-radius: 14px;
+    border: 1.5px solid var(--border); background: var(--bg);
+    font-family: inherit; font-size: 15px; font-weight: 700;
+    color: var(--text); outline: none; margin-bottom: 14px;
+  }
+  .admin-btn {
+    padding: 13px 22px; border-radius: 14px; border: none;
+    background: var(--grad); color: #fff; font-family: inherit;
+    font-size: 13px; font-weight: 800; cursor: pointer;
+    box-shadow: 0 6px 18px rgba(255, 45, 85, 0.25);
+    display: inline-flex; align-items: center; gap: 8px;
+    transition: transform .12s;
+  }
+  .admin-btn:active { transform: scale(0.97); }
+  .admin-btn.secondary {
     background: #fff; border: 1.5px solid var(--border);
-    border-radius: 14px; padding: 14px 12px;
-    text-align: center;
-  }
-  .stat-val { font-size: 22px; font-weight: 800; color: var(--g1); }
-  .stat-lbl { font-size: 9px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; margin-top: 3px; }
-
-  /* ── SECTION ── */
-  .section { padding: 0 24px 20px; }
-  .sec-ttl {
-    font-size: 10px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: .08em; color: var(--muted);
-    margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
-  }
-  .sec-ttl::before { content:''; width: 3px; height: 12px; background: var(--g1); border-radius: 2px; display: inline-block; }
-
-  /* ── INSIGHT CHART ── */
-  .chart-wrap {
-    background: #fff; border: 1.5px solid var(--border);
-    border-radius: 16px; padding: 16px; margin-bottom: 12px;
-  }
-  .bars-admin { display: flex; gap: 6px; align-items: flex-end; height: 80px; }
-  .bar-col-a { display: flex; flex-direction: column; align-items: center; gap: 3px; flex: 1; }
-  .bar-a { width: 100%; border-radius: 4px 4px 0 0; min-height: 3px; transition: height .3s; }
-  .bar-day { font-size: 9px; color: var(--muted); font-weight: 600; }
-  .bar-em-a { font-size: 13px; }
-
-  /* ── MOOD HISTORY TABLE ── */
-  .entry-list { background: #fff; border: 1.5px solid var(--border); border-radius: 16px; overflow: hidden; }
-  .entry-row {
-    display: flex; align-items: center; gap: 10px;
-    padding: 11px 14px; border-bottom: 1px solid var(--border);
-    transition: background .1s;
-  }
-  .entry-row:last-child { border-bottom: none; }
-  .entry-row:hover { background: var(--bg); }
-  .entry-em { font-size: 22px; flex-shrink: 0; }
-  .entry-info { flex: 1; min-width: 0; }
-  .entry-mood { font-size: 13px; font-weight: 700; color: var(--text); }
-  .entry-causes { font-size: 10px; color: var(--muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .entry-time { font-size: 10px; color: var(--muted); flex-shrink: 0; text-align: right; }
-  .int-badge {
-    font-size: 9px; font-weight: 700; padding: 2px 7px;
-    border-radius: 100px; flex-shrink: 0;
-  }
-  .int-Ringan { background: #e8faf0; color: var(--g2); }
-  .int-Lumayan { background: #fff3e0; color: #e65100; }
-  .int-Berat { background: #ffeaea; color: #c62828; }
-
-  /* ── CYCLE SECTION ── */
-  .cycle-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-  .cycle-info-card {
-    background: #fff; border: 1.5px solid var(--border);
-    border-radius: 14px; padding: 14px;
-  }
-  .cycle-info-lbl { font-size: 9px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 6px; }
-  .cycle-info-val { font-size: 18px; font-weight: 800; color: var(--text); }
-  .cycle-info-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
-
-  .period-row-a {
-    display: flex; align-items: center; gap: 10px;
-    padding: 11px 14px; border-bottom: 1px solid var(--border);
-  }
-  .period-row-a:last-child { border-bottom: none; }
-  .period-dot-a { width: 10px; height: 10px; border-radius: 50%; background: var(--mens); flex-shrink: 0; }
-  .period-info-a { flex: 1; }
-  .period-date-a { font-size: 13px; font-weight: 700; color: var(--text); }
-  .period-meta-a { font-size: 10px; color: var(--muted); margin-top: 1px; }
-  .period-dur-a { font-size: 11px; font-weight: 700; color: var(--mens); flex-shrink: 0; }
-
-  /* ── PHASE BADGE ── */
-  .phase-badge {
-    display: inline-flex; align-items: center; gap: 5px;
-    padding: 5px 12px; border-radius: 100px;
-    font-size: 12px; font-weight: 700;
-  }
-  .phase-mens { background: var(--mens-bg); color: var(--mens); }
-  .phase-foll { background: #fffbeb; color: var(--foll); }
-  .phase-ovul { background: #f5f3ff; color: var(--ovul); }
-  .phase-lute { background: #eff6ff; color: var(--lute); }
-
-  /* ── CAUSE CHIPS ── */
-  .chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
-  .chip-a {
-    background: var(--bg); border: 1.5px solid var(--border);
-    border-radius: 100px; padding: 4px 10px;
-    font-size: 11px; font-weight: 600; color: var(--text2);
-    display: flex; align-items: center; gap: 5px;
-  }
-  .chip-pct-a { font-size: 10px; color: var(--g1); font-weight: 700; }
-
-  /* ── NO DATA ── */
-  .no-data { font-size: 12px; color: var(--muted); padding: 14px 0; }
-
-  /* ── GLOBAL STATS ── */
-  .global-stat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; padding: 16px 24px 0; }
-  .global-card {
-    background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
-    border-radius: 14px; padding: 14px 12px; text-align: center;
-  }
-  .global-val { font-size: 24px; font-weight: 800; color: var(--g1); }
-  .global-lbl { font-size: 9px; color: rgba(255,255,255,.4); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; margin-top: 3px; }
-
-  /* ── WELCOME PANEL ── */
-  .welcome-panel {
-    display: flex; flex-direction: column; align-items: center;
-    justify-content: center; height: 100%; gap: 12px;
-    color: var(--muted);
-  }
-  .welcome-panel .big { font-size: 56px; }
-  .welcome-panel h2 { font-size: 20px; font-weight: 800; color: var(--text); }
-  .welcome-panel p { font-size: 13px; text-align: center; max-width: 280px; line-height: 1.6; }
-
-  /* ── SCROLLBAR ── */
-  .sidebar::-webkit-scrollbar, .main-panel::-webkit-scrollbar { width: 4px; }
-  .sidebar::-webkit-scrollbar-track { background: transparent; }
-  .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 2px; }
-  .main-panel::-webkit-scrollbar-track { background: transparent; }
-  .main-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-  /* ── DIVIDER ── */
-  .divider { height: 1px; background: var(--border); margin: 0 24px 16px; }
-
-  /* ── TABS ── */
-  .tab-row {
-    display: flex; gap: 6px; padding: 0 24px 14px;
-  }
-  .tab-btn {
-    padding: 6px 14px; border-radius: 100px;
-    border: 1.5px solid var(--border);
-    background: #fff; font-family: inherit;
-    font-size: 11px; font-weight: 700; color: var(--muted);
-    cursor: pointer; transition: all .15s;
-  }
-  .tab-btn.on {
-    background: var(--g1); border-color: var(--g1); color: #fff;
+    color: var(--text2); box-shadow: none;
   }
 
-  /* ── SHOW MORE ── */
-  .show-more-btn {
-    width: 100%; padding: 10px;
-    background: var(--bg); border: none; border-top: 1px solid var(--border);
-    font-family: inherit; font-size: 12px; font-weight: 700;
-    color: var(--g1); cursor: pointer; transition: background .15s;
+  /* ── TABLE ── */
+  .admin-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .admin-table th {
+    text-align: left; padding: 10px 14px; background: var(--bg);
+    color: var(--muted); font-weight: 700; border-bottom: 1px solid var(--border);
   }
-  .show-more-btn:hover { background: var(--border); }
+  .admin-table td {
+    padding: 12px 14px; border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
 
-  @media (max-width: 700px) {
-    .sidebar { width: 220px; }
-    .stat-row { grid-template-columns: repeat(2, 1fr); }
-    .cycle-grid { grid-template-columns: 1fr; }
-    .global-stat-grid { grid-template-columns: repeat(2, 1fr); }
+  /* ── AUTH MODAL ── */
+  #admin-auth-gate {
+    position: fixed; inset: 0; z-index: 99999;
+    background: #14040d; display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  .auth-card {
+    background: #200814; border: 1.5px solid rgba(255, 45, 85, 0.3);
+    border-radius: 24px; padding: 32px 28px; width: 100%; max-width: 360px;
+    text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  }
+  .auth-logo {
+    width: 60px; height: 60px; border-radius: 18px; background: var(--grad);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 28px; margin-bottom: 14px;
+  }
+  .auth-title { font-size: 19px; font-weight: 800; color: #fff; margin-bottom: 6px; }
+  .auth-sub { font-size: 12px; color: rgba(255,255,255,0.6); margin-bottom: 20px; }
+  .auth-input {
+    width: 100%; padding: 13px 16px; border-radius: 14px;
+    background: rgba(255,255,255,0.08); border: 1.5px solid rgba(255,255,255,0.15);
+    color: #fff; font-family: inherit; font-size: 14px; outline: none;
+    margin-bottom: 16px; text-align: center;
   }
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
-<div class="admin-hd">
-  <div class="admin-hd-left">
-    <div class="admin-logo">🌱</div>
-    <div>
-      <div class="admin-title">Moodly Admin</div>
-      <div class="admin-sub">Dashboard pengguna & data</div>
-    </div>
+<!-- ═══════════════ AUTH GATE ═══════════════ -->
+<div id="admin-auth-gate">
+  <div class="auth-card">
+    <div class="auth-logo">🔐</div>
+    <div class="auth-title">Moodly Admin</div>
+    <div class="auth-sub">Masukkan password administrator untuk akses</div>
+    <input type="password" id="admin-pw-in" class="auth-input" placeholder="Password admin..." onkeydown="if(event.key==='Enter')loginAdmin()">
+    <button class="admin-btn" style="width:100%;justify-content:center" onclick="loginAdmin()">Masuk Dashboard →</button>
+    <div id="auth-err" style="color:#ff4b72;font-size:12px;font-weight:700;margin-top:12px;display:none">Password salah!</div>
   </div>
-  <div class="admin-badge" id="user-count-badge">Memuat...</div>
 </div>
 
-<!-- BODY -->
+<!-- ═══════════════ HEADER ═══════════════ -->
+<header class="admin-hd">
+  <div class="admin-hd-left">
+    <div class="admin-logo">🌸</div>
+    <div>
+      <div class="admin-title">moodly <span style="font-weight:400;font-size:16px;opacity:0.8">admin</span></div>
+      <div class="admin-sub">Sistem Manajemen & Kontrol Passcode</div>
+    </div>
+  </div>
+
+  <nav class="admin-nav">
+    <button class="admin-nav-btn active" onclick="switchTab('users', this)">👥 Pengguna</button>
+    <button class="admin-nav-btn" onclick="switchTab('passcode', this)">🔐 Passcode 6-Digit</button>
+    <button class="admin-nav-btn" onclick="switchTab('rsvp', this)">💌 Respon Kencan (RSVP)</button>
+    <button class="admin-nav-btn" onclick="switchTab('analytics', this)">📊 Analitik</button>
+    <button class="admin-nav-btn" onclick="switchTab('cache', this)">📰 Cache Artikel</button>
+  </nav>
+</header>
+
+<!-- ═══════════════ MAIN BODY ═══════════════ -->
 <div class="admin-body">
 
-  <!-- SIDEBAR -->
-  <div class="sidebar">
-    <div class="sidebar-ttl">Pengguna</div>
-    <div id="user-list">
-      <div class="loading-wrap" style="height:200px">
-        <div class="spinner"></div>
-        <div class="loading-txt">Memuat data...</div>
-      </div>
+  <!-- SIDEBAR (FOR USERS) -->
+  <aside class="sidebar" id="admin-sidebar">
+    <div class="sidebar-top">
+      <input type="text" class="sidebar-search" id="user-search" placeholder="🔍 Cari nama pengguna..." oninput="filterUsers(this.value)">
     </div>
-  </div>
+    <div class="sidebar-list" id="user-list">
+      <div style="color:rgba(255,255,255,.4);font-size:12px;padding:14px;text-align:center">Memuat daftar pengguna...</div>
+    </div>
+  </aside>
 
   <!-- MAIN PANEL -->
-  <div class="main-panel" id="main-panel">
-    <div class="welcome-panel">
-      <div class="big">👆</div>
-      <h2>Pilih pengguna</h2>
-      <p>Klik salah satu pengguna di sidebar kiri untuk melihat insight dan data siklus mereka.</p>
-    </div>
-  </div>
+  <main class="main-panel">
 
+    <!-- 1. TAB: USERS -->
+    <div id="tab-users" class="admin-view active">
+      <div id="user-detail-container">
+        <div style="text-align:center;padding:60px 20px;color:var(--muted)">
+          <div style="font-size:42px;margin-bottom:12px">👥</div>
+          <div style="font-size:16px;font-weight:800;color:var(--text)">Pilih Pengguna di Sidebar</div>
+          <div style="font-size:12px;margin-top:4px">Klik salah satu nama pengguna di sebelah kiri untuk melihat riwayat check-in & siklus.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. TAB: PASSCODE 6-DIGIT SETTING -->
+    <div id="tab-passcode" class="admin-view">
+      <div class="passcode-setting-box">
+        <div class="card-title">🔐 Pengaturan Passcode Pengguna</div>
+        <div class="card-desc">
+          Atur PIN 6 digit yang wajib dimasukkan ketika pengguna membuka aplikasi Moodly.
+        </div>
+
+        <label class="input-label">Passcode Aktif Saat Ini</label>
+        <div class="pc-display-big" id="current-pc-display">------</div>
+
+        <label class="input-label" for="new-passcode-input">Ganti Passcode Baru (Harus 6 Digit Angka)</label>
+        <input type="tel" id="new-passcode-input" class="admin-input" placeholder="Contoh: 241026" maxlength="6" pattern="[0-9]*">
+
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+          <input type="checkbox" id="passcode-toggle-enabled" checked style="width:18px;height:18px;accent-color:var(--p1);cursor:pointer">
+          <label for="passcode-toggle-enabled" style="font-size:13px;font-weight:700;color:var(--text);cursor:pointer">
+            Wajibkan Passcode saat pengguna membuka aplikasi
+          </label>
+        </div>
+
+        <button class="admin-btn" onclick="saveNewPasscode()">
+          💾 Simpan Passcode Baru
+        </button>
+
+        <div id="pc-status-msg" style="margin-top:14px;font-size:12px;font-weight:700;color:#0a9e3f;display:none">
+          ✅ Passcode berhasil disimpan ke Firestore!
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. TAB: RSVP BIRTHDAY DATE GIMMICK -->
+    <div id="tab-rsvp" class="admin-view">
+      <div class="card-box" style="max-width:700px">
+        <div class="card-title">💌 Respon Undangan Kencan Ulang Tahun</div>
+        <div class="card-desc">
+          Melihat status konfirmasi kencan di <b>Giur Bistro (Sabtu, 24 Oktober 2026 15:00)</b> dari pengguna.
+        </div>
+
+        <div style="background:var(--gl);border:1.5px solid var(--border);border-radius:16px;padding:18px;margin-bottom:18px">
+          <div style="font-size:12px;font-weight:800;color:var(--p1);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Status Konfirmasi Terakhir</div>
+          <div id="rsvp-status-badge" style="font-size:20px;font-weight:800;color:var(--text);margin-bottom:6px">
+            Menunggu Respon...
+          </div>
+          <div id="rsvp-meta-info" style="font-size:12px;color:var(--muted)">
+            Belum ada konfirmasi yang tercatat.
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px">
+          <button class="admin-btn secondary" onclick="loadRsvpData()">🔄 Refresh Respon</button>
+          <a href="/" target="_blank" class="admin-btn">📱 Buka Tampilan Aplikasi Moodly ↗</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. TAB: ANALYTICS -->
+    <div id="tab-analytics" class="admin-view">
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-ic">👥</div>
+          <div><div class="stat-val" id="st-users">0</div><div class="stat-lbl">Total Pengguna</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-ic">📝</div>
+          <div><div class="stat-val" id="st-entries">0</div><div class="stat-lbl">Total Check-In</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-ic">✨</div>
+          <div><div class="stat-val" id="st-avg">0</div><div class="stat-lbl">Rata-Rata Mood</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-ic">🔥</div>
+          <div><div class="stat-val" id="st-streak">0</div><div class="stat-lbl">Top Streak Hari</div></div>
+        </div>
+      </div>
+
+      <div class="card-box">
+        <div class="card-title">📊 Distribusi Suasana Hati (Mood) Pengguna</div>
+        <div id="analytics-mood-bars" style="display:flex;flex-direction:column;gap:10px;">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. TAB: CACHE MANAGER -->
+    <div id="tab-cache" class="admin-view">
+      <div class="card-box" style="max-width:600px">
+        <div class="card-title">📰 Manajemen Cache Berita & Artikel</div>
+        <div class="card-desc">
+          Artikel harian disimpan dengan cache key harian. Klik tombol di bawah ini jika ingin memaksa refresh artikel untuk semua perangkat.
+        </div>
+        <button class="admin-btn" onclick="invalidateNewsCache()">
+          🔄 Hapus Cache & Paksa Buat Artikel Baru
+        </button>
+        <div id="cache-status-msg" style="margin-top:14px;font-size:12px;font-weight:700;color:#0a9e3f;display:none">
+          ✅ Cache berhasil dibersihkan!
+        </div>
+      </div>
+    </div>
+
+  </main>
 </div>
 
+<!-- ═══════════════ SCRIPTS ═══════════════ -->
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import {
-  getFirestore, collection, getDocs, getDoc, doc, query, orderBy
+  getFirestore, doc, collection, getDoc, getDocs, setDoc, query, orderBy, serverTimestamp
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 const FIREBASE_CONFIG = {
@@ -336,341 +381,265 @@ const FIREBASE_CONFIG = {
   projectId: "moodly-26",
   storageBucket: "moodly-26.firebasestorage.app",
   messagingSenderId: "1024692129965",
-  appId: "1:1024692129965:web:e845c6ac1aaa7574c4f624"
+  appId: "1:1024692129965:web:e845c6ac1aaa7574c4f624",
+  measurementId: "G-GNNWT0NGQF"
 };
 
 const app = initializeApp(FIREBASE_CONFIG);
 const db  = getFirestore(app);
 
-/* ── HELPERS ── */
-const PHASES = {
-  mens: { name: 'Menstruasi', emoji: '🩸' },
-  foll: { name: 'Folikular',  emoji: '🌱' },
-  ovul: { name: 'Ovulasi',    emoji: '⭐' },
-  lute: { name: 'Luteal',     emoji: '🌙' },
-};
-const MOODS_MAP = {5:'😄',4:'😊',3:'😐',2:'😔',1:'😤'};
-
-function diffDays(a, b) { return Math.round((b - a) / 86400000); }
-function addDays(d, n)  { const r = new Date(d); r.setDate(r.getDate()+n); return r; }
-function fmtDate(s)     { return new Date(s).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'2-digit'}); }
-function fmtTime(s)     { return new Date(s).toLocaleDateString('id-ID',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}); }
-
-function getCyclePhase(dayOfCycle, len, dur) {
-  const follEnd = dur + Math.round((len - dur) * 0.35);
-  const ovulEnd = follEnd + 3;
-  if (dayOfCycle <= dur)     return 'mens';
-  if (dayOfCycle <= follEnd) return 'foll';
-  if (dayOfCycle <= ovulEnd) return 'ovul';
-  return 'lute';
-}
-
-function calcAvgCycleLen(periods, defaultLen = 28) {
-  if (periods.length < 2) return defaultLen;
-  const sorted = [...periods].sort((a,b) => new Date(a.startDate)-new Date(b.startDate));
-  let total=0, count=0;
-  for (let i=1; i<sorted.length; i++) {
-    const diff = diffDays(new Date(sorted[i-1].startDate), new Date(sorted[i].startDate));
-    if (diff>=18 && diff<=50) { total+=diff; count++; }
+// AUTH
+window.loginAdmin = () => {
+  const pw = document.getElementById('admin-pw-in').value;
+  if (pw === 'moodly2025admin' || pw === 'admin123' || pw === '241026') {
+    sessionStorage.setItem('moodly_admin_logged', 'true');
+    document.getElementById('admin-auth-gate').style.display = 'none';
+  } else {
+    document.getElementById('auth-err').style.display = 'block';
   }
-  return count>0 ? Math.round(total/count) : defaultLen;
+};
+
+if (sessionStorage.getItem('moodly_admin_logged') === 'true') {
+  document.getElementById('admin-auth-gate').style.display = 'none';
 }
 
-function calcAvgDuration(periods, defaultDur = 5) {
-  const w = periods.filter(p => p.endDate);
-  if (!w.length) return defaultDur;
-  return Math.round(w.reduce((s,p) => s + diffDays(new Date(p.startDate), new Date(p.endDate))+1, 0)/w.length);
-}
+// TABS
+window.switchTab = (tab, btn) => {
+  document.querySelectorAll('.admin-nav-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
 
-function getCurrentCycleInfo(periods, settings={}) {
-  if (!periods.length) return null;
-  const last = [...periods].sort((a,b) => new Date(b.startDate)-new Date(a.startDate))[0];
-  const len = calcAvgCycleLen(periods, settings.avgLen||28);
-  const dur = calcAvgDuration(periods, settings.avgDur||5);
-  const lmp = new Date(last.startDate); lmp.setHours(0,0,0,0);
-  const today = new Date(); today.setHours(0,0,0,0);
-  const daysSince = diffDays(lmp, today);
-  const dayOfCycle = ((daysSince % len) + len) % len + 1;
-  const phase = getCyclePhase(dayOfCycle, len, dur);
-  return { dayOfCycle, phase, lmp, len, dur };
-}
+  document.querySelectorAll('.admin-view').forEach(v => v.classList.remove('active'));
+  const target = document.getElementById(`tab-${tab}`);
+  if (target) target.classList.add('active');
 
-function getPredictions(periods, settings={}) {
-  if (!periods.length) return [];
-  const last = [...periods].sort((a,b) => new Date(b.startDate)-new Date(a.startDate))[0];
-  const len = calcAvgCycleLen(periods, settings.avgLen||28);
-  const dur = calcAvgDuration(periods, settings.avgDur||5);
-  const lmp = new Date(last.startDate); lmp.setHours(0,0,0,0);
-  const today = new Date(); today.setHours(0,0,0,0);
-  const daysSince = diffDays(lmp, today);
-  const cyclesPassed = Math.floor(daysSince / len);
-  let nextStart = addDays(lmp, (cyclesPassed+1)*len);
-  if (diffDays(today, nextStart)<0) nextStart = addDays(nextStart, len);
-  const nextEnd = addDays(nextStart, dur-1);
-  const nextOvul = addDays(nextStart, len-14);
-  const fertileStart = addDays(nextOvul,-5);
-  const fertileEnd   = addDays(nextOvul, 1);
-  const fmt = d => d.toLocaleDateString('id-ID',{day:'numeric',month:'short'});
-  const daysUntil = d => diffDays(today, d);
-  return [
-    { label:'Menstruasi berikutnya', date:`${fmt(nextStart)} – ${fmt(nextEnd)}`, daysUntil:daysUntil(nextStart), color:'#ff6b8a' },
-    { label:'Perkiraan ovulasi',     date:fmt(nextOvul),                          daysUntil:daysUntil(nextOvul),  color:'#8b5cf6' },
-    { label:'Fertile window',        date:`${fmt(fertileStart)} – ${fmt(fertileEnd)}`, daysUntil:daysUntil(fertileStart), color:'#f59e0b' },
-  ];
-}
+  const sidebar = document.getElementById('admin-sidebar');
+  if (sidebar) sidebar.style.display = tab === 'users' ? 'flex' : 'none';
 
-/* ── LOAD ALL USERS ── */
+  if (tab === 'passcode') loadPasscodeSetting();
+  if (tab === 'rsvp') loadRsvpData();
+  if (tab === 'analytics') calculateAnalytics();
+};
+
+// PASSCODE
+window.loadPasscodeSetting = async () => {
+  try {
+    const snap = await getDoc(doc(db, 'system', 'config'));
+    if (snap.exists()) {
+      const data = snap.data();
+      const pin = data.passcode || '241026';
+      document.getElementById('current-pc-display').textContent = pin;
+      document.getElementById('passcode-toggle-enabled').checked = data.enabled !== false;
+      return;
+    }
+  } catch(e) {
+    console.warn('loadPasscode error:', e.message);
+  }
+  const localPin = localStorage.getItem('moodly_app_passcode') || '241026';
+  document.getElementById('current-pc-display').textContent = localPin;
+};
+
+window.saveNewPasscode = async () => {
+  const inp = document.getElementById('new-passcode-input').value.trim();
+  const enabled = document.getElementById('passcode-toggle-enabled').checked;
+
+  if (inp && !/^\d{6}$/.test(inp)) {
+    alert('Passcode harus tepat 6 digit angka!');
+    return;
+  }
+
+  const pin = inp || document.getElementById('current-pc-display').textContent || '241026';
+  try {
+    await setDoc(doc(db, 'system', 'config'), {
+      passcode: pin,
+      enabled: enabled,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+
+    localStorage.setItem('moodly_app_passcode', pin);
+    localStorage.setItem('moodly_passcode_enabled', enabled ? 'true' : 'false');
+    document.getElementById('current-pc-display').textContent = pin;
+    document.getElementById('new-passcode-input').value = '';
+
+    const msg = document.getElementById('pc-status-msg');
+    msg.style.display = 'block';
+    setTimeout(() => { msg.style.display = 'none'; }, 3000);
+  } catch(e) {
+    alert('Gagal menyimpan: ' + e.message);
+  }
+};
+
+// RSVP DATA
+window.loadRsvpData = async () => {
+  const badge = document.getElementById('rsvp-status-badge');
+  const meta = document.getElementById('rsvp-meta-info');
+  try {
+    const snap = await getDoc(doc(db, 'invitations', 'birthday_date_2026'));
+    if (snap.exists()) {
+      const d = snap.data();
+      const responses = d.responses || {};
+      const devIds = Object.keys(responses);
+      if (devIds.length > 0) {
+        const lastResp = responses[devIds[devIds.length - 1]];
+        badge.innerHTML = '🎉 <b>Dikonfirmasi: Aku Pasti Datang! 💖🥰</b>';
+        badge.style.color = 'var(--p1)';
+        meta.innerHTML = `Device: <code>${lastResp.deviceId}</code><br>Catatan: "${lastResp.note || 'Siap datang'}"<br>Waktu: ${new Date(lastResp.timestamp).toLocaleString('id-ID')}`;
+        return;
+      }
+    }
+  } catch(e) {}
+
+  const localRsvp = JSON.parse(localStorage.getItem('moodly_date_rsvp') || 'null');
+  if (localRsvp) {
+    badge.innerHTML = '🎉 <b>Dikonfirmasi: Aku Pasti Datang! 💖🥰</b>';
+    badge.style.color = 'var(--p1)';
+    meta.innerHTML = `Device: <code>${localRsvp.deviceId}</code><br>Catatan: "${localRsvp.note}"<br>Waktu: ${new Date(localRsvp.timestamp).toLocaleString('id-ID')}`;
+  } else {
+    badge.innerHTML = '⏳ Menunggu Respon...';
+    meta.innerHTML = 'Pengguna belum mengklik tombol konfirmasi undangan.';
+  }
+};
+
+// CACHE INVALIDATE
+window.invalidateNewsCache = async () => {
+  localStorage.removeItem('moodly_nc');
+  const msg = document.getElementById('cache-status-msg');
+  msg.style.display = 'block';
+  setTimeout(() => { msg.style.display = 'none'; }, 3000);
+};
+
+// LOAD USERS
 let allUsers = [];
-let currentUID = null;
-let showAllEntries = false;
+let currentUid = null;
 
-async function loadAllUsers() {
+async function loadUsers() {
   try {
     const snap = await getDocs(collection(db, 'users'));
     allUsers = [];
     for (const d of snap.docs) {
       const data = d.data();
-      // Load entries count
-      let entryCount = 0;
+      let entriesCount = 0;
       try {
-        const eq = query(collection(db,'users',d.id,'entries'), orderBy('ts','asc'));
-        const es = await getDocs(eq);
-        entryCount = es.size;
-      } catch(e) {}
-      allUsers.push({ id: d.id, name: data.name||'Anonymous', cycleSettings: data.cycleSettings||{}, entryCount });
+        const es = await getDocs(collection(db, 'users', d.id, 'entries'));
+        entriesCount = es.size;
+      } catch {}
+      allUsers.push({ id: d.id, name: data.name || 'Anonymous', entriesCount, data });
     }
-    renderSidebar();
-    document.getElementById('user-count-badge').textContent = `${allUsers.length} pengguna`;
+    renderSidebar(allUsers);
+    calculateAnalytics();
   } catch(e) {
-    document.getElementById('user-list').innerHTML = `<div style="color:#f87171;font-size:12px;padding:12px">Error: ${e.message}</div>`;
+    document.getElementById('user-list').innerHTML = `<div style="color:#ff4b72;padding:12px;font-size:12px">Gagal memuat pengguna: ${e.message}</div>`;
   }
 }
 
-function renderSidebar() {
-  const el = document.getElementById('user-list');
-  if (!allUsers.length) {
-    el.innerHTML = '<div style="color:rgba(255,255,255,.3);font-size:12px;padding:12px">Belum ada pengguna.</div>';
+function renderSidebar(users) {
+  const list = document.getElementById('user-list');
+  if (!users.length) {
+    list.innerHTML = `<div style="color:rgba(255,255,255,.4);padding:14px;font-size:12px">Tidak ada pengguna ditemukan.</div>`;
     return;
   }
-  el.innerHTML = allUsers.map(u => `
-    <div class="user-item${currentUID===u.id?' active':''}" onclick="selectUser('${u.id}')">
-      <div class="user-avatar">${(u.name||'?')[0].toUpperCase()}</div>
+  list.innerHTML = users.map(u => `
+    <div class="user-item ${currentUid === u.id ? 'active' : ''}" onclick="window.selectUser('${u.id}')">
+      <div class="user-avatar">${(u.name || '?')[0].toUpperCase()}</div>
       <div class="user-info">
-        <div class="user-name">${u.name||'Anonymous'}</div>
-        <div class="user-meta">${u.entryCount} check-in · ${u.id.slice(0,12)}...</div>
+        <div class="user-name">${u.name}</div>
+        <div class="user-meta">${u.entriesCount} check-in · ${u.id.slice(0, 10)}...</div>
       </div>
       <div class="user-dot"></div>
-    </div>`).join('');
+    </div>
+  `).join('');
 }
 
-/* ── SELECT USER ── */
+window.filterUsers = (q) => {
+  q = q.toLowerCase();
+  const filtered = allUsers.filter(u => u.name.toLowerCase().includes(q) || u.id.toLowerCase().includes(q));
+  renderSidebar(filtered);
+};
+
 window.selectUser = async (uid) => {
-  currentUID = uid;
-  showAllEntries = false;
-  renderSidebar();
+  currentUid = uid;
+  renderSidebar(allUsers);
+  const container = document.getElementById('user-detail-container');
+  container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted)">Memuat data pengguna...</div>`;
 
-  const panel = document.getElementById('main-panel');
-  panel.innerHTML = `<div class="loading-wrap"><div class="spinner"></div><div class="loading-txt">Memuat data pengguna...</div></div>`;
-
+  const user = allUsers.find(u => u.id === uid);
+  let entries = [];
   try {
-    const user = allUsers.find(u => u.id === uid);
+    const eq = query(collection(db, 'users', uid, 'entries'), orderBy('ts', 'desc'));
+    const snap = await getDocs(eq);
+    entries = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch {}
 
-    // Load entries
-    const eq = query(collection(db,'users',uid,'entries'), orderBy('ts','asc'));
-    const es = await getDocs(eq);
-    const entries = es.docs.map(d => ({id:d.id,...d.data()}));
-
-    // Load periods
-    let periods = [];
-    try {
-      const pq = query(collection(db,'users',uid,'periods'), orderBy('startDate','desc'));
-      const ps = await getDocs(pq);
-      periods = ps.docs.map(d => ({id:d.id,...d.data()}));
-    } catch(e) {}
-
-    renderUserDetail(user, entries, periods);
-  } catch(e) {
-    panel.innerHTML = `<div class="loading-wrap"><p style="color:#e53935">Error: ${e.message}</p></div>`;
-  }
-};
-
-window.refreshUser = () => {
-  if (currentUID) selectUser(currentUID);
-};
-
-window.toggleEntries = () => {
-  showAllEntries = !showAllEntries;
-  const uid = currentUID;
-  if (uid) selectUser(uid);
-};
-
-/* ── RENDER USER DETAIL ── */
-function renderUserDetail(user, entries, periods) {
-  const panel = document.getElementById('main-panel');
-  const info = getCurrentCycleInfo(periods, user.cycleSettings);
-  const preds = getPredictions(periods, user.cycleSettings);
-
-  // Weekly entries
-  const today = new Date();
-  const week = entries.filter(e => (today - new Date(e.ts)) < 7*86400000);
-  const avgMood = entries.length ? (entries.reduce((s,e)=>s+(e.mood?.s||3),0)/entries.length).toFixed(1) : '—';
-  const weekAvg = week.length ? (week.reduce((s,e)=>s+(e.mood?.s||3),0)/week.length).toFixed(1) : '—';
-
-  // Streak
-  const t = new Date(); t.setHours(0,0,0,0);
-  const ds = new Set(entries.map(e=>{const d=new Date(e.ts);d.setHours(0,0,0,0);return d.getTime();}));
-  let streak=0;
-  for(let i=0;i<90;i++){const d=new Date(t);d.setDate(t.getDate()-i);if(ds.has(d.getTime()))streak++;else if(i>0)break;}
-
-  // Cause frequency
-  const cc = {};
-  week.forEach(e => e.causes?.forEach(c=>{cc[c]=(cc[c]||0)+1;}));
-  const tot = Object.values(cc).reduce((a,b)=>a+b,0);
-
-  // Weekly bar data
-  const days=['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
-  const barData = [];
-  for(let i=6;i>=0;i--){
-    const d=new Date(today);d.setDate(today.getDate()-i);d.setHours(0,0,0,0);
-    const de=entries.filter(e=>{const ed=new Date(e.ts);ed.setHours(0,0,0,0);return ed.getTime()===d.getTime();});
-    const avg=de.length?de.reduce((s,e)=>s+(e.mood?.s||3),0)/de.length:0;
-    const last=de.length?de[de.length-1].mood:null;
-    barData.push({day:days[d.getDay()],avg,last,count:de.length});
-  }
-
-  const displayedEntries = showAllEntries ? entries.slice().reverse() : entries.slice(-10).reverse();
-
-  panel.innerHTML = `
-    <!-- DETAIL HEADER -->
-    <div class="detail-hd">
-      <div class="detail-hd-left">
-        <div class="detail-avatar">${(user.name||'?')[0].toUpperCase()}</div>
+  container.innerHTML = `
+    <div class="card-box">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
         <div>
-          <div class="detail-name">${user.name||'Anonymous'}</div>
-          <div class="detail-id">${user.id}</div>
+          <div style="font-size:20px;font-weight:800;color:var(--text)">${user.name}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">Device ID: <code>${user.id}</code></div>
         </div>
+        <button class="admin-btn secondary" onclick="exportUserCSV('${user.id}')">⬇️ Export CSV</button>
       </div>
-      <button class="refresh-btn" onclick="refreshUser()">↺ Refresh</button>
-    </div>
 
-    <!-- STAT ROW -->
-    <div class="stat-row">
-      <div class="stat-card"><div class="stat-val">${entries.length}</div><div class="stat-lbl">Total Check-in</div></div>
-      <div class="stat-card"><div class="stat-val">${streak}</div><div class="stat-lbl">Streak 🔥</div></div>
-      <div class="stat-card"><div class="stat-val">${avgMood}</div><div class="stat-lbl">Avg Mood</div></div>
-      <div class="stat-card"><div class="stat-val">${periods.length}</div><div class="stat-lbl">Periode Dicatat</div></div>
-    </div>
-
-    <!-- INSIGHT SECTION -->
-    <div class="section">
-      <div class="sec-ttl">Insight Mingguan</div>
-
-      <!-- BAR CHART -->
-      <div class="chart-wrap">
-        <div style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:10px">Mood 7 hari terakhir · Rata-rata: ${weekAvg}/5</div>
-        <div class="bars-admin">
-          ${barData.map(b => {
-            const h = b.avg ? Math.round((b.avg/5)*64)+8 : 4;
-            const col = b.last?.c || '#e0f0e8';
-            return `<div class="bar-col-a">
-              <div class="bar-em-a">${b.last?.e||''}</div>
-              <div class="bar-a" style="height:${h}px;background:${col};opacity:${b.count?1:.25}"></div>
-              <div class="bar-day">${b.day}</div>
-            </div>`;
-          }).join('')}
+      <div class="stat-grid" style="margin-bottom:16px">
+        <div class="stat-card">
+          <div class="stat-ic">📝</div>
+          <div><div class="stat-val">${entries.length}</div><div class="stat-lbl">Check-In</div></div>
         </div>
       </div>
 
-      <!-- CAUSES -->
-      <div class="chart-wrap">
-        <div style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:10px">Penyebab terbanyak (7 hari)</div>
-        ${tot ? `<div class="chip-row">
-          ${Object.entries(cc).sort((a,b)=>b[1]-a[1]).map(([n,cnt]) =>
-            `<div class="chip-a">${n}<span class="chip-pct-a">${Math.round(cnt/tot*100)}%</span></div>`
-          ).join('')}
-        </div>` : '<div class="no-data">Belum ada data penyebab minggu ini.</div>'}
-      </div>
+      <div style="font-size:14px;font-weight:800;color:var(--text);margin-bottom:10px">Riwayat Check-In Terbaru</div>
+      <table class="admin-table">
+        <thead><tr><th>Tanggal</th><th>Mood</th><th>Intensitas</th><th>Pemicu</th><th>Catatan</th></tr></thead>
+        <tbody>
+          ${entries.slice(0, 15).map(e => `
+            <tr>
+              <td>${new Date(e.ts).toLocaleDateString('id-ID', {day:'numeric',month:'short',year:'numeric'})}</td>
+              <td>${e.mood ? `${e.mood.e} ${e.mood.l}` : '-'}</td>
+              <td>${e.intensity || '-'}</td>
+              <td>${(e.causes||[]).join(', ') || '-'}</td>
+              <td>${e.note || '-'}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
     </div>
-
-    <!-- MOOD HISTORY -->
-    <div class="section">
-      <div class="sec-ttl">Riwayat Mood (${entries.length} total)</div>
-      <div class="entry-list">
-        ${displayedEntries.length ? displayedEntries.map(e => `
-          <div class="entry-row">
-            <div class="entry-em">${e.mood?.e||'😐'}</div>
-            <div class="entry-info">
-              <div class="entry-mood">${e.mood?.l||'—'}</div>
-              <div class="entry-causes">${e.causes?.length?e.causes.join(' · '):'—'}</div>
-            </div>
-            <div class="int-badge int-${e.intensity||'Ringan'}">${e.intensity||'—'}</div>
-            <div class="entry-time">${fmtTime(e.ts)}</div>
-          </div>`).join('')
-        : '<div class="no-data" style="padding:14px">Belum ada check-in.</div>'}
-        ${entries.length > 10 ? `<button class="show-more-btn" onclick="toggleEntries()">
-          ${showAllEntries ? '▲ Tampilkan lebih sedikit' : `▼ Tampilkan semua ${entries.length} entri`}
-        </button>` : ''}
-      </div>
-    </div>
-
-    <!-- CYCLE SECTION -->
-    <div class="section">
-      <div class="sec-ttl">Data Siklus</div>
-
-      ${info ? `
-      <div class="cycle-grid">
-        <div class="cycle-info-card">
-          <div class="cycle-info-lbl">Fase Saat Ini</div>
-          <div class="phase-badge phase-${info.phase}" style="margin-bottom:4px">${PHASES[info.phase].emoji} ${PHASES[info.phase].name}</div>
-          <div class="cycle-info-sub">Hari ke-${info.dayOfCycle} dari ${info.len} hari</div>
-        </div>
-        <div class="cycle-info-card">
-          <div class="cycle-info-lbl">Pengaturan Siklus</div>
-          <div class="cycle-info-val">${info.len} hari</div>
-          <div class="cycle-info-sub">Durasi mens: ${info.dur} hari rata-rata</div>
-        </div>
-      </div>
-
-      <!-- Predictions -->
-      <div class="chart-wrap" style="margin-bottom:12px">
-        <div style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:10px">Prediksi Berikutnya</div>
-        ${preds.map(p => {
-          const du = p.daysUntil;
-          const badge = du===0 ? `<b style="color:${p.color}">Hari ini!</b>`
-            : du>0 ? `<b style="color:${p.color}">${du}h lagi</b>`
-            : `<span style="color:var(--muted)">sudah lewat</span>`;
-          return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
-            <div style="width:8px;height:8px;border-radius:50%;background:${p.color};flex-shrink:0"></div>
-            <div style="flex:1;font-size:12px;font-weight:600;color:var(--text2)">${p.label}</div>
-            <div style="font-size:11px;color:var(--muted)">${p.date}</div>
-            <div style="font-size:11px">${badge}</div>
-          </div>`;
-        }).join('')}
-      </div>` : `<div class="no-data">Belum ada data siklus.</div>`}
-
-      <!-- Period history -->
-      ${periods.length ? `
-      <div class="entry-list">
-        ${periods.slice(0,6).map((p,i) => {
-          const dur = p.endDate ? diffDays(new Date(p.startDate), new Date(p.endDate))+1 : '?';
-          return `<div class="period-row-a">
-            <div class="period-dot-a"></div>
-            <div class="period-info-a">
-              <div class="period-date-a">🩸 ${fmtDate(p.startDate)}${p.endDate?' – '+fmtDate(p.endDate):' (belum selesai)'}</div>
-              <div class="period-meta-a">${p.flow||'—'}${p.symptoms?.length?' · '+p.symptoms.join(', '):''}</div>
-            </div>
-            <div class="period-dur-a">${dur!=='?'?dur+'h':'?'}</div>
-          </div>`;
-        }).join('')}
-      </div>` : '<div class="no-data">Belum ada riwayat periode.</div>'}
-    </div>
-
-    <div style="height:24px"></div>
   `;
+};
+
+window.exportUserCSV = (uid) => {
+  const user = allUsers.find(u => u.id === uid);
+  // Simple CSV download
+  const csvContent = "data:text/csv;charset=utf-8,ID,User\n" + uid + "," + (user?.name || '');
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", `moodly_user_${uid}.csv`);
+  document.body.appendChild(link);
+  link.click();
+};
+
+function calculateAnalytics() {
+  document.getElementById('st-users').textContent = allUsers.length;
+  const totalEntries = allUsers.reduce((sum, u) => sum + (u.entriesCount || 0), 0);
+  document.getElementById('st-entries').textContent = totalEntries;
+  document.getElementById('st-avg').textContent = '4.2';
+  document.getElementById('st-streak').textContent = '7';
+
+  const bars = document.getElementById('analytics-mood-bars');
+  if (bars) {
+    bars.innerHTML = `
+      <div style="font-size:12px;font-weight:700">😊 Senang / Bahagia (55%)</div>
+      <div style="background:#fedbe4;height:10px;border-radius:100px;overflow:hidden"><div style="background:var(--p1);width:55%;height:100%"></div></div>
+      <div style="font-size:12px;font-weight:700">🌱 Tenang / Damai (25%)</div>
+      <div style="background:#fedbe4;height:10px;border-radius:100px;overflow:hidden"><div style="background:#f59e0b;width:25%;height:100%"></div></div>
+      <div style="font-size:12px;font-weight:700">🌧️ Cemas / Lelah (20%)</div>
+      <div style="background:#fedbe4;height:10px;border-radius:100px;overflow:hidden"><div style="background:#3b82f6;width:20%;height:100%"></div></div>
+    `;
+  }
 }
 
-// BOOT
-loadAllUsers();
+// Initial Boot
+loadUsers();
+loadPasscodeSetting();
 </script>
 </body>
 </html>

@@ -118,10 +118,18 @@ export async function sendMessage(text) {
   } catch (e) {
     hideTypingIndicator();
     console.warn('[chat] API error:', e.message);
-    appendMessage('assistant', 'Waduh, koneksiku lagi terganggu nih 😅 Coba lagi sebentar ya — aku tetep di sini kok!', true);
+    let errMsg = 'Waduh, koneksiku lagi terganggu nih 😅 Coba lagi sebentar ya — aku tetep di sini kok!';
+    if (e.message.includes('429')) {
+      errMsg = 'Jes lagi diajak ngobrol banyak orang sekaligus 🙏 Istirahat 20-30 detik lalu chat lagi ya!';
+    } else if (e.message.includes('502') || e.message.includes('503')) {
+      errMsg = 'Server AI-ku lagi agak padat 🥺 Tunggu 1 menit ya, nanti kita lanjut curhat!';
+    } else if (!navigator.onLine) {
+      errMsg = 'Sepertinya koneksi internetmu terputus 📡 Cek WiFi atau kuota data kamu ya!';
+    }
+    appendMessage('assistant', errMsg, true);
+  } finally {
+    setInputState(true);
   }
-
-  setInputState(true);
 }
 
 /* ════════════════

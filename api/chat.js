@@ -22,31 +22,49 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'GROQ_API_KEY not configured' });
   }
 
-  try {
-    const { messages } = req.body;
-
-    const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+  async function callGroq(model) {
+    return await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
+        model,
         max_tokens: 400,
         temperature: 0.8,
         messages,
       }),
     });
+  }
+
+  try {
+    const { messages } = req.body;
+    let modelUsed = 'llama-3.3-70b-versatile';
+    let groqRes = await callGroq(modelUsed);
+
+    // Retry once if primary fails
+    if (!groqRes.ok) {
+      console.warn(`[api/chat] primary attempt 1 failed (${groqRes.status}), retrying in 800ms...`);
+      await new Promise(r => setTimeout(r, 800));
+      groqRes = await callGroq(modelUsed);
+    }
+
+    // Fallback model if primary still fails
+    if (!groqRes.ok) {
+      console.warn(`[api/chat] primary failed (${groqRes.status}), switching to fallback model...`);
+      modelUsed = 'llama-3.1-8b-instant';
+      groqRes = await callGroq(modelUsed);
+    }
 
     if (!groqRes.ok) {
       const err = await groqRes.text();
-      return res.status(groqRes.status).json({ error: err });
+      return res.status(groqRes.status).json({ error: err, status: groqRes.status });
     }
 
     const data = await groqRes.json();
     const reply = data.choices?.[0]?.message?.content?.trim() || '';
-    return res.status(200).json({ reply });
+    return res.status(200).json({ reply, model: modelUsed });
 
   } catch (e) {
     console.error('[api/chat] error:', e.message);

@@ -5,27 +5,32 @@
 
 import {
   loadProfile, saveProfile, loadEntries,
-  deleteAllEntries, clearAllData, checkConnection
-} from '../firebase.js';
+  deleteAllEntries, clearAllData, checkConnection,
+  loadAppPasscode, saveSpecialDateRsvp, loadSpecialDateRsvp, DEFAULT_PASSCODE
+} from './firebase.js';
 
 import { initCycle, renderCycleScreen, renderHomeCycleBanner,
          showCycleSetup, saveCycleSetupFromForm,
          showLogPeriod, submitLogPeriod, getCurrentCycleInfo,
-         getPeriods } from '../cycle.js';
+         getPeriods } from './cycle.js';
 
-import { updateInsight, exportPDF } from '../insight.js';
+import { updateInsight, exportPDF } from './insight.js';
 import { initNews, forceRefresh, filterNews, openArt, closeArt, buildHomePreview } from './news.js';
-import { buildCheckinUI, startCheckin, goStep, submitCheckin, MOODS } from '../checkin.js';
-import { initChat, sendMessage, buildQuickReplies } from '../chat.js';
-import { initNearby, findNearby, filterNearby, refreshNearby, searchNearby } from '../nearby.js';
-import { openStories, closeStories } from '../stories.js';
-import { initSafePlace } from '../safeplace.js';
+import { buildCheckinUI, startCheckin, goStep, submitCheckin, MOODS } from './checkin.js';
+import { initChat, sendMessage, buildQuickReplies } from './chat.js';
+import { initNearby, findNearby, filterNearby, refreshNearby, searchNearby } from './nearby.js';
+import { openStories, closeStories } from './stories.js';
+import { initSafePlace } from './safeplace.js';
 
 /* ════════════════
    GLOBAL STATE
 ════════════════ */
 let entries = [];
 let uname   = '';
+let configuredPasscode = DEFAULT_PASSCODE || '241026';
+let isPasscodeEnabled = true;
+let enteredPin = '';
+let isSessionUnlocked = false;
 
 /* ════════════════
    BOOT
@@ -57,6 +62,17 @@ async function boot() {
   buildCheckinUI();
   buildNavHandlers();
   initViewportHandler();
+
+  // Load passcode settings from Firestore / local
+  const passConfig = await loadAppPasscode();
+  configuredPasscode = String(passConfig.passcode || '241026').trim();
+  isPasscodeEnabled = passConfig.enabled !== false;
+
+  if (isPasscodeEnabled && !isSessionUnlocked) {
+    showPasscodeOverlay();
+  } else {
+    unlockApp(false);
+  }
 
   // Show home
   showScreen('home');
@@ -319,8 +335,156 @@ window._openModal  = openModal;
 window._closeModal = closeModal;
 
 /* ════════════════
+   IOS PASSCODE LOGIC
+════════════════ */
+function showPasscodeOverlay() {
+  const overlay = document.getElementById('ios-passcode-overlay');
+  if (!overlay) return;
+  overlay.classList.remove('unlocked');
+  enteredPin = '';
+  updatePinDots();
+  const feedback = document.getElementById('pc-feedback');
+  if (feedback) feedback.textContent = '';
+}
+
+function pressPin(digit) {
+  if (isSessionUnlocked || enteredPin.length >= 6) return;
+  enteredPin += String(digit);
+  updatePinDots();
+
+  if (enteredPin.length === 6) {
+    setTimeout(verifyPin, 120);
+  }
+}
+
+function backspacePin() {
+  if (isSessionUnlocked || enteredPin.length === 0) return;
+  enteredPin = enteredPin.slice(0, -1);
+  updatePinDots();
+  const feedback = document.getElementById('pc-feedback');
+  if (feedback) feedback.textContent = '';
+}
+
+function updatePinDots() {
+  const dots = document.querySelectorAll('#pc-dots .pc-dot');
+  dots.forEach((dot, index) => {
+    dot.classList.toggle('filled', index < enteredPin.length);
+  });
+}
+
+async function verifyPin() {
+  const passConfig = await loadAppPasscode();
+  configuredPasscode = String(passConfig.passcode || configuredPasscode).trim();
+
+  if (enteredPin === configuredPasscode) {
+    unlockApp(true);
+  } else {
+    if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
+    const row = document.getElementById('pc-dots');
+    if (row) {
+      row.classList.add('shake');
+      setTimeout(() => row.classList.remove('shake'), 450);
+    }
+    const feedback = document.getElementById('pc-feedback');
+    if (feedback) feedback.textContent = 'Passcode salah. Coba lagi ya ✨';
+    setTimeout(() => {
+      enteredPin = '';
+      updatePinDots();
+    }, 450);
+  }
+}
+
+function unlockApp(triggerGimmick = true) {
+  isSessionUnlocked = true;
+  const overlay = document.getElementById('ios-passcode-overlay');
+  if (overlay) overlay.classList.add('unlocked');
+
+  if (triggerGimmick) {
+    setTimeout(() => {
+      openDateInvitation();
+    }, 420);
+  }
+}
+
+/* ════════════════
+   SPECIAL BIRTHDAY DATE INVITATION GIMMICK
+════════════════ */
+let countdownTimer = null;
+
+function openDateInvitation() {
+  const modal = document.getElementById('birthday-date-modal');
+  if (!modal) return;
+  modal.classList.add('show');
+  startCountdown();
+}
+
+function closeDateInvitation() {
+  const modal = document.getElementById('birthday-date-modal');
+  if (modal) modal.classList.remove('show');
+  if (countdownTimer) clearInterval(countdownTimer);
+}
+
+async function acceptDateInvite() {
+  await saveSpecialDateRsvp('accepted', 'Siap datang & bawa kebahagiaan');
+  if (window._moodlyAlert) {
+    window._moodlyAlert({
+      icon: '💖',
+      title: 'Yeay! Janji Ketemu! 🥰',
+      msg: 'Sampai jumpa di Giur Bistro, Sabtu 24 Oktober 2026 jam 15.00! Jangan lupa outfit cerah nuansa biru mudanya ya Cantik! 👗🩵'
+    });
+  } else if (window._moodlyToast) {
+    window._moodlyToast('Konfirmasi tersimpan! Sampai jumpa di Giur Bistro ya 💖');
+  }
+  closeDateInvitation();
+}
+
+function startCountdown() {
+  if (countdownTimer) clearInterval(countdownTimer);
+  updateCountdown();
+  countdownTimer = setInterval(updateCountdown, 1000);
+}
+
+function updateCountdown() {
+  // Target: Sabtu, 24 Oktober 2026 15:00:00 WIB
+  const targetDate = new Date('2026-10-24T15:00:00+07:00').getTime();
+  const now = Date.now();
+  const diff = targetDate - now;
+
+  const daysEl = document.getElementById('cd-days');
+  const hoursEl = document.getElementById('cd-hours');
+  const minsEl = document.getElementById('cd-mins');
+  const secsEl = document.getElementById('cd-secs');
+
+  if (!daysEl) return;
+
+  if (diff <= 0) {
+    daysEl.textContent = '00';
+    hoursEl.textContent = '00';
+    minsEl.textContent = '00';
+    secsEl.textContent = '00';
+    return;
+  }
+
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+  const mins = Math.floor((diff / (1000 * 60)) % 60);
+  const secs = Math.floor((diff / 1000) % 60);
+
+  daysEl.textContent = String(days).padStart(2, '0');
+  hoursEl.textContent = String(hours).padStart(2, '0');
+  minsEl.textContent = String(mins).padStart(2, '0');
+  secsEl.textContent = String(secs).padStart(2, '0');
+}
+
+/* ════════════════
    GLOBAL WINDOW BINDINGS
 ════════════════ */
+window._pressPin = pressPin;
+window._backspacePin = backspacePin;
+window._openDateInvitation = openDateInvitation;
+window._closeDateInvitation = closeDateInvitation;
+window._acceptDateInvite = acceptDateInvite;
+
 window._enterApp    = enterApp;
 window._saveName    = saveName;
 window._showProf    = showProf;

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#f4faf7">
+<meta name="theme-color" content="#fff5f8">
 <meta name="apple-mobile-web-app-title" content="Moodly">
 <link rel="apple-touch-icon" href="img/moodly.png">
 <title>Moodly</title>
@@ -54,6 +54,18 @@
         Check-in
       </button>
     </div>
+  </div>
+
+  <!-- Special Birthday Date Reminder Banner -->
+  <div id="home-date-pill" onclick="window._openDateInvitation()">
+    <div class="hdp-left">
+      <span class="hdp-icon">💌</span>
+      <div>
+        <div class="hdp-title">Undangan Kencan Ulang Tahun 🎂</div>
+        <div class="hdp-sub">Sabtu, 24 Okt 2026 @ Giur Bistro</div>
+      </div>
+    </div>
+    <div class="hdp-badge">Buka 💖</div>
   </div>
 
   <!-- Cycle banner -->
@@ -323,6 +335,8 @@
     <button class="ftab"     onclick="window._filterNews('tidur',this)">Tidur</button>
     <button class="ftab"     onclick="window._filterNews('self-care',this)">Self-Care</button>
     <button class="ftab"     onclick="window._filterNews('motivasi',this)">Motivasi</button>
+    <button class="ftab"     onclick="window._filterNews('islam',this)">☪️ Islam & Psikologi</button>
+    <button class="ftab"     onclick="window._filterNews('bookmark',this)">⭐ Tersimpan</button>
   </div>
 
   <div id="news-wrap">
@@ -483,13 +497,14 @@
   <div class="art-topbar">
     <div class="art-back" onclick="window._closeArt()">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-        <path d="M19 12H5M12 19l-7-7 7-7" stroke="#3a5c46" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M19 12H5M12 19l-7-7 7-7" stroke="#ff2d55" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </div>
     <div class="art-tb-info">
       <div class="art-tb-src" id="art-tb-src">—</div>
       <div class="art-tb-ttl" id="art-tb-ttl">—</div>
     </div>
+    <div id="art-progress" class="art-progress-bar"></div>
   </div>
   <div class="art-scroll">
     <div class="art-body" id="art-body"></div>
@@ -595,7 +610,126 @@
   </div>
 </div>
 
-</body>
+<!-- ═══════════════ IOS PASSCODE OVERLAY ═══════════════ -->
+<div id="ios-passcode-overlay">
+  <div class="pc-top">
+    <div class="pc-avatar">🌸</div>
+    <div class="pc-title">Masukkan Passcode</div>
+    <div class="pc-subtitle">Moodly kamu diamankan dengan PIN 6 digit</div>
+    <div class="pc-dots-row" id="pc-dots">
+      <div class="pc-dot"></div>
+      <div class="pc-dot"></div>
+      <div class="pc-dot"></div>
+      <div class="pc-dot"></div>
+      <div class="pc-dot"></div>
+      <div class="pc-dot"></div>
+    </div>
+    <div class="pc-feedback" id="pc-feedback"></div>
+  </div>
+
+  <div class="pc-keypad">
+    <div class="pc-key" onclick="window._pressPin('1')"><div class="pc-num">1</div><div class="pc-letters"></div></div>
+    <div class="pc-key" onclick="window._pressPin('2')"><div class="pc-num">2</div><div class="pc-letters">ABC</div></div>
+    <div class="pc-key" onclick="window._pressPin('3')"><div class="pc-num">3</div><div class="pc-letters">DEF</div></div>
+    <div class="pc-key" onclick="window._pressPin('4')"><div class="pc-num">4</div><div class="pc-letters">GHI</div></div>
+    <div class="pc-key" onclick="window._pressPin('5')"><div class="pc-num">5</div><div class="pc-letters">JKL</div></div>
+    <div class="pc-key" onclick="window._pressPin('6')"><div class="pc-num">6</div><div class="pc-letters">MNO</div></div>
+    <div class="pc-key" onclick="window._pressPin('7')"><div class="pc-num">7</div><div class="pc-letters">PQRS</div></div>
+    <div class="pc-key" onclick="window._pressPin('8')"><div class="pc-num">8</div><div class="pc-letters">TUV</div></div>
+    <div class="pc-key" onclick="window._pressPin('9')"><div class="pc-num">9</div><div class="pc-letters">WXYZ</div></div>
+    <div class="pc-key pc-key-action" style="visibility:hidden"></div>
+    <div class="pc-key" onclick="window._pressPin('0')"><div class="pc-num">0</div><div class="pc-letters"></div></div>
+    <div class="pc-key pc-key-action" onclick="window._backspacePin()">⌫</div>
+  </div>
+</div>
+
+<!-- ═══════════════ SPECIAL BIRTHDAY DATE INVITATION MODAL ═══════════════ -->
+<div id="birthday-date-modal" onclick="if(event.target===this)window._closeDateInvitation()">
+  <div class="bday-card">
+    <div class="bday-hero-img-box">
+      <div class="bday-hero-decor"></div>
+      <div class="bday-badge-top">✨ Special Invitation</div>
+      <button class="bday-close-btn" onclick="window._closeDateInvitation()">✕</button>
+
+      <div class="giur-bistro-art">
+        <div class="giur-art-building">🍽️✨</div>
+        <div style="font-size:12px;font-weight:800;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,0.3);letter-spacing:1px;text-transform:uppercase;margin-top:4px">
+          Giur Bistro · Bandung
+        </div>
+      </div>
+    </div>
+
+    <div class="bday-body">
+      <div class="bday-title">
+        Kencan Spesial & <span>Ulang Tahunmu</span> 🎂
+      </div>
+
+      <div class="bday-intro">
+        "Untuk naikin mood kamu, developer Moodly mau ngajak kamu kencan dan makan spesial ngerayain ulang tahunmu! Siapkan kebahagiaanmu sepuasnya ya 💖"
+      </div>
+
+      <!-- Live Countdown -->
+      <div class="bday-countdown-box">
+        <div class="bday-cd-label">Menghitung Waktu Menuju Kencan</div>
+        <div class="bday-cd-digits" id="bday-countdown">
+          <div class="bday-cd-seg"><span class="bday-cd-num" id="cd-days">--</span><span class="bday-cd-txt">Hari</span></div>
+          <span class="bday-cd-sep">:</span>
+          <div class="bday-cd-seg"><span class="bday-cd-num" id="cd-hours">--</span><span class="bday-cd-txt">Jam</span></div>
+          <span class="bday-cd-sep">:</span>
+          <div class="bday-cd-seg"><span class="bday-cd-num" id="cd-mins">--</span><span class="bday-cd-txt">Menit</span></div>
+          <span class="bday-cd-sep">:</span>
+          <div class="bday-cd-seg"><span class="bday-cd-num" id="cd-secs">--</span><span class="bday-cd-txt">Detik</span></div>
+        </div>
+      </div>
+
+      <!-- Details -->
+      <div class="bday-detail-card">
+        <div class="bday-detail-ic">🗓️</div>
+        <div class="bday-detail-info">
+          <div class="bday-detail-h">Waktu & Tanggal</div>
+          <div class="bday-detail-sub">Sabtu, 24 Oktober 2026 · Pukul 15.00 WIB</div>
+        </div>
+      </div>
+
+      <div class="bday-detail-card">
+        <div class="bday-detail-ic">📍</div>
+        <div class="bday-detail-info">
+          <div class="bday-detail-h">Giur Bistro</div>
+          <div class="bday-detail-sub">Jl. Aria Jipang No. 1-3, Citarum, Kec. Bandung Wetan, Kota Bandung, Jawa Barat 40115 (Dekat Gedung Sate)</div>
+        </div>
+      </div>
+
+      <!-- Dress Code -->
+      <div class="bday-dresscode">
+        <div style="font-size:26px">👗🩵</div>
+        <div class="bday-dress-info">
+          <h4>Dress Code Spesial</h4>
+          <p>Gunakan outfit cerah dengan sentuhan nuansa biru muda ya!</p>
+        </div>
+      </div>
+
+      <!-- Map Link Card -->
+      <div class="bday-map-preview">
+        <div class="bday-map-banner">
+          <div class="bday-map-addr">🗺️ Lokasi: Giur Bistro, Jl. Aria Jipang Bandung</div>
+          <a href="https://www.google.com/maps/search/?api=1&query=Giur+Bistro+Bandung" target="_blank" class="bday-map-link-btn">
+            Buka Maps ↗
+          </a>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="bday-rsvp-actions">
+        <button class="bday-rsvp-btn primary" onclick="window._acceptDateInvite()">
+          Aku Pasti Datang! 💖🥰
+        </button>
+        <button class="bday-rsvp-btn secondary" onclick="window._closeDateInvitation()">
+          Siap, Masuk ke Moodly ✨
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ═══════ MOODLY MODAL SYSTEM ═══════ -->
 <div id="moodly-modal-bg">

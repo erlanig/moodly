@@ -226,4 +226,109 @@ export async function clearJesMemory() {
   try { await setDoc(jesMemRef(), { facts: [], updatedAt: serverTimestamp() }); } catch {}
 }
 
-export { db, DEVICE_ID };
+/* ════════════════ SYSTEM CONFIG & PASSCODE ════════════════ */
+const configDocRef = () => doc(db, 'system', 'config');
+const DEFAULT_PASSCODE = '241026';
+
+export async function loadAppPasscode() {
+  try {
+    const snap = await getDoc(configDocRef());
+    if (snap.exists()) {
+      const data = snap.data();
+      if (data.passcode) {
+        localStorage.setItem('moodly_app_passcode', String(data.passcode));
+        localStorage.setItem('moodly_passcode_enabled', data.enabled !== false ? 'true' : 'false');
+        return { passcode: String(data.passcode), enabled: data.enabled !== false };
+      }
+    }
+  } catch (e) {
+    console.warn('[FB] loadAppPasscode error:', e.message);
+  }
+  const localPin = localStorage.getItem('moodly_app_passcode') || DEFAULT_PASSCODE;
+  const localEnabled = localStorage.getItem('moodly_passcode_enabled') !== 'false';
+  return { passcode: localPin, enabled: localEnabled };
+}
+
+export async function saveAppPasscode(passcode, enabled = true) {
+  const pin = String(passcode).trim();
+  localStorage.setItem('moodly_app_passcode', pin);
+  localStorage.setItem('moodly_passcode_enabled', enabled ? 'true' : 'false');
+  try {
+    await setDoc(configDocRef(), { passcode: pin, enabled, updatedAt: serverTimestamp() }, { merge: true });
+    return true;
+  } catch (e) {
+    console.warn('[FB] saveAppPasscode error:', e.message);
+    return false;
+  }
+}
+
+/* ════════════════ BIRTHDAY DATE RSVP ════════════════ */
+const rsvpDocRef = () => doc(db, 'invitations', 'birthday_date_2026');
+
+export async function saveSpecialDateRsvp(status, note = '') {
+  const payload = {
+    deviceId: DEVICE_ID,
+    status, // 'accepted' | 'declined' | 'excited'
+    note,
+    timestamp: new Date().toISOString(),
+  };
+  localStorage.setItem('moodly_date_rsvp', JSON.stringify(payload));
+  try {
+    await setDoc(rsvpDocRef(), {
+      responses: {
+        [DEVICE_ID]: { ...payload, serverAt: serverTimestamp() }
+      },
+      lastResponseAt: serverTimestamp()
+    }, { merge: true });
+    return true;
+  } catch (e) {
+    console.warn('[FB] saveSpecialDateRsvp error:', e.message);
+    return false;
+  }
+}
+
+export async function loadSpecialDateRsvp() {
+  try {
+    const snap = await getDoc(rsvpDocRef());
+    if (snap.exists()) {
+      const data = snap.data();
+      return data.responses?.[DEVICE_ID] || null;
+    }
+  } catch {}
+  try {
+    return JSON.parse(localStorage.getItem('moodly_date_rsvp') || 'null');
+  } catch {
+    return null;
+  }
+}
+
+/* ════════════════ ADMIN HELPERS ════════════════ */
+export async function fetchAllUsers() {
+  try {
+    const snap = await getDocs(collection(db, 'users'));
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch (e) {
+    console.warn('[FB] fetchAllUsers error:', e.message);
+    return [];
+  }
+}
+
+export async function fetchUserEntries(deviceId) {
+  try {
+    const snap = await getDocs(query(collection(db, 'users', deviceId, 'entries'), orderBy('ts', 'desc')));
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch (e) {
+    return [];
+  }
+}
+
+export async function fetchUserPeriods(deviceId) {
+  try {
+    const snap = await getDocs(query(collection(db, 'users', deviceId, 'periods'), orderBy('startDate', 'desc')));
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch (e) {
+    return [];
+  }
+}
+
+export { db, DEVICE_ID, DEFAULT_PASSCODE };
