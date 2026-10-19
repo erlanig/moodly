@@ -1,7 +1,12 @@
 /* ═══════════════════════════════════════
-   MOODLY — cycle.js  v2
+   MOODLY — cycle.js  v3
    • Tombol Mulai / Selesai Mens
    • Input per hari (flow + gejala)
+   • PENGISIAN MUNDUR:
+       - pilih tanggal mana pun dalam periode (strip tanggal di modal log)
+       - isi hari yang terlewat, juga setelah periode selesai
+       - catat periode lampau (lupa tekan Mulai)
+       - pilih tanggal selesai (lupa tekan Selesai)
    • AI prediksi periode berikutnya (Groq)
    • AI makanan + minuman + kalimat motivasi
    ═══════════════════════════════════════ */
@@ -39,6 +44,10 @@ export const FLOWS = [
   {l:'Deras',  dots:3}, {l:'Sangat deras',dots:4},
 ];
 
+const FLOW_COLORS = ['#e5e7eb', '#ffc2cf', '#ff9db3', '#ff6b8a', '#d6336c'];
+const MAX_ACTIVE_DAYS = 20;   // periode tanpa tanggal selesai dianggap "aktif" maks segini
+const MAX_RANGE_DAYS  = 31;   // batas jumlah hari yang ditampilkan di strip tanggal
+
 /* ══════════════════════════════
    STATE
 ══════════════════════════════ */
@@ -48,6 +57,10 @@ let periodDays  = {};   // { [periodId]: [{date, flow, symptoms}] }
 let dailyLogFlow     = null;
 let dailyLogSymptoms = [];
 let editingDayDate   = null;
+let editingPeriodId  = null;
+
+let backfillOpen   = false;   // form "catat periode sebelumnya"
+let endPickerOpen  = false;   // pilih tanggal selesai manual
 
 let aiPredCache  = null;
 let aiPredLoading= false;
@@ -58,6 +71,7 @@ let foodLoading  = false;
    INIT
 ══════════════════════════════ */
 export async function initCycle() {
+  ensureStyles();
   const pds = await loadPeriods();
   periods = pds || [];
 
@@ -129,7 +143,7 @@ export function getActivePeriod() {
     if (!p.startDate || p.startDate > today) return false;
     if (p.endDate) return false;   // sudah selesai
     // aktif maksimal 20 hari ke depan
-    return diffDays(parseDateSafe(p.startDate), new Date()) <= 20;
+    return diffDays(parseDateSafe(p.startDate), new Date()) <= MAX_ACTIVE_DAYS;
   }) || null;
 }
 function getDayOfPeriod(period) {
@@ -137,9 +151,63 @@ function getDayOfPeriod(period) {
   const today = new Date(); today.setHours(0,0,0,0);
   return diffDays(start, today) + 1;
 }
+function getDayNumberOn(period, dateStr) {
+  return diffDays(parseDateSafe(period.startDate), parseDateSafe(dateStr)) + 1;
+}
+function getLog(periodId, dateStr) {
+  return (periodDays[periodId] || []).find(d => d.date === dateStr) || null;
+}
 function getTodayLog(periodId) {
-  const today = fmtDateInput(new Date());
-  return (periodDays[periodId] || []).find(d => d.date === today) || null;
+  return getLog(periodId, fmtDateInput(new Date()));
+}
+
+/**
+ * Daftar tanggal (YYYY-MM-DD) dalam sebuah periode — dari hari pertama
+ * sampai tanggal selesai (atau hari ini jika belum selesai). Maks 31 hari.
+ */
+function getPeriodDates(period) {
+  const todayStr = fmtDateInput(new Date());
+  let endStr = period.endDate || todayStr;
+  if (endStr > todayStr) endStr = todayStr;
+  const start = parseDateSafe(period.startDate);
+  if (!start) return [];
+  const out = [];
+  for (let i = 0; i < MAX_RANGE_DAYS; i++) {
+    const ds = fmtDateInput(addDays(start, i));
+    if (ds > endStr) break;
+    out.push(ds);
+  }
+  return out;
+}
+function getMissingDates(period) {
+  return getPeriodDates(period).filter(ds => !getLog(period.id, ds));
+}
+
+/** Akhir efektif sebuah periode (untuk cek tabrakan tanggal). */
+function effectiveEnd(p) {
+  if (p.endDate) return p.endDate;
+  const todayStr = fmtDateInput(new Date());
+  return p === getActivePeriod() ? todayStr : p.startDate;
+}
+function overlapsExisting(startStr, endStr, ignoreId = null) {
+  return periods.some(p => {
+    if (p.id === ignoreId || !p.startDate) return false;
+    return startStr <= effectiveEnd(p) && endStr >= p.startDate;
+  });
+}
+
+/** Render ulang semua bagian layar siklus (tanpa memaksa refresh makanan). */
+function refreshAll() {
+  const info = getCurrentCycleInfo();
+  renderPhaseCard(info);
+  renderMensActionButton();
+  renderDailyLogBanner();
+  renderCycleStrip(info);
+  renderPhaseMiniCards(info);
+  renderPeriodHistory();
+  renderCycleTip(info);
+  renderAIPrediction(true);
+  renderFoodRecommendation();
 }
 
 /* ══════════════════════════════
@@ -151,10 +219,15 @@ export async function startPeriod() {
     return;
   }
   const today = fmtDateInput(new Date());
+  if (overlapsExisting(today, today)) {
+    window._moodlyToast?.('Tanggal hari ini sudah masuk ke periode lain.');
+    return;
+  }
   const id = await addPeriod({ startDate: today, endDate: null });
   periods.unshift({ id, startDate: today, endDate: null });
   periodDays[id] = [];
 
+  backfillOpen = false;
   renderMensActionButton();
   renderDailyLogBanner();
   renderPeriodHistory();
@@ -174,25 +247,90 @@ export async function stopPeriod() {
     msg: `Periode hari ke-${dayNum} (mulai ${fmtDate(active.startDate)}). Konfirmasi selesai hari ini?`,
     confirmTxt: 'Ya, Selesai 🌸',
     onConfirm: async () => {
-      const today = fmtDateInput(new Date());
-      await updatePeriod(active.id, { endDate: today });
-      const idx = periods.findIndex(p => p.id === active.id);
-      if (idx >= 0) periods[idx].endDate = today;
-
-      renderMensActionButton();
-      renderDailyLogBanner();
-      renderPeriodHistory();
-      renderAIPrediction(true);
-
-      window._moodlyToast?.('Periode selesai dicatat ✓');
+      await setPeriodEnd(active.id, fmtDateInput(new Date()), true);
     }
   });
+}
+
+/**
+ * Set tanggal selesai untuk periode tertentu (boleh tanggal lampau).
+ * Dipakai oleh tombol Selesai, picker tanggal, dan history.
+ */
+async function setPeriodEnd(periodId, endStr, silent = false) {
+  const p = periods.find(x => x.id === periodId);
+  if (!p) return false;
+  const todayStr = fmtDateInput(new Date());
+
+  if (!endStr)               { window._moodlyToast?.('Pilih tanggal selesai dulu.'); return false; }
+  if (endStr < p.startDate)  { window._moodlyToast?.('Tanggal selesai tidak boleh sebelum tanggal mulai.'); return false; }
+  if (endStr > todayStr)     { window._moodlyToast?.('Tanggal selesai tidak boleh di masa depan.'); return false; }
+  if (diffDays(parseDateSafe(p.startDate), parseDateSafe(endStr)) + 1 > MAX_RANGE_DAYS) {
+    window._moodlyToast?.(`Durasi periode maksimal ${MAX_RANGE_DAYS} hari.`); return false;
+  }
+  if (overlapsExisting(p.startDate, endStr, p.id)) {
+    window._moodlyToast?.('Tanggal tersebut bertabrakan dengan periode lain.'); return false;
+  }
+
+  await updatePeriod(p.id, { endDate: endStr });
+  p.endDate = endStr;
+  endPickerOpen = false;
+
+  refreshAll();
+  if (!silent) window._moodlyToast?.('Tanggal selesai tersimpan ✓');
+  else         window._moodlyToast?.('Periode selesai dicatat ✓');
+
+  // Tawarkan isi hari yang terlewat
+  const missing = getMissingDates(p).length;
+  if (missing > 0) {
+    setTimeout(() => window._moodlyToast?.(`Ada ${missing} hari belum diisi — tap 📝 di riwayat untuk isi mundur`), 1800);
+  }
+  return true;
+}
+
+/**
+ * Catat periode lampau (lupa tekan Mulai). Tanggal selesai opsional:
+ * kosong = periode masih berlangsung (hanya boleh jika mulai ≤ 20 hari lalu).
+ */
+async function submitBackfillPeriod() {
+  const startStr = document.getElementById('bf-start')?.value || '';
+  const endStr   = document.getElementById('bf-end')?.value   || '';
+  const todayStr = fmtDateInput(new Date());
+
+  if (!startStr)            { window._moodlyToast?.('Isi tanggal mulai dulu.'); return; }
+  if (startStr > todayStr)  { window._moodlyToast?.('Tanggal mulai tidak boleh di masa depan.'); return; }
+  if (endStr) {
+    if (endStr < startStr)  { window._moodlyToast?.('Tanggal selesai tidak boleh sebelum tanggal mulai.'); return; }
+    if (endStr > todayStr)  { window._moodlyToast?.('Tanggal selesai tidak boleh di masa depan.'); return; }
+    if (diffDays(parseDateSafe(startStr), parseDateSafe(endStr)) + 1 > MAX_RANGE_DAYS) {
+      window._moodlyToast?.(`Durasi periode maksimal ${MAX_RANGE_DAYS} hari.`); return;
+    }
+  } else {
+    if (diffDays(parseDateSafe(startStr), new Date()) > MAX_ACTIVE_DAYS) {
+      window._moodlyToast?.('Mulai sudah lama — isi juga tanggal selesainya ya.'); return;
+    }
+    if (getActivePeriod()) {
+      window._moodlyToast?.('Sudah ada periode aktif. Selesaikan dulu atau isi tanggal selesai.'); return;
+    }
+  }
+  if (overlapsExisting(startStr, endStr || startStr)) {
+    window._moodlyToast?.('Tanggal tersebut bertabrakan dengan periode yang sudah ada.'); return;
+  }
+
+  const id = await addPeriod({ startDate: startStr, endDate: endStr || null });
+  periods.unshift({ id, startDate: startStr, endDate: endStr || null });
+  periodDays[id] = [];
+  backfillOpen = false;
+
+  refreshAll();
+  window._moodlyToast?.('Periode tersimpan ✓ — isi log hariannya ya');
+  setTimeout(() => openDailyLog(id), 300);
 }
 
 /* ══════════════════════════════
    RENDER — MAIN SCREEN
 ══════════════════════════════ */
 export function renderCycleScreen(entries = []) {
+  ensureStyles();
   const info = getCurrentCycleInfo();
   renderPhaseCard(info);
   renderMensActionButton();
@@ -246,12 +384,22 @@ function renderPhaseCard(info) {
 function renderMensActionButton() {
   const el = document.getElementById('mens-action-wrap');
   if (!el) return;
-  const active = getActivePeriod();
+  const active   = getActivePeriod();
+  const todayStr = fmtDateInput(new Date());
 
   if (active) {
     const dayNum   = getDayOfPeriod(active);
     const todayLog = getTodayLog(active.id);
     const needsLog = !todayLog;
+
+    const endPicker = endPickerOpen ? `
+      <div class="bf-form">
+        <label class="bf-lbl">Tanggal selesai</label>
+        <input type="date" id="end-date-input" class="bf-input"
+               min="${active.startDate}" max="${todayStr}" value="${todayStr}">
+        <button class="bf-save" onclick="window._submitEndDate()">Simpan</button>
+      </div>` : '';
+
     el.innerHTML = `
       <div class="mens-active-row">
         <div class="mar-info">
@@ -263,12 +411,29 @@ function renderMensActionButton() {
         <button class="mens-stop-btn" onclick="window._stopPeriod()">
           ✓ Selesai
         </button>
-      </div>`;
+      </div>
+      <div class="bf-link" onclick="window._toggleEndPicker()">
+        ${endPickerOpen ? '✕ Tutup' : 'Sudah selesai kemarin / lupa tekan Selesai? Pilih tanggal'}
+      </div>
+      ${endPicker}`;
   } else {
+    const form = backfillOpen ? `
+      <div class="bf-form">
+        <label class="bf-lbl">Tanggal mulai</label>
+        <input type="date" id="bf-start" class="bf-input" max="${todayStr}">
+        <label class="bf-lbl">Tanggal selesai <span style="opacity:.6">(kosongkan jika masih berlangsung)</span></label>
+        <input type="date" id="bf-end" class="bf-input" max="${todayStr}">
+        <button class="bf-save" onclick="window._submitBackfill()">Simpan periode</button>
+      </div>` : '';
+
     el.innerHTML = `
       <button class="mens-start-btn" onclick="window._startPeriod()">
         🩸 Mulai Menstruasi
-      </button>`;
+      </button>
+      <div class="bf-link" onclick="window._toggleBackfill()">
+        ${backfillOpen ? '✕ Tutup' : '＋ Lupa catat? Isi periode sebelumnya'}
+      </div>
+      ${form}`;
   }
 }
 
@@ -280,7 +445,16 @@ function renderDailyLogBanner() {
   if (!active) { el.innerHTML = ''; return; }
 
   const dayNum   = getDayOfPeriod(active);
+  const todayStr = fmtDateInput(new Date());
   const todayLog = getTodayLog(active.id);
+
+  // hari sebelumnya yang belum diisi (tidak termasuk hari ini)
+  const missingPast = getMissingDates(active).filter(ds => ds !== todayStr);
+  const missingHtml = missingPast.length
+    ? `<div class="db-sub" style="color:var(--mens);margin-top:4px">
+         ${missingPast.length} hari terlewat ·
+         <u onclick="event.stopPropagation();window._openDailyLogDate('${active.id}','${missingPast[0]}')">isi mundur</u>
+       </div>` : '';
 
   if (todayLog) {
     const dots     = FLOWS.find(f => f.l === todayLog.flow)?.dots || 0;
@@ -294,6 +468,7 @@ function renderDailyLogBanner() {
           <div class="db-day">Hari ke-${dayNum} · Log Harian</div>
           <div class="db-status">${dotsHtml} <b>${todayLog.flow || ''}</b></div>
           ${syms ? `<div class="db-chips">${syms}</div>` : ''}
+          ${missingHtml}
         </div>
         <div class="db-edit-btn">Edit ›</div>
       </div>`;
@@ -304,6 +479,7 @@ function renderDailyLogBanner() {
         <div class="db-body">
           <div class="db-day">Hari ke-${dayNum} Menstruasi</div>
           <div class="db-sub">Seberapa deras hari ini? Ada gejala apa?</div>
+          ${missingHtml}
         </div>
         <button class="db-fill-btn">Isi ›</button>
       </div>`;
@@ -358,33 +534,59 @@ function renderPeriodHistory() {
     el.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:8px 0">Belum ada riwayat. Tap "Mulai Menstruasi" untuk memulai tracking!</div>';
     return;
   }
-  el.innerHTML = sorted.slice(0, 8).map((p, i) => {
-    const start = fmtDate(p.startDate);
-    const end   = p.endDate ? fmtDate(p.endDate) : '— (aktif)';
-    const dur   = p.endDate ? diffDays(parseDateSafe(p.startDate), parseDateSafe(p.endDate)) + 1 : getDayOfPeriod(p);
+  const active   = getActivePeriod();
+  const todayStr = fmtDateInput(new Date());
 
-    const days    = (periodDays[p.id] || []).sort((a,b) => a.date.localeCompare(b.date));
-    const dayHtml = days.length
+  el.innerHTML = sorted.slice(0, 8).map((p, i) => {
+    const isActive = active && active.id === p.id;
+    const start = fmtDate(p.startDate);
+    const end   = p.endDate ? fmtDate(p.endDate) : (isActive ? '— (aktif)' : '— (belum diatur)');
+    const dur   = p.endDate
+      ? diffDays(parseDateSafe(p.startDate), parseDateSafe(p.endDate)) + 1
+      : (isActive ? getDayOfPeriod(p) : null);
+
+    // Chip per hari — bisa diklik untuk isi / edit (termasuk hari yang terlewat)
+    const dates = getPeriodDates(p);
+    const dayHtml = dates.length
       ? `<div class="ph-daily-row">
-          ${days.map(d => {
-            const dots = FLOWS.find(f => f.l === d.flow)?.dots || 0;
-            const cls  = ['','fd-light','fd-med','fd-heavy','fd-vheavy'][dots] || 'fd-light';
-            const tip  = `${fmtDateShort(d.date)}: ${d.flow || '—'}${d.symptoms?.length ? ' · ' + d.symptoms.join(', ') : ''}`;
-            return `<div class="ph-day-col" title="${tip}">
-              <div class="ph-day-lbl">${fmtDateShort(d.date)}</div>
+          ${dates.map(ds => {
+            const log   = getLog(p.id, ds);
+            const dots  = FLOWS.find(f => f.l === log?.flow)?.dots || 0;
+            const color = log ? FLOW_COLORS[dots] : null;
+            const tip   = log
+              ? `${fmtDateShort(ds)}: ${log.flow || '—'}${log.symptoms?.length ? ' · ' + log.symptoms.join(', ') : ''}`
+              : `${fmtDateShort(ds)}: belum diisi — tap untuk isi`;
+            return `<div class="ph-day-col bf-chip${log ? ' filled' : ' missing'}" title="${tip}"
+                         onclick="window._openDailyLogDate('${p.id}','${ds}')">
+              <div class="bf-chip-dot" style="${color ? `background:${color}` : ''}"></div>
+              <div class="ph-day-lbl">${fmtDateShort(ds)}</div>
             </div>`;
           }).join('')}
         </div>` : '';
+
+    const missingCnt = dates.filter(ds => !getLog(p.id, ds)).length;
+    const missingTxt = missingCnt
+      ? `<div class="ph-dur" style="color:var(--mens)">${missingCnt} hari belum diisi — tap tanggal untuk isi mundur</div>` : '';
+
+    // Periode belum punya tanggal selesai & bukan periode aktif → minta tanggal selesai
+    const endFix = (!p.endDate && !isActive) ? `
+      <div class="bf-form" style="margin-top:6px">
+        <label class="bf-lbl">Tanggal selesai periode ini</label>
+        <input type="date" id="end-${p.id}" class="bf-input" min="${p.startDate}" max="${todayStr}">
+        <button class="bf-save" onclick="window._setEndFromInput('${p.id}')">Simpan</button>
+      </div>` : '';
 
     return `<div class="ph-row">
       <div class="ph-num">${sorted.length - i}</div>
       <div class="ph-info">
         <div class="ph-dates">🩸 ${start} – ${end}</div>
-        <div class="ph-dur">${dur} hari${p.endDate ? '' : ' (belum selesai)'}</div>
+        <div class="ph-dur">${dur ? dur + ' hari' : '? hari'}${p.endDate || !isActive ? '' : ' (belum selesai)'}</div>
+        ${missingTxt}
         ${dayHtml}
+        ${endFix}
       </div>
       <div class="ph-acts">
-        ${!p.endDate ? '' : `<div class="ph-act" onclick="window._editPeriodDay('${p.id}')" title="Log harian">📝</div>`}
+        <div class="ph-act" onclick="window._editPeriodDay('${p.id}')" title="Isi / edit log harian">📝</div>
         <div class="ph-act" onclick="window._deletePeriod('${p.id}')" title="Hapus">🗑</div>
       </div>
     </div>`;
@@ -564,10 +766,13 @@ function _renderAIPredFallback(el) {
 }
 
 async function _fetchAIPrediction(completed, active) {
-  // Susun data untuk prompt
-  const historyLines = completed.slice(0, 8).map((p, i) => {
+  // Susun data untuk prompt (urut terbaru dulu)
+  const recent = [...completed]
+    .sort((a,b) => parseDateSafe(b.startDate) - parseDateSafe(a.startDate))
+    .slice(0, 8);
+  const historyLines = recent.map((p, i) => {
     const dur  = diffDays(parseDateSafe(p.startDate), parseDateSafe(p.endDate)) + 1;
-    const days = (periodDays[p.id] || []).sort((a,b) => a.date.localeCompare(b.date));
+    const days = (periodDays[p.id] || []).slice().sort((a,b) => a.date.localeCompare(b.date));
     const dayDetail = days.length
       ? ' (' + days.map(d => `hari ${diffDays(parseDateSafe(p.startDate), parseDateSafe(d.date)) + 1}: ${d.flow || '—'}${d.symptoms?.length ? ', ' + d.symptoms.join(', ') : ''}`).join('; ') + ')'
       : '';
@@ -812,38 +1017,111 @@ function _fallbackMotivasi(phase) {
 }
 
 /* ══════════════════════════════
-   DAILY LOG MODAL
+   DAILY LOG MODAL  (bisa pilih tanggal → pengisian mundur)
 ══════════════════════════════ */
-export function openDailyLog(periodId) {
-  const active = periodId ? periods.find(p => p.id === periodId) : getActivePeriod();
-  if (!active) {
+
+/**
+ * Buka modal log harian.
+ *  - periodId : periode yang dibuka (default: periode aktif)
+ *  - dateStr  : tanggal yang dibuka (default: hari ini untuk periode aktif,
+ *               atau hari pertama yang belum terisi)
+ */
+export function openDailyLog(periodId, dateStr) {
+  ensureStyles();
+  const period = periodId ? periods.find(p => p.id === periodId) : getActivePeriod();
+  if (!period) {
     window._moodlyAlert?.({ icon:'🩸', title:'Tidak ada periode aktif', msg:'Tap "Mulai Menstruasi" untuk memulai periode baru.' });
     return;
   }
 
-  dailyLogFlow     = null;
-  dailyLogSymptoms = [];
-  editingDayDate   = fmtDateInput(new Date());
-
-  const todayLog = getTodayLog(active.id);
-  if (todayLog) {
-    const fIdx = FLOWS.findIndex(f => f.l === todayLog.flow);
-    dailyLogFlow     = fIdx >= 0 ? fIdx : null;
-    dailyLogSymptoms = (todayLog.symptoms || []).map(s => SYMPTOMS.findIndex(x => x.l === s)).filter(i => i >= 0);
+  const dates = getPeriodDates(period);
+  if (!dates.length) {
+    window._moodlyToast?.('Tidak ada tanggal yang bisa diisi untuk periode ini.');
+    return;
   }
 
-  const title  = document.getElementById('daily-modal-title');
-  const dayNum = getDayOfPeriod(active);
-  if (title) title.textContent = `🩸 Log Hari ke-${dayNum}`;
+  // Tentukan tanggal default
+  let target = dateStr;
+  if (!target || !dates.includes(target)) {
+    const todayStr  = fmtDateInput(new Date());
+    const isActive  = getActivePeriod()?.id === period.id;
+    const firstMiss = dates.find(ds => !getLog(period.id, ds));
+    if (isActive && dates.includes(todayStr))      target = todayStr;
+    else if (firstMiss)                            target = firstMiss;
+    else                                           target = dates[dates.length - 1];
+  }
 
+  editingPeriodId = period.id;
+  _loadDayState(period.id, target);
   _renderDailyLogModal();
   openModal('daily-log-modal');
+}
+
+function _loadDayState(periodId, dateStr) {
+  editingDayDate   = dateStr;
+  dailyLogFlow     = null;
+  dailyLogSymptoms = [];
+
+  const log = getLog(periodId, dateStr);
+  if (log) {
+    const fIdx = FLOWS.findIndex(f => f.l === log.flow);
+    dailyLogFlow     = fIdx >= 0 ? fIdx : null;
+    dailyLogSymptoms = (log.symptoms || []).map(s => SYMPTOMS.findIndex(x => x.l === s)).filter(i => i >= 0);
+  }
+}
+
+function _ensureDateStripEl() {
+  let strip = document.getElementById('daily-date-strip');
+  if (strip) return strip;
+  const flowEl = document.getElementById('daily-flow-row');
+  if (!flowEl || !flowEl.parentNode) return null;
+  strip = document.createElement('div');
+  strip.id = 'daily-date-strip';
+  flowEl.parentNode.insertBefore(strip, flowEl);
+  return strip;
 }
 
 function _renderDailyLogModal() {
   const flowEl = document.getElementById('daily-flow-row');
   const symEl  = document.getElementById('daily-sym-grid');
   if (!flowEl || !symEl) return;
+
+  const period = periods.find(p => p.id === editingPeriodId);
+
+  // Judul
+  const title = document.getElementById('daily-modal-title');
+  if (title && period && editingDayDate) {
+    const n = getDayNumberOn(period, editingDayDate);
+    const isToday = editingDayDate === fmtDateInput(new Date());
+    title.textContent = `🩸 Log Hari ke-${n} · ${isToday ? 'Hari ini' : fmtDate(editingDayDate)}`;
+  }
+
+  // Strip tanggal (pilih hari mana pun dalam periode)
+  const strip = _ensureDateStripEl();
+  if (strip && period) {
+    const dates = getPeriodDates(period);
+    const todayStr = fmtDateInput(new Date());
+    const missingCnt = dates.filter(ds => !getLog(period.id, ds)).length;
+    strip.innerHTML = `
+      <div class="dls-wrap">
+        <div class="dls-row">
+          ${dates.map(ds => {
+            const log = getLog(period.id, ds);
+            const sel = ds === editingDayDate;
+            const dots = FLOWS.find(f => f.l === log?.flow)?.dots || 0;
+            return `<div class="dls-chip${sel ? ' sel' : ''}${log ? ' filled' : ' missing'}"
+                         onclick="window._selectDailyDate('${ds}')">
+              <div class="dls-n">H${getDayNumberOn(period, ds)}</div>
+              <div class="dls-d">${ds === todayStr ? 'Hari ini' : fmtDateShort(ds)}</div>
+              <div class="dls-dot" style="${log ? `background:${FLOW_COLORS[dots]}` : ''}"></div>
+            </div>`;
+          }).join('')}
+        </div>
+        ${missingCnt ? `<div class="dls-hint">${missingCnt} hari belum diisi (titik kosong) — tap tanggal untuk isi mundur</div>` : ''}
+      </div>`;
+    // geser ke tanggal terpilih
+    setTimeout(() => strip.querySelector('.dls-chip.sel')?.scrollIntoView({ inline:'center', block:'nearest' }), 50);
+  }
 
   flowEl.innerHTML = FLOWS.map((f, i) => `
     <div class="flow-btn${dailyLogFlow === i ? ' sel' : ''}" onclick="window._selectDailyFlow(${i})">
@@ -859,8 +1137,8 @@ function _renderDailyLogModal() {
 }
 
 export async function submitDailyLog() {
-  const active = getActivePeriod();
-  if (!active || !editingDayDate) return;
+  const period = periods.find(p => p.id === editingPeriodId);
+  if (!period || !editingDayDate) return;
 
   const data = {
     date:     editingDayDate,
@@ -868,19 +1146,30 @@ export async function submitDailyLog() {
     symptoms: dailyLogSymptoms.map(i => SYMPTOMS[i].l),
   };
 
-  if (!periodDays[active.id]) periodDays[active.id] = [];
-  const days = periodDays[active.id];
+  if (!periodDays[period.id]) periodDays[period.id] = [];
+  const days = periodDays[period.id];
   const idx  = days.findIndex(d => d.date === editingDayDate);
   if (idx >= 0) days[idx] = data; else days.push(data);
 
-  await savePeriodDay(active.id, editingDayDate, data);
+  await savePeriodDay(period.id, editingDayDate, data);
+
+  // Jika masih ada hari yang belum diisi, tawarkan lanjut ke hari kosong berikutnya
+  const nextMissing = getMissingDates(period).find(ds => ds !== editingDayDate);
+  const wasToday    = editingDayDate === fmtDateInput(new Date());
+  const savedDate   = editingDayDate;
+
   closeModal('daily-log-modal');
   renderDailyLogBanner();
   renderMensActionButton();
   renderPhaseCard(getCurrentCycleInfo());
   renderPeriodHistory();
-  renderFoodRecommendation(true);
-  window._moodlyToast?.('Log harian tersimpan ✓');
+  if (wasToday) renderFoodRecommendation(true);
+  // data hari berubah → prediksi AI perlu dihitung ulang kalau periode sudah selesai
+  if (period.endDate && savedDate) renderAIPrediction(true);
+
+  window._moodlyToast?.(nextMissing
+    ? `Log ${fmtDate(savedDate)} tersimpan ✓ · masih ada hari yang kosong`
+    : 'Log harian tersimpan ✓');
 }
 
 /* ══════════════════════════════
@@ -895,12 +1184,13 @@ export function renderHomeCycleBanner() {
   if (active) {
     const dayNum   = getDayOfPeriod(active);
     const needsLog = !getTodayLog(active.id);
+    const missing  = getMissingDates(active).filter(ds => ds !== fmtDateInput(new Date())).length;
     el.className = 'cycle-banner mens';
     el.innerHTML = `<div class="cb-ico">🩸</div>
       <div class="cb-body">
         <div class="cb-tag mens">Sedang Menstruasi · Hari ke-${dayNum}</div>
         <div class="cb-title">${needsLog ? 'Belum isi log hari ini' : 'Log harian sudah tercatat ✓'}</div>
-        <div class="cb-sub">${needsLog ? 'Tap untuk isi kondisi hari ini →' : 'Lihat detail siklus →'}</div>
+        <div class="cb-sub">${needsLog ? 'Tap untuk isi kondisi hari ini →' : (missing ? `${missing} hari terlewat belum diisi →` : 'Lihat detail siklus →')}</div>
       </div><div class="cb-arr" style="color:#ff6b8a">🩸</div>`;
     return;
   }
@@ -940,7 +1230,7 @@ export function renderInsightCycleMini() {
   }
   el.innerHTML = sorted.slice(0, 4).map(p => {
     const dur     = p.endDate ? diffDays(parseDateSafe(p.startDate), parseDateSafe(p.endDate)) + 1 : '?';
-    const dayLogs = (periodDays[p.id] || []).sort((a,b) => a.date.localeCompare(b.date));
+    const dayLogs = (periodDays[p.id] || []).slice().sort((a,b) => a.date.localeCompare(b.date));
     const flowMini = dayLogs.map(d => {
       const dots = FLOWS.find(f => f.l === d.flow)?.dots || 0;
       return '<span class="fd-mini ' + (['','fd-light','fd-med','fd-heavy','fd-vheavy'][dots]||'fd-med') + '" style="display:inline-block;margin:0 1px"></span>'.repeat(dots);
@@ -969,15 +1259,37 @@ export function renderInsightCycleMini() {
 window._startPeriod     = startPeriod;
 window._stopPeriod      = stopPeriod;
 window._openDailyLog    = () => openDailyLog();
+window._openDailyLogDate = (periodId, dateStr) => openDailyLog(periodId, dateStr);
 window._closeDailyLog   = () => closeModal('daily-log-modal');
 window._submitDailyLog  = submitDailyLog;
 window._selectDailyFlow = (i) => { dailyLogFlow = i; _renderDailyLogModal(); };
+window._selectDailyDate = (dateStr) => {
+  if (!editingPeriodId) return;
+  _loadDayState(editingPeriodId, dateStr);
+  _renderDailyLogModal();
+};
 window._toggleDailySym  = (i) => {
   const idx = dailyLogSymptoms.indexOf(i);
   if (idx >= 0) dailyLogSymptoms.splice(idx, 1); else dailyLogSymptoms.push(i);
   _renderDailyLogModal();
 };
 window._editPeriodDay = (periodId) => openDailyLog(periodId);
+
+// Pengisian mundur: periode lampau & tanggal selesai manual
+window._toggleBackfill  = () => { backfillOpen = !backfillOpen; renderMensActionButton(); };
+window._toggleEndPicker = () => { endPickerOpen = !endPickerOpen; renderMensActionButton(); };
+window._submitBackfill  = submitBackfillPeriod;
+window._submitEndDate   = async () => {
+  const active = getActivePeriod();
+  if (!active) return;
+  const val = document.getElementById('end-date-input')?.value;
+  await setPeriodEnd(active.id, val);
+};
+window._setEndFromInput = async (periodId) => {
+  const val = document.getElementById(`end-${periodId}`)?.value;
+  await setPeriodEnd(periodId, val);
+};
+
 window._deletePeriod  = async (id) => {
   window._moodlyConfirm({
     icon:'🗑', title:'Hapus periode ini?',
@@ -987,11 +1299,7 @@ window._deletePeriod  = async (id) => {
       await deletePeriod(id);
       delete periodDays[id];
       periods = periods.filter(p => p.id !== id);
-      renderMensActionButton();
-      renderDailyLogBanner();
-      renderPeriodHistory();
-      renderPhaseCard(getCurrentCycleInfo());
-      renderAIPrediction(true);
+      refreshAll();
     }
   });
 };
@@ -1005,6 +1313,46 @@ window._refreshFood = async () => {
   localStorage.removeItem('moodly_food_cache');
   await renderFoodRecommendation(true);
 };
+
+/* ══════════════════════════════
+   STYLES (disuntik sekali — tidak perlu ubah CSS/HTML)
+══════════════════════════════ */
+function ensureStyles() {
+  if (document.getElementById('cycle-backfill-styles')) return;
+  const st = document.createElement('style');
+  st.id = 'cycle-backfill-styles';
+  st.textContent = `
+    /* strip tanggal di modal log */
+    .dls-wrap{margin:0 0 14px}
+    .dls-row{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 8px;scrollbar-width:none}
+    .dls-row::-webkit-scrollbar{display:none}
+    .dls-chip{flex:0 0 auto;min-width:54px;padding:8px 6px;border-radius:12px;text-align:center;
+      border:1.5px solid rgba(0,0,0,.08);background:var(--card,#fff);cursor:pointer;transition:all .15s}
+    .dls-chip.missing{border-style:dashed}
+    .dls-chip.sel{border-color:#ff6b8a;background:rgba(255,107,138,.12);transform:translateY(-1px)}
+    .dls-n{font-size:12px;font-weight:700;color:var(--text,#222)}
+    .dls-d{font-size:10px;color:var(--muted,#888);margin-top:1px}
+    .dls-dot{width:8px;height:8px;border-radius:50%;margin:5px auto 0;border:1.5px solid rgba(0,0,0,.15);background:transparent}
+    .dls-chip.filled .dls-dot{border-color:transparent}
+    .dls-hint{font-size:11px;color:var(--muted,#888);margin-top:2px}
+    /* chip per hari di riwayat */
+    .ph-daily-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+    .bf-chip{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:38px;padding:5px 6px;
+      border-radius:10px;border:1px solid rgba(0,0,0,.08);cursor:pointer}
+    .bf-chip.missing{border-style:dashed;opacity:.85}
+    .bf-chip:active{transform:scale(.95)}
+    .bf-chip-dot{width:9px;height:9px;border-radius:50%;border:1.5px solid rgba(0,0,0,.18);background:transparent}
+    .bf-chip.filled .bf-chip-dot{border-color:transparent}
+    /* link & form pengisian mundur */
+    .bf-link{font-size:12px;color:var(--muted,#888);text-align:center;margin-top:10px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+    .bf-form{display:flex;flex-direction:column;gap:6px;margin-top:10px;padding:12px;border-radius:14px;
+      background:rgba(255,107,138,.06);border:1px solid rgba(255,107,138,.2)}
+    .bf-lbl{font-size:11px;font-weight:600;color:var(--muted,#888)}
+    .bf-input{padding:9px 10px;border-radius:10px;border:1px solid rgba(0,0,0,.12);font-size:14px;background:var(--card,#fff);color:var(--text,#222)}
+    .bf-save{margin-top:4px;padding:10px;border:none;border-radius:12px;background:#ff6b8a;color:#fff;font-weight:700;font-size:13px;cursor:pointer}
+  `;
+  document.head.appendChild(st);
+}
 
 /* ══════════════════════════════
    HELPERS
