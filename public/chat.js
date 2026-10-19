@@ -303,12 +303,13 @@ function appendMessage(role, text, animate = false, articleIdx = null) {
     avatar.src = 'img/jes-memoji.svg';
     avatar.alt = 'Jes Memoji';
     avatar.className = 'chat-msg-memoji';
+    avatar.style.cssText = 'width:26px!important;height:26px!important;min-width:26px!important;max-width:26px!important;min-height:26px!important;max-height:26px!important;border-radius:50%!important;object-fit:cover!important;margin-right:8px!important;margin-bottom:2px!important;align-self:flex-end!important;flex-shrink:0!important;background:#ffffff!important;box-shadow:0 1px 3px rgba(0,0,0,0.08)!important;';
     div.appendChild(avatar);
   }
 
   const bubble = document.createElement('div');
   bubble.className = 'chat-bubble';
-  if (role === 'assistant') bubble.style.cssText = 'display:flex;flex-direction:column;';
+  if (role === 'assistant') bubble.style.cssText = 'display:flex;flex-direction:column;flex:1;max-width:calc(100% - 40px);';
 
   if (role === 'assistant') {
     const textNode = document.createElement('span');
@@ -324,7 +325,7 @@ function appendMessage(role, text, animate = false, articleIdx = null) {
       artEl.innerHTML = `
         <div class="chat-art-label">📖 Bacaan pendukung</div>
         <div class="chat-art-card" onclick="window._openArt(${articleIdx})">
-          <span class="chat-art-em">${art.emoji}</span>
+          <span class="chat-art-em" style="font-size:16px;">📚</span>
           <div>
             <div class="chat-art-title">${art.title}</div>
             <div class="chat-art-src">${art.source} · ${art.readTime}</div>
@@ -358,8 +359,8 @@ function showTypingIndicator() {
   const div = document.createElement('div');
   div.className = 'chat-msg chat-ai';
   div.id = 'chat-typing';
-  div.innerHTML = `<img src="img/jes-memoji.svg" alt="Jes" class="chat-msg-memoji">
-  <div class="chat-bubble chat-typing-bubble">
+  div.innerHTML = `<img src="img/jes-memoji.svg" alt="Jes" class="chat-msg-memoji" style="width:26px!important;height:26px!important;min-width:26px!important;max-width:26px!important;min-height:26px!important;max-height:26px!important;border-radius:50%!important;object-fit:cover!important;margin-right:8px!important;margin-bottom:2px!important;align-self:flex-end!important;flex-shrink:0!important;background:#ffffff!important;box-shadow:0 1px 3px rgba(0,0,0,0.08)!important;">
+  <div class="chat-bubble chat-typing-bubble" style="max-width:calc(100% - 40px);">
     <span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>
   </div>`;
   wrap.appendChild(div);

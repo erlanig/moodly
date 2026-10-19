@@ -72,23 +72,50 @@ async function boot() {
   buildNavHandlers();
   initViewportHandler();
 
+  // Pre-load news articles in background so articles are instantly available
+  initNews();
+
   // Load passcode settings from Firestore / local
   const passConfig = await loadAppPasscode();
   configuredPasscode = String(passConfig.passcode || '261004').trim();
   isPasscodeEnabled = passConfig.enabled !== false;
 
-  if (isPasscodeEnabled && !isSessionUnlocked) {
-    showPasscodeOverlay();
-  } else {
-    unlockApp(false);
+  // Prepare home screen
+  updateHome();
+
+  // Splashscreen lifecycle: smooth Apple iOS Pink fadeout after ~1.3s
+  const splash = document.getElementById('splash');
+  let splashDone = false;
+  function dismissSplash() {
+    if (splashDone) return;
+    splashDone = true;
+    if (splash) {
+      splash.classList.add('hide');
+      setTimeout(() => {
+        splash.classList.remove('active');
+        showScreen('home');
+        if (isPasscodeEnabled && !isSessionUnlocked) {
+          showPasscodeOverlay();
+        } else {
+          unlockApp(false);
+        }
+      }, 420);
+    } else {
+      showScreen('home');
+      if (isPasscodeEnabled && !isSessionUnlocked) {
+        showPasscodeOverlay();
+      } else {
+        unlockApp(false);
+      }
+    }
   }
 
-  // Show home
-  showScreen('home');
+  window._skipSplash = dismissSplash;
+  setTimeout(dismissSplash, 1300);
 
-  // If new user, show name modal
+  // If new user, show name modal after splash
   if (!uname) {
-    setTimeout(() => openModal('name-modal'), 650);
+    setTimeout(() => openModal('name-modal'), 2200);
   }
 
   // Poll sync every 60s
@@ -102,7 +129,7 @@ async function boot() {
    SCREEN ROUTER
 ════════════════ */
 export function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.screen:not(#splash)').forEach(s => s.classList.remove('active'));
 
   // nav highlight — iOS Clean Pink & Neutral Gray
   document.querySelectorAll('.ni').forEach(b => {
@@ -189,13 +216,11 @@ function updateHome() {
 ════════════════ */
 function greet() {
   const h   = new Date().getHours();
-  const t   = h<5?'Tengah malam':h<12?'Pagi':h<15?'Siang':h<18?'Sore':'Malam';
-  const ico = h<5?'🌙':h<12?'☀️':h<18?'🌤️':'🌙';
-  const n   = uname || 'kamu';
+  const t   = h<5?'Malam':h<12?'Pagi':h<15?'Siang':h<18?'Sore':'Malam';
   const tag = document.getElementById('hero-tag');
-  if (tag) tag.textContent = `Selamat ${t}, ${n} ${ico}`;
+  if (tag) tag.textContent = `${t} yang damai`;
   const tb = document.getElementById('tb-uname');
-  if (tb)  tb.textContent  = uname || 'Profil';
+  if (tb)  tb.textContent  = uname || 'Avril';
 }
 
 /* ════════════════

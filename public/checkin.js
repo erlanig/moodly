@@ -20,18 +20,18 @@ export const MOODS = [
 ];
 
 export const CAUSES = [
-  {svg:'<path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2zM16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16" stroke="#1db954" stroke-width="1.8" stroke-linecap="round"/>',n:'Kerjaan'},
-  {svg:'<path d="M22 10v6M2 10l10-5 10 5-10 5-10-5z" stroke="#1db954" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 12v5c3 3 9 3 12 0v-5" stroke="#1db954" stroke-width="1.8" stroke-linecap="round"/>',n:'Kuliah'},
-  {svg:'<circle cx="12" cy="12" r="10" stroke="#1db954" stroke-width="1.8"/><path d="M12 6v6l4 2" stroke="#1db954" stroke-width="1.8" stroke-linecap="round"/>',n:'Finansial'},
-  {svg:'<path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" stroke="#1db954" stroke-width="1.8" stroke-linejoin="round"/>',n:'Relationship'},
-  {svg:'<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke="#1db954" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 22V12h6v10" stroke="#1db954" stroke-width="1.8" stroke-linecap="round"/>',n:'Keluarga'},
-  {svg:'<path d="M17 7l-1.41-1.41L12 9.17l-3.59-3.58L7 7l5 5 5-5zM12 21c-4.97 0-9-4.03-9-9s4.03-9 9-9 9 4.03 9 9-4.03 9-9 9z" stroke="#1db954" stroke-width="1.5"/>',n:'Kurang tidur'},
-  {svg:'<path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#1db954" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',n:'Kesehatan'},
-  {svg:'<circle cx="12" cy="12" r="10" stroke="#1db954" stroke-width="1.8"/><path d="M12 16v-4M12 8h.01" stroke="#1db954" stroke-width="2" stroke-linecap="round"/>',n:'Ga tau'},
+  {svg:'<path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2zM16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16" stroke="#ff2d55" stroke-width="1.8" stroke-linecap="round"/>',n:'Kerjaan'},
+  {svg:'<path d="M22 10v6M2 10l10-5 10 5-10 5-10-5z" stroke="#ff2d55" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 12v5c3 3 9 3 12 0v-5" stroke="#ff2d55" stroke-width="1.8" stroke-linecap="round"/>',n:'Kuliah'},
+  {svg:'<circle cx="12" cy="12" r="10" stroke="#ff2d55" stroke-width="1.8"/><path d="M12 6v6l4 2" stroke="#ff2d55" stroke-width="1.8" stroke-linecap="round"/>',n:'Finansial'},
+  {svg:'<path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" stroke="#ff2d55" stroke-width="1.8" stroke-linejoin="round"/>',n:'Relationship'},
+  {svg:'<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke="#ff2d55" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 22V12h6v10" stroke="#ff2d55" stroke-width="1.8" stroke-linecap="round"/>',n:'Keluarga'},
+  {svg:'<path d="M17 7l-1.41-1.41L12 9.17l-3.59-3.58L7 7l5 5 5-5zM12 21c-4.97 0-9-4.03-9-9s4.03-9 9-9 9 4.03 9 9-4.03 9-9 9z" stroke="#ff2d55" stroke-width="1.5"/>',n:'Kurang tidur'},
+  {svg:'<path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#ff2d55" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',n:'Kesehatan'},
+  {svg:'<circle cx="12" cy="12" r="10" stroke="#ff2d55" stroke-width="1.8"/><path d="M12 16v-4M12 8h.01" stroke="#ff2d55" stroke-width="2" stroke-linecap="round"/>',n:'Ga tau'},
 ];
 
 export const INTENSITIES = [
-  {l:'Ringan', svg:'<path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke="#1db954" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="4" stroke="#1db954" stroke-width="2"/>'},
+  {l:'Ringan', svg:'<path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke="#ff2d55" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="4" stroke="#ff2d55" stroke-width="2"/>'},
   {l:'Lumayan',svg:'<circle cx="12" cy="12" r="10" stroke="#f57c00" stroke-width="2"/><path d="M8 15s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01" stroke="#f57c00" stroke-width="2" stroke-linecap="round"/>'},
   {l:'Berat',  svg:'<circle cx="12" cy="12" r="10" stroke="#e53935" stroke-width="2"/><path d="M16 16s-1.5-2-4-2-4 2-4 2M9 9h.01M15 9h.01" stroke="#e53935" stroke-width="2" stroke-linecap="round"/>'},
 ];

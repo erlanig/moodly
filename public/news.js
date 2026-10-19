@@ -110,15 +110,43 @@ export async function initNews() {
   }
 }
 
+function slotLabel() {
+  const h = new Date().getHours();
+  if (h >= 4 && h < 11) return 'Pagi';
+  if (h >= 11 && h < 15) return 'Siang';
+  if (h >= 15 && h < 18) return 'Sore';
+  return 'Malam';
+}
+
+export function getCatIcon(cat) {
+  switch(cat) {
+    case 'mood':
+      return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff2d55" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>`;
+    case 'stres':
+      return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>`;
+    case 'tidur':
+      return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5856d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>`;
+    case 'self-care':
+      return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff9500" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>`;
+    case 'motivasi':
+      return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34c759" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`;
+    default:
+      return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff2d55" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>`;
+  }
+}
+
 /* ════════════════
-   FETCH ARTICLES — dengan web search untuk berita terkini
+   FETCH ARTICLES
 ════════════════ */
 async function loadArticles() {
-  document.getElementById('news-wrap').innerHTML = `
-    <div class="ldwrap">
-      <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-      <div class="ld-txt">Mencari berita & menyiapkan 10 artikel ${slotLabel().toLowerCase()} ini…</div>
-    </div>`;
+  const wrap = document.getElementById('news-wrap');
+  if (wrap) {
+    wrap.innerHTML = `
+      <div class="ldwrap">
+        <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+        <div class="ld-txt">Menyiapkan kurasi 10 artikel ${slotLabel().toLowerCase()} ini…</div>
+      </div>`;
+  }
 
   const today  = new Date();
   const topics = TOPICS[getTopicIndex()];
@@ -127,51 +155,38 @@ async function loadArticles() {
   const prompt = `Kamu penulis kesehatan mental Indonesia yang hangat dan berbasis bukti ilmiah.
 Tanggal hari ini: ${today.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}.
 
-PENTING: Sebelum menulis, gunakan web_search untuk mencari 2–3 berita atau studi kesehatan mental terbaru dari Indonesia hari ini atau minggu ini. Sertakan konteks berita terkini ini sebagai referensi relevan di dalam artikel yang sesuai topiknya.
-
 Tulis tepat 10 artikel lengkap dan unik. Topik (satu artikel per topik, urutan sama):
 ${topics.map((t,i) => `${i+1}. ${t}`).join('\n')}
 
 Kembalikan HANYA JSON array valid, tanpa markdown, tanpa teks di luar JSON:
-[{"id":1,"cat":"${cats[0]}","emoji":"<emoji>","source":"<Halodoc|Alodokter|Klikdokter|SehatQ|Kompas Health|Hellosehat|Riliv Blog|Into The Light|Yayasan Pulih>","title":"<judul max 12 kata>","preview":"<2 kalimat menarik, bila relevan sebutkan konteks berita terkini>","tags":["<tag1>","<tag2>","<tag3>"],"readTime":"<X menit>","content":"<HTML artikel min 400 kata: pakai p h3 blockquote ul li strong, bahasa hangat relatable, ada tips praktis, bila ada berita terkini yang relevan sisipkan sebagai konteks informatif, akhiri dengan kalimat motivasi>"},...]
-Kategori tiap artikel berurutan: ${cats.join(', ')}`;
+[{"id":1,"cat":"${cats[0]}","source":"<Halodoc|Alodokter|Klikdokter|SehatQ|Kompas Health|Hellosehat|Riliv Blog|Into The Light|Yayasan Pulih>","title":"<judul max 12 kata>","preview":"<2 kalimat menarik>","tags":["<tag1>","<tag2>","<tag3>"],"readTime":"<X menit>","content":"<HTML artikel min 400 kata: pakai p h3 blockquote ul li strong, bahasa hangat relatable, tips praktis, motivasi>"},...]`;
 
   try {
-    // ✅ FIXED: tambahkan web_search tool agar Claude bisa fetch berita terkini
-    const API_URL = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
-      ? 'http://localhost:3001/api/anthropic'
-      : '/api/anthropic';
-    const res = await fetch(API_URL, {
+    const res = await fetch('/api/anthropic', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 10000,
-        tools: [
-          {
-            type: 'web_search_20250305',
-            name: 'web_search'
-          }
-        ],
         messages: [{ role: 'user', content: prompt }]
       })
     });
 
+    if (!res.ok) throw new Error('API unavailable: ' + res.status);
     const data = await res.json();
-
-    // ✅ FIXED: ekstrak teks dari semua blok (termasuk setelah tool_use)
-    const raw = data.content
+    const raw = (data.content || [])
       .filter(c => c.type === 'text')
       .map(c => c.text || '')
       .join('');
 
     const arts = JSON.parse(raw.replace(/```json|```/g,'').trim());
+    if (!Array.isArray(arts) || !arts.length) throw new Error('Format invalid');
     artStore = arts;
     await saveNewsCache(todayKey(), arts);
     renderNews(arts, curFilter);
     buildHomePreview();
   } catch (e) {
-    console.warn('[news] fetch failed, using fallback', e.message);
+    console.warn('[news] Menggunakan artikel kurasi:', e.message);
     artStore = fallbackArticles();
     await saveNewsCache(todayKey(), artStore);
     renderNews(artStore, curFilter);
@@ -224,13 +239,13 @@ export function renderNews(arts, filter) {
     const isBookmarked = bms.some(b => b.title === a.title);
     return `<div class="ncard card-enter" onclick="window._openArt(${idx >= 0 ? idx : 0})">
       <div class="ncard-top">
-        <div class="ncard-thumb">${a.emoji}</div>
+        <div class="ncard-thumb" style="display:flex;align-items:center;justify-content:center;background:#fff5f7;border-radius:12px;width:40px;height:40px;border:1px solid rgba(255,45,85,0.12)">${getCatIcon(a.cat)}</div>
         <div class="ncard-body">
           <div class="ncard-src-row">
             <div class="ncard-dot"></div>
             <div class="ncard-src">${a.source}</div>
             <span class="nbadge-new">Baru hari ini</span>
-            ${isBookmarked ? '<span style="margin-left:auto;font-size:12px;">⭐</span>' : ''}
+            ${isBookmarked ? '<span style="margin-left:auto;font-size:12px;color:#ff9500">★</span>' : ''}
           </div>
           <div class="ncard-title">${a.title}</div>
           <div class="ncard-snip">${a.preview}</div>
@@ -255,14 +270,18 @@ export function buildHomePreview() {
   if (!el) return;
   if (!artStore.length) {
     el.innerHTML = `<div class="prev-card" onclick="window._showScreen('news')">
-      <div class="prev-em">📰</div>
+      <div class="prev-em" style="display:flex;align-items:center;justify-content:center;background:#fff5f7;border-radius:10px;width:34px;height:34px;border:1px solid rgba(255,45,85,0.12)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff2d55" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+      </div>
       <div><div class="prev-src">Artikel Harian</div><div class="prev-title">10 tips kesehatan mental update setiap hari →</div></div>
     </div>`;
     return;
   }
   el.innerHTML = artStore.slice(0, 2).map((a, i) => `
     <div class="prev-card" onclick="window._openArt(${i})" style="margin-bottom:7px">
-      <div class="prev-em">${a.emoji}</div>
+      <div class="prev-em" style="display:flex;align-items:center;justify-content:center;background:#fff5f7;border-radius:10px;width:34px;height:34px;border:1px solid rgba(255,45,85,0.12)">
+        ${getCatIcon(a.cat)}
+      </div>
       <div>
         <div class="prev-src">${a.source}</div>
         <div class="prev-title">${a.title}</div>

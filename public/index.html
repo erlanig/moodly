@@ -16,83 +16,120 @@
 <body>
 <div id="app">
 
-<!-- ═══════════════ SPLASH ═══════════════ -->
-<div id="splash" class="screen">
-  <div class="sp-title">mood<span class="sp-title-g">ly</span></div>
+<!-- ═══════════════ SPLASH SCREEN (APPLE iOS PINK) ═══════════════ -->
+<div id="splash" class="screen active" onclick="window._skipSplash?.()">
+  <div class="sp-container">
+    <div class="sp-logo-box">
+      <img src="img/jes-memoji.svg" alt="Moodly" class="sp-memoji-logo">
+    </div>
+    <div class="sp-brand">mood<span style="color:#ff2d55">ly</span></div>
+    <div class="sp-tagline">Ruang aman untuk perasaanmu</div>
+    <div class="sp-loader-row">
+      <div class="sp-loader-dot"></div>
+      <div class="sp-loader-dot"></div>
+      <div class="sp-loader-dot"></div>
+    </div>
+  </div>
 </div>
 
-<!-- ═══════════════ HOME ═══════════════ -->
+<!-- ═══════════════ HOME SCREEN (FINETIKS iOS STYLE) ═══════════════ -->
 <div id="home" class="screen">
+  <!-- Top Bar: Avatar + Greeting (Left), Moodly Logo (Right) -->
   <div class="tb">
-    <div class="tb-logo">
-      <!-- <div class="tb-dot">
-        <img src="img/moodly.png" alt="M" onerror="this.parentElement.innerHTML='🌱'">
-      </div> -->
-      <div class="tb-name">mood<b>ly</b></div>
+    <div class="tb-profile" onclick="window._showProf()">
+      <img src="img/jes-memoji.svg" alt="User" class="tb-avatar">
+      <div class="tb-user-meta">
+        <span class="tb-welcome">Selamat Datang,</span>
+        <span class="tb-name-val" id="tb-uname">Avril</span>
+      </div>
     </div>
-    <div class="tb-pill" onclick="window._showProf()">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
-        <circle cx="12" cy="8" r="4" stroke="#3a5c46" stroke-width="2"/>
-        <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#3a5c46" stroke-width="2" stroke-linecap="round"/>
-      </svg>
-      <span id="tb-uname">Profil</span>
-      <!-- <span class="sync-dot" title="Firebase sync"></span> -->
+    <div class="tb-brand" onclick="window._showProf()">
+      <div class="tb-logo-text">mood<b>ly</b></div>
     </div>
   </div>
 
-  <div class="hero">
-    <div class="hero-tag" id="hero-tag">Selamat pagi ☀️</div>
-    <div class="hero-h" id="hero-h">Hari ini<br>gimana perasaanmu?</div>
-    <div class="hero-sub">Jujur aja, ga ada yang ngejudge 🤝</div>
-    <div class="hero-foot">
-      <div class="hero-streak">🔥 <span id="streak">0</span> hari</div>
-      <button class="hero-cta" onclick="window._startCheckin()">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="12" r="10" stroke="#0a9e3f" stroke-width="2"/>
-          <path d="M12 8v8M8 12h8" stroke="#0a9e3f" stroke-width="2" stroke-linecap="round"/>
-        </svg>
+  <!-- Hero Card: Finetiks Main Card Layout -->
+  <div class="hero-card">
+    <div class="hero-top-row">
+      <div class="hero-date-tag" id="hero-tag">Pagi yang tenang</div>
+      <div class="hero-streak-badge">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ff2d55" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 11-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg>
+        <span id="streak">0</span> hari
+      </div>
+    </div>
+
+    <div class="hero-h" id="hero-h">Hari ini,<br>gimana perasaanmu?</div>
+    <div class="hero-sub">Jujur pada dirimu sendiri, tanpa ada penghakiman.</div>
+
+    <!-- 3 Quick Action Pills (Finetiks 'Record Transaction' style with vector icons) -->
+    <div class="hero-actions-label">Menu Cepat</div>
+    <div class="hero-actions-row">
+      <button class="hero-pill-btn p-pink" onclick="window._startCheckin()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ff2d55" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
         Check-in
+      </button>
+      <button class="hero-pill-btn p-purple" onclick="window._openChatDirect()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5856d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Curhat AI
+      </button>
+      <button class="hero-pill-btn p-blue" onclick="window._showScreen('safeplace')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V10l7-7 7 7v11M9 21v-6h6v6"/></svg>
+        Rohani
       </button>
     </div>
   </div>
 
-  <!-- Special Birthday Date Reminder Banner -->
+  <!-- Special Birthday Date Reminder Banner (Apple Pass / Ticket style) -->
   <div id="home-date-pill" onclick="window._openDateInvitation()">
     <div class="hdp-left">
-      <span class="hdp-icon">💌</span>
+      <div class="hdp-icon-tile">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff2d55" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </div>
       <div>
-        <div class="hdp-title">Undangan Kencan Ulang Tahun 🎂</div>
-        <div class="hdp-sub">Sabtu, 24 Okt 2026 @ Giur Bistro</div>
+        <div class="hdp-title">Undangan Kencan Ulang Tahun</div>
+        <div class="hdp-sub">Sabtu, 24 Okt 2026 · Giur Bistro, Bandung</div>
       </div>
     </div>
-    <div class="hdp-badge">Buka 💖</div>
+    <div class="hdp-badge">
+      Buka
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+    </div>
   </div>
 
   <!-- Cycle banner -->
   <div id="home-cycle-banner" class="cycle-banner none" onclick="window._showScreen('cycle')"></div>
 
+  <!-- Statistics Row: 2 Clean Rounded Cards (Finetiks style) -->
   <div class="stats">
     <div class="scard">
-      <div class="scard-ic g">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
-          <path d="M9 11l3 3L22 4" stroke="var(--p1, #ff2d55)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" stroke="var(--p1, #ff2d55)" stroke-width="2" stroke-linecap="round"/>
+      <div class="scard-ic p">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff2d55" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+          <polyline points="22 4 12 14.01 9 11.01"/>
         </svg>
       </div>
-      <div><div class="scard-val" id="s-total">0</div><div class="scard-lbl">Total Check-in</div></div>
+      <div>
+        <div class="scard-val" id="s-total">0</div>
+        <div class="scard-lbl">Total Check-in</div>
+      </div>
     </div>
     <div class="scard">
       <div class="scard-ic o">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
-          <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z" stroke="#f57c00" stroke-width="1.8" stroke-linejoin="round"/>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff9500" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/>
         </svg>
       </div>
-      <div><div class="scard-val" id="s-avg">—</div><div class="scard-lbl">Rata-rata Mood</div></div>
+      <div>
+        <div class="scard-val" id="s-avg">—</div>
+        <div class="scard-lbl">Rata-rata Mood</div>
+      </div>
     </div>
   </div>
 
   <div class="slbl">Terakhir Check-in</div>
   <div id="last-wrap"></div>
+
   <!-- Chat banner -->
   <div class="home-chat-banner" onclick="window._openChatDirect()">
     <div class="hcb-left">

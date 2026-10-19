@@ -257,8 +257,8 @@ export function renderResults(results, filter) {
     <div class="nb-header">
       <div class="nb-city">
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
-          <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z" stroke="#1db954" stroke-width="2"/>
-          <circle cx="12" cy="10" r="3" stroke="#1db954" stroke-width="2"/>
+          <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z" stroke="#ff2d55" stroke-width="2"/>
+          <circle cx="12" cy="10" r="3" stroke="#ff2d55" stroke-width="2"/>
         </svg>
         ${nb.cityName}
       </div>
@@ -273,7 +273,7 @@ export function renderResults(results, filter) {
     <div class="nb-filters">
       ${FILTERS.map(f => `
         <button class="nb-ftab ${filter===f.id?'on':''}" onclick="window._filterNearby('${f.id}')">
-          ${f.emoji} ${f.label}
+          ${f.label}
         </button>`).join('')}
     </div>
     <div class="nb-count-row"><span class="nb-count">${list.length} layanan ditemukan</span></div>
@@ -283,11 +283,6 @@ export function renderResults(results, filter) {
 }
 
 function cardHTML(r) {
-  const typeEmoji = {
-    'Rumah Sakit':'🏥','Rumah Sakit Jiwa':'🏨',
-    'Puskesmas':'🏢','Klinik Psikologi':'🧠','Universitas':'🎓'
-  };
-  const emoji    = typeEmoji[r.jenis_layanan] || '🏥';
   const safe     = (r.nama_layanan||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');
   const distLabel= r._cityDist != null ? `· <strong>~${r._cityDist} km</strong>` : '';
   const biaya    = !r.biaya_mulai ? 'Gratis' : `Mulai Rp ${Number(r.biaya_mulai).toLocaleString('id')}`;
@@ -296,11 +291,13 @@ function cardHTML(r) {
 
   return `<div class="nb-card">
     <div class="nb-card-top">
-      <div class="nb-card-emoji">${emoji}</div>
+      <div class="nb-card-emoji" style="display:flex;align-items:center;justify-content:center;background:#fff0f3;border-radius:10px;width:34px;height:34px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ff2d55" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      </div>
       <div class="nb-card-info">
         <div class="nb-card-name">${r.nama_layanan||'—'}</div>
         <div class="nb-card-area">
-          <svg width="9" height="9" viewBox="0 0 24 24" fill="none"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z" stroke="#1db954" stroke-width="2"/><circle cx="12" cy="10" r="3" stroke="#1db954" stroke-width="2"/></svg>
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="none"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z" stroke="#ff2d55" stroke-width="2"/><circle cx="12" cy="10" r="3" stroke="#ff2d55" stroke-width="2"/></svg>
           ${r.kabupaten_kota||''} ${distLabel}
         </div>
         <div class="nb-rating-row">
