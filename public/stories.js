@@ -99,11 +99,11 @@ function renderStoryPreview() {
 
   // Motivational quotes by mood score
   const quotes = {
-    5: ['Energi kamu tuh menular banget 🌟', 'Hari ini milik kamu sepenuhnya ✨', 'Kebahagiaan kamu valid & berharga 💛'],
-    4: ['Oke itu udah lebih dari cukup 🌱', 'Pelan-pelan, kamu baik-baik aja 💚', 'Kamu handle segalanya dengan bagus!'],
-    3: ['Hari datar pun tetap berharga 🌤️', 'Kamu masih di sini, itu keren banget', 'Proses itu nggak selalu terasa dramatis'],
-    2: ['Boleh ngerasa berat, kamu manusia', 'Kesedihan itu tanda hati yang masih hidup 💙', 'Kamu nggak sendirian melewati ini'],
-    1: ['Berani check-in itu udah kuat banget 🫂', 'Satu hari pada satu waktu aja', 'Rest is productive. Istirahat dulu ya.'],
+    5: ['Energi positifmu terasa begitu nyata.', 'Hari ini milikmu seutuhnya.', 'Kebahagiaanmu selalu valid & berharga.'],
+    4: ['Merasa cukup oke itu sudah sangat baik.', 'Pelan-pelan saja, semua akan baik-baik saja.', 'Kamu mampu melewati harimu dengan baik.'],
+    3: ['Hari yang tenang tetap sangat berharga.', 'Kamu hadir seutuhnya hari ini, itu luar biasa.', 'Proses bertumbuh tidak selalu harus terburu-buru.'],
+    2: ['Boleh merasa lelah, kamu manusia seutuhnya.', 'Perasaanmu valid. Berikan dirimu waktu.', 'Kamu tidak sendirian melewati proses ini.'],
+    1: ['Menyadari perasaan adalah langkah pertama pemulihan.', 'Satu langkah kecil pada satu waktu.', 'Istirahat adalah bagian dari pemulihan dirimu.'],
   };
   const moodScore = mood?.s || 3;
   const quoteList = quotes[moodScore] || quotes[3];
@@ -117,14 +117,14 @@ function renderStoryPreview() {
 
       <!-- Header -->
       <div class="story-header" style="color:${theme.text}88">
-        <span class="story-app">🌱 moodly</span>
+        <span class="story-app">moodly</span>
         <span class="story-time">${timeStr} · ${dateStr}</span>
       </div>
 
       <!-- Main mood -->
       <div class="story-center">
-        <div class="story-em-wrap" style="background:${theme.accent}22;border:2px solid ${theme.accent}44">
-          <span class="story-em">${mood?.e || '😐'}</span>
+        <div class="story-em-wrap" style="background:${theme.accent}15;border:1.5px solid ${theme.accent}30">
+          ${mood?.img ? `<img src="${mood.img}" class="story-3d-img" style="width:68px;height:68px;object-fit:contain" alt="">` : `<span class="story-em">${mood?.e || '•'}</span>`}
         </div>
         <div class="story-mood-name" style="color:${theme.text}">${mood?.l || 'Biasa'}</div>
         <div class="story-quote" style="color:${theme.text}cc">${quote}</div>
@@ -189,7 +189,7 @@ export async function downloadStory() {
   if (typeof html2canvas === 'undefined') {
     // Fallback: show instructions
     window._moodlyAlert({
-      icon: '📤',
+      iconSvg: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ff2d55" stroke-width="2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>',
       title: 'Screenshot Manual',
       msg: 'Tekan tombol power+volume bawah (Android) atau power+home (iOS) untuk screenshot, lalu share ke Stories!'
     });

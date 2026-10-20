@@ -40,7 +40,7 @@ function renderWeeklyBars(entries) {
 
     const w = document.createElement('div'); w.className = 'bar-col';
     w.innerHTML = `
-      ${last ? `<div class="bar-em">${last.e}</div>` : '<div class="bar-em" style="opacity:0">·</div>'}
+      ${last ? (last.img ? `<img src="${last.img}" style="width:18px;height:18px;object-fit:contain;margin-bottom:3px" alt="">` : `<div class="bar-em">${last.e}</div>`) : '<div class="bar-em" style="opacity:0">·</div>'}
       <div class="bar" style="height:${h}px;background:${col};opacity:${de.length?1:.3}"></div>
       <div class="bar-d">${days[d.getDay()]}</div>`;
     bw.appendChild(w);
@@ -89,7 +89,7 @@ function renderCalendar(entries, periods) {
     if (dt === tod) cls += ' today';
     html += `<div class="${cls}">
       <span>${dt}</span>
-      ${isMens ? '<span class="cal-em">🩸</span>' : mood ? `<span class="cal-em">${mood.e}</span>` : ''}
+      ${isMens ? '<span class="cal-em" style="display:flex;align-items:center;justify-content:center"><svg width="10" height="10" viewBox="0 0 24 24" fill="var(--mens)"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg></span>' : mood ? (mood.img ? `<img src="${mood.img}" style="width:13px;height:13px;object-fit:contain" alt="">` : `<span class="cal-em">${mood.e}</span>`) : ''}
     </div>`;
   }
   cg.innerHTML = html;
@@ -106,11 +106,11 @@ function renderWeeklyAnalysis(entries) {
 
   if (week.length >= 3) {
     const avg = week.reduce((s,e) => s + (e.mood?.s||3), 0) / week.length;
-    if (avg >= 4)      el.textContent = '🌟 Seminggu ini mood kamu positif banget! Pertahankan energi ini ya.';
-    else if (avg >= 3) el.textContent = '⚖️ Mood kamu cukup stabil. Ada ups and downs, tapi kamu handle dengan baik.';
-    else               el.textContent = '💙 Minggu ini terasa berat ya. Ingat — minta bantuan itu kuat, bukan lemah.';
+    if (avg >= 4)      el.textContent = 'Seminggu ini suasana hatimu sangat positif! Pertahankan energi baik ini ya.';
+    else if (avg >= 3) el.textContent = 'Suasana hatimu cukup stabil. Ada pasang surut, namun kamu menghadapinya dengan baik.';
+    else               el.textContent = 'Minggu ini terasa cukup menguras ya. Luangkan waktu untuk istirahat dan bernapas sejenak.';
   } else if (week.length) {
-    el.textContent = `📈 Kamu udah ${week.length}× check-in! Terusin biar insight makin akurat.`;
+    el.textContent = `Kamu sudah ${week.length}× check-in. Terus lakukan untuk melihat pola suasana hatimu.`;
   } else {
     el.textContent = 'Belum cukup data. Check-in dulu yuk!';
   }
@@ -148,7 +148,7 @@ function renderJournal(entries) {
         const d = new Date(e.ts);
         const t = d.toLocaleDateString('id-ID', { weekday:'short', day:'numeric', month:'short' });
         return `<div class="jrow">
-          <span style="font-size:21px">${e.mood?.e||'😐'}</span>
+          <div style="width:36px;height:36px;border-radius:10px;background:#fff5f7;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(255,45,85,0.08)">${e.mood?.img ? `<img src="${e.mood.img}" style="width:24px;height:24px;object-fit:contain" alt="">` : `<span style="font-size:16px">${e.mood?.e||'•'}</span>`}</div>
           <div>
             <div style="font-size:12px;font-weight:700;color:var(--text)">${e.mood?.l||'—'} · ${e.intensity||'—'}</div>
             <div style="font-size:11px;color:var(--muted)">${t}${e.causes?.length ? ' · ' + e.causes.slice(0,2).join(', ') : ''}</div>

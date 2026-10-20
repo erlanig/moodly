@@ -213,7 +213,7 @@ function updateHome() {
     </div>`;
   } else {
     el.innerHTML = `<div style="text-align:center;padding:18px;color:var(--muted);font-size:13px">
-      Belum ada check-in 👋<br><small>Tap tombol Check-in di atas</small></div>`;
+      Belum ada check-in hari ini<br><small style="margin-top:4px;display:inline-block">Tap tombol Check-in di atas untuk mulai</small></div>`;
   }
 
   renderHomeCycleBanner();
@@ -278,7 +278,7 @@ async function updateName() {
 
 async function clearUserData() {
   window._moodlyConfirm({
-    icon: '❓',
+    iconSvg: '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#ff3b30" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
     title: 'Hapus Semua Data?',
     msg: 'Semua check-in, siklus, dan data akan terhapus permanen.',
     confirmTxt: 'Ya, Hapus Semua',
@@ -431,7 +431,7 @@ async function verifyPin() {
       setTimeout(() => row.classList.remove('shake'), 450);
     }
     const feedback = document.getElementById('pc-feedback');
-    if (feedback) feedback.textContent = 'Passcode salah. Coba lagi ya ✨';
+    if (feedback) feedback.textContent = 'Passcode salah. Silakan coba lagi.';
     setTimeout(() => {
       enteredPin = '';
       updatePinDots();
@@ -473,7 +473,7 @@ async function acceptDateInvite() {
   await saveSpecialDateRsvp('accepted', 'Siap datang & bawa kebahagiaan');
   if (window._moodlyAlert) {
     window._moodlyAlert({
-      icon: '💌',
+      iconSvg: '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#ff2d55" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>',
       title: 'Konfirmasi Diterima',
       msg: 'Sampai jumpa di Giur Bistro, Sabtu 24 Oktober 2026 pukul 15.00 WIB. Jangan lupa kenakan pakaian cerah dengan nuansa biru muda ya.'
     });

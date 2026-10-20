@@ -209,7 +209,7 @@
 <!-- ═══════════════ AUTH GATE ═══════════════ -->
 <div id="admin-auth-gate">
   <div class="auth-card">
-    <div class="auth-logo">🔐</div>
+    <div class="auth-logo" style="display:flex;align-items:center;justify-content:center;margin-bottom:12px"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ff2d55" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
     <div class="auth-title">Moodly Admin</div>
     <div class="auth-sub">Masukkan password administrator untuk akses</div>
     <input type="password" id="admin-pw-in" class="auth-input" placeholder="Password admin..." onkeydown="if(event.key==='Enter')loginAdmin()">
@@ -221,7 +221,7 @@
 <!-- ═══════════════ HEADER ═══════════════ -->
 <header class="admin-hd">
   <div class="admin-hd-left">
-    <div class="admin-logo">🌸</div>
+    <div class="admin-logo" style="display:flex;align-items:center;justify-content:center"><img src="img/3d/3d-heart.png" style="width:28px;height:28px;object-fit:contain" alt=""></div>
     <div>
       <div class="admin-title">moodly <span style="font-weight:400;font-size:16px;opacity:0.8">admin</span></div>
       <div class="admin-sub">Sistem Manajemen & Kontrol Passcode</div>
@@ -229,12 +229,12 @@
   </div>
 
   <nav class="admin-nav">
-    <button class="admin-nav-btn active" onclick="switchTab('users', this)">👥 Pengguna</button>
-    <button class="admin-nav-btn" onclick="switchTab('passcode', this)">🔐 Passcode 6-Digit</button>
-    <button class="admin-nav-btn" onclick="switchTab('ai', this)">🤖 AI & Chatbot</button>
-    <button class="admin-nav-btn" onclick="switchTab('rsvp', this)">💌 Respon Kencan (RSVP)</button>
-    <button class="admin-nav-btn" onclick="switchTab('analytics', this)">📊 Analitik</button>
-    <button class="admin-nav-btn" onclick="switchTab('cache', this)">📰 Cache Artikel</button>
+    <button class="admin-nav-btn active" onclick="switchTab('users', this)">Pengguna</button>
+    <button class="admin-nav-btn" onclick="switchTab('passcode', this)">Passcode 6-Digit</button>
+    <button class="admin-nav-btn" onclick="switchTab('ai', this)">AI & Chatbot</button>
+    <button class="admin-nav-btn" onclick="switchTab('rsvp', this)">Respon Kencan</button>
+    <button class="admin-nav-btn" onclick="switchTab('analytics', this)">Analitik</button>
+    <button class="admin-nav-btn" onclick="switchTab('cache', this)">Cache Artikel</button>
   </nav>
 </header>
 
@@ -244,7 +244,7 @@
   <!-- SIDEBAR (FOR USERS) -->
   <aside class="sidebar" id="admin-sidebar">
     <div class="sidebar-top">
-      <input type="text" class="sidebar-search" id="user-search" placeholder="🔍 Cari nama pengguna..." oninput="filterUsers(this.value)">
+      <input type="text" class="sidebar-search" id="user-search" placeholder="Cari nama pengguna..." oninput="filterUsers(this.value)">
     </div>
     <div class="sidebar-list" id="user-list">
       <div style="color:rgba(255,255,255,.4);font-size:12px;padding:14px;text-align:center">Memuat daftar pengguna...</div>
@@ -268,7 +268,7 @@
     <!-- 2. TAB: PASSCODE 6-DIGIT SETTING -->
     <div id="tab-passcode" class="admin-view">
       <div class="passcode-setting-box">
-        <div class="card-title">🔐 Pengaturan Passcode Pengguna</div>
+        <div class="card-title">Pengaturan Passcode Pengguna</div>
         <div class="card-desc">
           Atur PIN 6 digit yang wajib dimasukkan ketika pengguna membuka aplikasi Moodly.
         </div>
@@ -287,11 +287,11 @@
         </div>
 
         <button class="admin-btn" onclick="saveNewPasscode()">
-          💾 Simpan Passcode Baru
+          Simpan Passcode Baru
         </button>
 
         <div id="pc-status-msg" style="margin-top:14px;font-size:12px;font-weight:700;color:var(--p1);display:none">
-          ✅ Passcode berhasil disimpan!
+          Passcode berhasil disimpan.
         </div>
       </div>
     </div>
@@ -299,7 +299,7 @@
     <!-- 2.5. TAB: AI & CHATBOT SETTING -->
     <div id="tab-ai" class="admin-view">
       <div class="card-box" style="max-width:650px">
-        <div class="card-title">🤖 Pengaturan AI Chatbot (Jes)</div>
+        <div class="card-title">Pengaturan AI Chatbot (Jes)</div>
         <div class="card-desc">
           Konfigurasikan API Key AI agar Jes bisa merespons curhat secara interaktif dan real-time menggunakan model tercanggih (Groq Llama 3.3 / Google Gemini 1.5/2.0 Flash).
         </div>
@@ -313,8 +313,8 @@
         <div style="font-size:11px;color:var(--muted);margin:-8px 0 16px">Dapatkan gratis di <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--p1)">aistudio.google.com</a></div>
 
         <div style="display:flex;gap:10px">
-          <button class="admin-btn" onclick="saveAIKeys()">💾 Simpan Konfigurasi AI</button>
-          <button class="admin-btn secondary" onclick="testAIConnection()">🧪 Uji Koneksi AI</button>
+          <button class="admin-btn" onclick="saveAIKeys()">Simpan Konfigurasi AI</button>
+          <button class="admin-btn secondary" onclick="testAIConnection()">Uji Koneksi AI</button>
         </div>
 
         <div id="ai-status-msg" style="margin-top:14px;font-size:12px;font-weight:700;display:none"></div>
@@ -324,7 +324,7 @@
     <!-- 3. TAB: RSVP BIRTHDAY DATE GIMMICK -->
     <div id="tab-rsvp" class="admin-view">
       <div class="card-box" style="max-width:700px">
-        <div class="card-title">💌 Respon Undangan Kencan Ulang Tahun</div>
+        <div class="card-title">Respon Undangan Kencan Ulang Tahun</div>
         <div class="card-desc">
           Melihat status konfirmasi kencan di <b>Giur Bistro (Sabtu, 24 Oktober 2026 15:00)</b> dari pengguna.
         </div>
@@ -340,8 +340,8 @@
         </div>
 
         <div style="display:flex;gap:10px">
-          <button class="admin-btn secondary" onclick="loadRsvpData()">🔄 Refresh Respon</button>
-          <a href="/" target="_blank" class="admin-btn">📱 Buka Tampilan Aplikasi Moodly ↗</a>
+          <button class="admin-btn secondary" onclick="loadRsvpData()">Refresh Respon</button>
+          <a href="/" target="_blank" class="admin-btn">Buka Aplikasi Moodly ↗</a>
         </div>
       </div>
     </div>
@@ -368,7 +368,7 @@
       </div>
 
       <div class="card-box">
-        <div class="card-title">📊 Distribusi Suasana Hati (Mood) Pengguna</div>
+        <div class="card-title">Distribusi Suasana Hati (Mood) Pengguna</div>
         <div id="analytics-mood-bars" style="display:flex;flex-direction:column;gap:10px;">
           <!-- Populated by JS -->
         </div>
@@ -378,15 +378,15 @@
     <!-- 5. TAB: CACHE MANAGER -->
     <div id="tab-cache" class="admin-view">
       <div class="card-box" style="max-width:600px">
-        <div class="card-title">📰 Manajemen Cache Berita & Artikel</div>
+        <div class="card-title">Manajemen Cache Berita & Artikel</div>
         <div class="card-desc">
           Artikel harian disimpan dengan cache key harian. Klik tombol di bawah ini jika ingin memaksa refresh artikel untuk semua perangkat.
         </div>
         <button class="admin-btn" onclick="invalidateNewsCache()">
-          🔄 Hapus Cache & Paksa Buat Artikel Baru
+          Hapus Cache & Perbarui Artikel
         </button>
         <div id="cache-status-msg" style="margin-top:14px;font-size:12px;font-weight:700;color:#0a9e3f;display:none">
-          ✅ Cache berhasil dibersihkan!
+          Cache berhasil dibersihkan.
         </div>
       </div>
     </div>
@@ -499,7 +499,7 @@ window.saveNewPasscode = async () => {
 
   // 3. Always show positive feedback to admin
   const msg = document.getElementById('pc-status-msg');
-  msg.textContent = `✅ Passcode berhasil diubah menjadi: ${pin}`;
+  msg.textContent = `Passcode berhasil diubah menjadi: ${pin}`;
   msg.style.display = 'block';
   setTimeout(() => { msg.style.display = 'none'; }, 3500);
 };
@@ -540,7 +540,7 @@ window.saveAIKeys = async () => {
   }
 
   const msg = document.getElementById('ai-status-msg');
-  msg.textContent = '✅ Konfigurasi API Key AI berhasil disimpan!';
+  msg.textContent = 'Konfigurasi API Key AI berhasil disimpan.';
   msg.style.color = 'var(--p1)';
   msg.style.display = 'block';
   setTimeout(() => { msg.style.display = 'none'; }, 3500);
@@ -566,7 +566,7 @@ window.testAIConnection = async () => {
         })
       });
       if (res.ok) {
-        msg.textContent = '✅ Koneksi Groq AI Berhasil & Aktif!';
+        msg.textContent = 'Koneksi Groq AI Berhasil & Aktif.';
         msg.style.color = '#10b981';
         return;
       }
@@ -578,12 +578,12 @@ window.testAIConnection = async () => {
         body: JSON.stringify({ contents: [{ parts: [{ text: 'Halo test' }] }] })
       });
       if (res.ok) {
-        msg.textContent = '✅ Koneksi Gemini AI Berhasil & Aktif!';
+        msg.textContent = 'Koneksi Gemini AI Berhasil & Aktif.';
         msg.style.color = '#10b981';
         return;
       }
     }
-    msg.textContent = '⚠️ API Key belum valid atau kuota habis. Jes akan menggunakan Offline Empathy Engine.';
+    msg.textContent = 'API Key belum valid atau kuota habis. Jes akan menggunakan Offline Empathy Engine.';
     msg.style.color = '#ef4444';
   } catch (e) {
     msg.textContent = `❌ Gagal menguji koneksi: ${e.message}`;
@@ -603,7 +603,7 @@ window.loadRsvpData = async () => {
       const devIds = Object.keys(responses);
       if (devIds.length > 0) {
         const lastResp = responses[devIds[devIds.length - 1]];
-        badge.innerHTML = '🎉 <b>Dikonfirmasi: Aku Pasti Datang! 💖🥰</b>';
+        badge.innerHTML = '<b>Dikonfirmasi: Aku Pasti Datang!</b>';
         badge.style.color = 'var(--p1)';
         meta.innerHTML = `Device: <code>${lastResp.deviceId}</code><br>Catatan: "${lastResp.note || 'Siap datang'}"<br>Waktu: ${new Date(lastResp.timestamp).toLocaleString('id-ID')}`;
         return;
@@ -613,7 +613,7 @@ window.loadRsvpData = async () => {
 
   const localRsvp = JSON.parse(localStorage.getItem('moodly_date_rsvp') || 'null');
   if (localRsvp) {
-    badge.innerHTML = '🎉 <b>Dikonfirmasi: Aku Pasti Datang! 💖🥰</b>';
+    badge.innerHTML = '<b>Dikonfirmasi: Aku Pasti Datang!</b>';
     badge.style.color = 'var(--p1)';
     meta.innerHTML = `Device: <code>${localRsvp.deviceId}</code><br>Catatan: "${localRsvp.note}"<br>Waktu: ${new Date(localRsvp.timestamp).toLocaleString('id-ID')}`;
   } else {
@@ -750,11 +750,11 @@ function calculateAnalytics() {
   const bars = document.getElementById('analytics-mood-bars');
   if (bars) {
     bars.innerHTML = `
-      <div style="font-size:12px;font-weight:700">😊 Senang / Bahagia (55%)</div>
+      <div style="font-size:12px;font-weight:700">Senang / Bahagia (55%)</div>
       <div style="background:#fedbe4;height:10px;border-radius:100px;overflow:hidden"><div style="background:var(--p1);width:55%;height:100%"></div></div>
-      <div style="font-size:12px;font-weight:700">🌱 Tenang / Damai (25%)</div>
+      <div style="font-size:12px;font-weight:700">Tenang / Damai (25%)</div>
       <div style="background:#fedbe4;height:10px;border-radius:100px;overflow:hidden"><div style="background:#f59e0b;width:25%;height:100%"></div></div>
-      <div style="font-size:12px;font-weight:700">🌧️ Cemas / Lelah (20%)</div>
+      <div style="font-size:12px;font-weight:700">Cemas / Lelah (20%)</div>
       <div style="background:#fedbe4;height:10px;border-radius:100px;overflow:hidden"><div style="background:#3b82f6;width:20%;height:100%"></div></div>
     `;
   }

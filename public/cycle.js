@@ -23,20 +23,28 @@ import {
 ══════════════════════════════ */
 export const PHASES = [
   { id:'mens', name:'Menstruasi', emoji:'🩸', color:'#ff6b8a',
-    tip:'Istirahat lebih banyak, minum air hangat, kompres perut jika kram. Mood mungkin lebih sensitif — itu wajar. Self-compassion dulu ya 💗' },
+    tip:'Istirahat lebih banyak, minum air hangat, dan kompres perut jika kram. Rawat dirimu dengan penuh kasih hari ini.' },
   { id:'foll', name:'Folikular',  emoji:'🌱', color:'#f59e0b',
-    tip:'Energi mulai naik! Waktu terbaik untuk memulai proyek baru atau berolahraga lebih intens. Kamu di momentum terbaikmu ✨' },
+    tip:'Energi mulai meningkat. Waktu yang tepat untuk memulai rutinitas baru atau berolahraga ringan.' },
   { id:'ovul', name:'Ovulasi',    emoji:'⭐', color:'#8b5cf6',
-    tip:'Puncak energi dan kepercayaan diri! Waktu ideal untuk presentasi, bersosialisasi, atau aktivitas high-intensity 🌟' },
+    tip:'Puncak energi dan suasana hati cerah. Manfaatkan momen ini untuk berinteraksi dan beraktivitas optimal.' },
   { id:'lute', name:'Luteal',     emoji:'🌙', color:'#3b82f6',
-    tip:'Energi mulai turun, PMS mungkin muncul. Prioritaskan self-care, kurangi kafein, dan jangan terlalu keras pada dirimu 🫂' },
+    tip:'Energi berangsur turun. Prioritaskan relaksasi, kurangi kafein, dan berikan tubuhmu waktu jeda yang cukup.' },
 ];
 
 export const SYMPTOMS = [
-  {e:'😣',l:'Kram'},         {e:'🤕',l:'Sakit kepala'}, {e:'😪',l:'Lelah'},
-  {e:'🤢',l:'Mual'},         {e:'😤',l:'Mood swing'},   {e:'🫃',l:'Kembung'},
-  {e:'😴',l:'Ngantuk'},      {e:'🍫',l:'Ngidam'},       {e:'😢',l:'Emosional'},
-  {e:'🔥',l:'Nyeri punggung'},{e:'😬',l:'Jerawat'},     {e:'💤',l:'Insomnia'},
+  {svg:'<path d="M12 2a10 10 0 100 20 10 10 0 000-20zM8 12h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>', l:'Kram'},
+  {svg:'<circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>', l:'Sakit kepala'},
+  {svg:'<path d="M18.36 5.64a9 9 0 11-12.73 0M12 2v10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>', l:'Lelah'},
+  {svg:'<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M8 15s1.5-2 4-2 4 2 4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>', l:'Mual'},
+  {svg:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>', l:'Mood swing'},
+  {svg:'<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2"/>', l:'Kembung'},
+  {svg:'<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>', l:'Ngantuk'},
+  {svg:'<path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" stroke="currentColor" stroke-width="2"/>', l:'Ngidam'},
+  {svg:'<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M9 9h.01M15 9h.01M16 16s-1.5-2-4-2-4 2-4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>', l:'Emosional'},
+  {svg:'<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>', l:'Nyeri punggung'},
+  {svg:'<circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="2" fill="currentColor"/>', l:'Jerawat'},
+  {svg:'<path d="M2 12h20M7 8l-4 4 4 4M17 8l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>', l:'Insomnia'},
 ];
 
 export const FLOWS = [
@@ -361,7 +369,7 @@ function renderPhaseCard(info) {
     const todayLog = getTodayLog(active.id);
     const flowTxt = todayLog?.flow ? ` · ${todayLog.flow}` : '';
     wrap.innerHTML = `<div class="phase-card mens">
-      <div class="phase-ring">🩸</div>
+      <div class="phase-ring" style="display:flex;align-items:center;justify-content:center"><svg width="36" height="36" viewBox="0 0 24 24" fill="var(--mens)"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg></div>
       <div class="phase-name">Sedang Menstruasi</div>
       <div class="phase-title">Hari ke-${dayNum}</div>
       <div class="phase-day">Mulai ${fmtDate(active.startDate)}${flowTxt}</div>
@@ -370,7 +378,7 @@ function renderPhaseCard(info) {
   }
   if (!info) {
     wrap.innerHTML = `<div class="phase-card none">
-      <div class="phase-ring" style="background:var(--gl);font-size:38px">🌸</div>
+      <div class="phase-ring" style="display:flex;align-items:center;justify-content:center;background:var(--gl)"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="var(--mens)" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
       <div class="phase-name" style="color:var(--muted)">Belum ada data siklus</div>
       <div class="phase-title" style="color:var(--text);font-size:18px">Tap tombol di bawah untuk mulai</div>
       <div class="phase-day" style="color:var(--muted)">Tracking dimulai dari hari pertama mensmu</div>
@@ -402,7 +410,7 @@ function renderMensActionButton() {
 
     const overdueAlert = dayNum >= 7 ? `
       <div class="bf-overdue-box">
-        <div class="bf-overdue-title">⚠️ Periode sudah berjalan ${dayNum} hari</div>
+        <div class="bf-overdue-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Periode sudah berjalan ${dayNum} hari</div>
         <div class="bf-overdue-desc">Sudah selesai kemarin atau beberapa hari lalu? Langsung selesaikan di sini:</div>
         <div class="bf-quick-btns">
           <button type="button" class="bf-qbtn" onclick="window._stopPeriodYesterday()">Selesai Kemarin</button>
@@ -427,7 +435,7 @@ function renderMensActionButton() {
       ${overdueAlert}
       <div class="mens-active-row">
         <div class="mar-info">
-          <div class="mar-badge">🩸 Menstruasi Hari ke-${dayNum}</div>
+          <div class="mar-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:4px"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg>Menstruasi Hari ke-${dayNum}</div>
           ${needsLog
             ? '<div class="mar-sub" style="color:var(--mens)">Belum isi log hari ini ↓</div>'
             : `<div class="mar-sub">${todayLog.flow || 'Log tercatat'} ✓</div>`}
@@ -438,11 +446,11 @@ function renderMensActionButton() {
       </div>
       <div class="bf-actions-row">
         <button class="bf-sub-btn" onclick="window._toggleEndPicker()">
-          ${endPickerOpen ? '✕ Tutup Picker' : '📅 Lupa Selesai? Pilih Tanggal Selesai'}
+          ${endPickerOpen ? 'Tutup Pilihan Tanggal' : 'Pilih Tanggal Selesai Manual'}
         </button>
         ${missingDates.length ? `
           <button class="bf-sub-btn missing-btn" onclick="window._openDailyLogDate('${active.id}', '${missingDates[0]}')">
-            📝 Isi Hari Terlewat (${missingDates.length} hari)
+            Isi Hari Terlewat (${missingDates.length} hari)
           </button>
         ` : ''}
       </div>
@@ -478,10 +486,10 @@ function renderMensActionButton() {
     el.innerHTML = `
       <div class="mens-action-group">
         <button class="mens-start-btn" onclick="window._promptStartPeriod()">
-          🩸 Mulai Menstruasi
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:6px"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg>Mulai Menstruasi
         </button>
         <button class="mens-backfill-btn" onclick="window._toggleBackfill()">
-          📅 Catat Mundur / Kelewat
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:6px"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Catat Mundur / Kelewat
         </button>
       </div>
       ${startPicker}
@@ -515,7 +523,7 @@ function renderDailyLogBanner() {
       .map(s => `<span class="db-chip">${s}</span>`).join('');
     el.innerHTML = `
       <div class="daily-banner daily-banner-done" onclick="window._openDailyLog()">
-        <div class="db-icon">🩸</div>
+        <div class="db-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="var(--mens)"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg></div>
         <div class="db-body">
           <div class="db-day">Hari ke-${dayNum} · Log Harian</div>
           <div class="db-status">${dotsHtml} <b>${todayLog.flow || ''}</b></div>
@@ -527,7 +535,7 @@ function renderDailyLogBanner() {
   } else {
     el.innerHTML = `
       <div class="daily-banner daily-banner-prompt" onclick="window._openDailyLog()">
-        <div class="db-icon">🩸</div>
+        <div class="db-icon" style="display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="var(--mens)"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg></div>
         <div class="db-body">
           <div class="db-day">Hari ke-${dayNum} Menstruasi</div>
           <div class="db-sub">Seberapa deras hari ini? Ada gejala apa?</div>
@@ -631,15 +639,15 @@ function renderPeriodHistory() {
     return `<div class="ph-row">
       <div class="ph-num">${sorted.length - i}</div>
       <div class="ph-info">
-        <div class="ph-dates">🩸 ${start} – ${end}</div>
+        <div class="ph-dates"><svg width="12" height="12" viewBox="0 0 24 24" fill="var(--mens)" style="vertical-align:middle;margin-right:4px"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg>${start} – ${end}</div>
         <div class="ph-dur">${dur ? dur + ' hari' : '? hari'}${p.endDate || !isActive ? '' : ' (belum selesai)'}</div>
         ${missingTxt}
         ${dayHtml}
         ${endFix}
       </div>
       <div class="ph-acts">
-        <div class="ph-act" onclick="window._editPeriodDay('${p.id}')" title="Isi / edit log harian">📝</div>
-        <div class="ph-act" onclick="window._deletePeriod('${p.id}')" title="Hapus">🗑</div>
+        <div class="ph-act" onclick="window._editPeriodDay('${p.id}')" title="Isi / edit log harian"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
+        <div class="ph-act" onclick="window._deletePeriod('${p.id}')" title="Hapus"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></div>
       </div>
     </div>`;
   }).join('');
@@ -681,7 +689,7 @@ export function renderMoodPhaseCorr(entries, info) {
 function renderCycleTip(info) {
   const el = document.getElementById('cycle-tip');
   if (!el) return;
-  if (!info) { el.textContent = 'Catat siklus pertamamu untuk mendapatkan tips yang personal 🌸'; return; }
+  if (!info) { el.textContent = 'Catat siklus pertamamu untuk mendapatkan tips yang personal.'; return; }
   const phase = PHASES.find(p => p.id === info.phase);
   el.textContent = phase?.tip || '';
 }
@@ -699,7 +707,7 @@ export async function renderAIPrediction(forceRefresh = false) {
   if (!completed.length && !active) {
     el.innerHTML = `
       <div class="ai-pred-empty">
-        <div class="ape-ico">🔮</div>
+        <div class="ape-ico"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--mens)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
         <div class="ape-title">Prediksi Siklus</div>
         <div class="ape-sub">Catat setidaknya 1 periode yang selesai<br>untuk melihat perkiraan siklus berikutnya</div>
       </div>`;
@@ -749,7 +757,7 @@ function _renderAIPredData(el, d) {
       </div>
       <div class="apc-rows">
         <div class="apc-row apc-row-mens">
-          <div class="apc-row-icon">🩸</div>
+          <div class="apc-row-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="var(--mens)"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg></div>
           <div class="apc-row-body">
             <div class="apc-row-label">Menstruasi berikutnya</div>
             <div class="apc-row-val">${d.prediksi || '—'}</div>
@@ -757,7 +765,7 @@ function _renderAIPredData(el, d) {
           </div>
         </div>
         ${d.fertile ? `<div class="apc-row apc-row-fert">
-          <div class="apc-row-icon">🌸</div>
+          <div class="apc-row-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg></div>
           <div class="apc-row-body">
             <div class="apc-row-label">Fertile window perkiraan</div>
             <div class="apc-row-val">${d.fertile}</div>
@@ -791,14 +799,14 @@ function _renderAIPredFallback(el) {
     <div class="ai-pred-card">
       <div class="apc-header">
         <div class="apc-title-row">
-          <span class="apc-badge">📅 Prediksi</span>
+          <span class="apc-badge">Prediksi Siklus</span>
           <button class="apc-refresh" onclick="window._refreshAIPred()">↻ Hitung Ulang</button>
         </div>
-        <div class="apc-motivasi">Kamu luar biasa sudah tracking siklus ini 🌸</div>
+        <div class="apc-motivasi">Kamu luar biasa sudah konsisten tracking siklus ini.</div>
       </div>
       <div class="apc-rows">
         <div class="apc-row apc-row-mens">
-          <div class="apc-row-icon">🩸</div>
+          <div class="apc-row-icon" style="display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="var(--mens)"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg></div>
           <div class="apc-row-body">
             <div class="apc-row-label">Menstruasi berikutnya</div>
             <div class="apc-row-val">${fmt(nextStart)} – ${fmt(nextEnd)}</div>
@@ -806,7 +814,7 @@ function _renderAIPredFallback(el) {
           </div>
         </div>
         <div class="apc-row apc-row-fert">
-          <div class="apc-row-icon">🌸</div>
+          <div class="apc-row-icon" style="display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg></div>
           <div class="apc-row-body">
             <div class="apc-row-label">Fertile window perkiraan</div>
             <div class="apc-row-val">${fmt(fertStart)} – ${fmt(addDays(ovul, 1))}</div>
@@ -899,7 +907,7 @@ export async function renderFoodRecommendation(forceRefresh = false) {
     <div class="food-rec-inner">
       <div class="ldwrap" style="padding:20px 0">
         <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-        <div class="ld-txt">AI menyiapkan rekomendasi makanan & minuman…</div>
+        <div class="ld-txt">Menyiapkan rekomendasi nutrisi untuk fase ini…</div>
       </div>
     </div>`;
 
@@ -923,16 +931,16 @@ function _renderFoodData(el, cache, phase) {
   el.innerHTML = `
     <div class="food-rec-inner">
       <div class="card-ttl" style="margin-bottom:10px">
-        ${phaseEmoji[phase]} Nutrisi untuk Fase ${phaseNames[phase] || ''}
+        <span style="display:inline-flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ff2d55" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span>Nutrisi Fase ${phaseNames[phase] || ''}</span></span>
         <button onclick="window._refreshFood()" class="food-refresh-btn">↻ Refresh</button>
       </div>
       ${cache.motivasi ? `<div class="food-motivasi">"${cache.motivasi}"</div>` : ''}
 
-      <div class="food-section-lbl">🍽️ Makanan</div>
+      <div class="food-section-lbl">Makanan Dianjurkan</div>
       <div class="food-list">
         ${(cache.items || []).map(item => `
           <div class="food-item">
-            <div class="food-emoji">${item.emoji || '🍽️'}</div>
+            <div class="food-emoji" style="display:flex;align-items:center;justify-content:center;background:rgba(255,45,85,0.08);border-radius:10px;width:34px;height:34px;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ff2d55" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg></div>
             <div class="food-info">
               <div class="food-name">${item.nama || ''}</div>
               <div class="food-reason">${item.alasan || ''}</div>
@@ -941,11 +949,11 @@ function _renderFoodData(el, cache, phase) {
       </div>
 
       ${(cache.drinks || []).length ? `
-        <div class="food-section-lbl" style="margin-top:12px">🥤 Minuman</div>
+        <div class="food-section-lbl" style="margin-top:12px">Minuman & Hidrasi</div>
         <div class="food-list">
           ${cache.drinks.map(d => `
             <div class="food-item">
-              <div class="food-emoji">${d.emoji || '🥤'}</div>
+              <div class="food-emoji" style="display:flex;align-items:center;justify-content:center;background:rgba(0,122,255,0.08);border-radius:10px;width:34px;height:34px;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg></div>
               <div class="food-info">
                 <div class="food-name">${d.nama || ''}</div>
                 <div class="food-reason">${d.alasan || ''}</div>
@@ -953,7 +961,7 @@ function _renderFoodData(el, cache, phase) {
             </div>`).join('')}
         </div>` : ''}
 
-      <div class="food-note">💡 Rekomendasi AI berdasarkan fase siklus · bukan pengganti saran dokter</div>
+      <div class="food-note">Rekomendasi nutrisi berdasarkan fase siklus · bukan pengganti saran medis dokter</div>
     </div>`;
 }
 
@@ -1145,7 +1153,7 @@ function _renderDailyLogModal() {
   if (title && period && editingDayDate) {
     const n = getDayNumberOn(period, editingDayDate);
     const isToday = editingDayDate === fmtDateInput(new Date());
-    title.textContent = `🩸 Log Hari ke-${n} · ${isToday ? 'Hari ini' : fmtDate(editingDayDate)}`;
+    title.innerHTML = `<span style="display:inline-flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="var(--mens)"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg><span>Log Hari ke-${n} · ${isToday ? 'Hari ini' : fmtDate(editingDayDate)}</span></span>`;
   }
 
   // Strip tanggal (pilih hari mana pun dalam periode)
@@ -1183,7 +1191,7 @@ function _renderDailyLogModal() {
 
   symEl.innerHTML = SYMPTOMS.map((s, i) => `
     <div class="sym-btn${dailyLogSymptoms.includes(i) ? ' sel' : ''}" onclick="window._toggleDailySym(${i})">
-      <span class="sym-e">${s.e}</span>
+      <span class="sym-ic" style="display:flex;align-items:center;justify-content:center;width:22px;height:22px;margin-bottom:3px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none">${s.svg || ''}</svg></span>
       <span class="sym-l">${s.l}</span>
     </div>`).join('');
 }
@@ -1259,7 +1267,7 @@ export function renderHomeCycleBanner() {
   }
 
   const phase  = PHASES.find(p => p.id === info.phase);
-  const titles = { mens:'Hari menstruasi 💗', foll:'Energi naik! 🌱', ovul:'Puncak energi ⭐', lute:'Self-care dulu 🌙' };
+  const titles = { mens:'Fase Menstruasi', foll:'Energi Meningkat', ovul:'Puncak Energi', lute:'Fase Self-Care' };
   el.className = `cycle-banner ${info.phase}`;
   el.innerHTML = `<div class="cb-ico">${phase.emoji}</div>
     <div class="cb-body">

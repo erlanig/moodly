@@ -347,7 +347,7 @@ function renderError(msg) {
   if (!el) return;
   el.innerHTML = `
     <div class="nb-idle">
-      <div class="nb-idle-ico">⚠️</div>
+      <div class="nb-idle-ico" style="display:flex;align-items:center;justify-content:center"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ff9500" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
       <div class="nb-idle-txt">Gagal memuat: ${msg}</div>
       <button class="nb-cta" onclick="window._refreshNearby()">Coba Lagi</button>
     </div>`;

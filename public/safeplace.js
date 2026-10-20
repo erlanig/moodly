@@ -693,7 +693,7 @@ export async function openSurah(no) {
   document.getElementById('surah-modal-title').textContent = `Memuat Surah ${no}...`;
   document.getElementById('surah-modal-content').innerHTML = `
     <div style="text-align:center;padding:48px;color:var(--muted)">
-      <div class="dot-spinner" style="font-size:28px;margin-bottom:12px">🌸</div>
+      <div class="dot-spinner" style="display:flex;align-items:center;justify-content:center;margin-bottom:12px"><img src="img/3d/3d-star.png" style="width:36px;height:36px;object-fit:contain" alt=""></div>
       <div>Menyiapkan ayat dan audio tilawah...</div>
     </div>`;
 
@@ -728,7 +728,7 @@ function renderSurahModal(arabic, indonesian) {
 
   document.getElementById('surah-modal-content').innerHTML = `
     <div class="surah-reader-bar">
-      <div class="surah-meta-badge">${arabic.revelationType === 'Meccan' ? '🕋 Makkiyah' : '🕌 Madaniyah'} · ${arabic.numberOfAyahs} Ayat</div>
+      <div class="surah-meta-badge">${arabic.revelationType === 'Meccan' ? 'Makkiyah' : 'Madaniyah'} · ${arabic.numberOfAyahs} Ayat</div>
       <div class="surah-font-controls">
         <span style="font-size:11px;color:var(--muted);font-weight:600">Ukuran:</span>
         <button class="sfont-btn ${currentFontSize === 's' ? 'active' : ''}" onclick="window._setSurahFont('s')">A-</button>
@@ -745,7 +745,7 @@ function renderSurahModal(arabic, indonesian) {
           <div class="surah-ayah-head">
             <span class="surah-ayah-tag">Ayat ${a.numberInSurah}</span>
             <button class="surah-audio-play-btn" id="audio-btn-${a.number}" onclick="window._playAyahAudio(${a.number}, this)">
-              ▶️ Putar Tilawah
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:4px"><polygon points="5 3 19 12 5 21 5 3"/></svg>Putar Tilawah
             </button>
           </div>
           <div class="surah-ar-text">${a.text} <span class="surah-num">﴿${a.numberInSurah}﴾</span></div>
@@ -770,7 +770,7 @@ window._setSurahFont = setSurahFont;
 export function playAyahAudio(globalAyahNumber, btn) {
   if (currentAudio) {
     currentAudio.pause();
-    document.querySelectorAll('.surah-audio-play-btn').forEach(b => b.textContent = '▶️ Putar Tilawah');
+    document.querySelectorAll('.surah-audio-play-btn').forEach(b => b.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:4px"><polygon points="5 3 19 12 5 21 5 3"/></svg>Putar Tilawah');
     document.querySelectorAll('.surah-ayah-item').forEach(el => el.classList.remove('playing-now'));
     if (activeAyahNum === globalAyahNumber) {
       activeAyahNum = null;
@@ -779,13 +779,13 @@ export function playAyahAudio(globalAyahNumber, btn) {
   }
 
   activeAyahNum = globalAyahNumber;
-  btn.textContent = '⏸️ Berhenti';
+  btn.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:4px"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>Berhenti';
   const itemEl = document.getElementById(`ayah-item-${globalAyahNumber}`);
   if (itemEl) itemEl.classList.add('playing-now');
 
   currentAudio = new Audio(`https://cdn.islamic.network/quran/audio/128/ar.alafasy/${globalAyahNumber}.mp3`);
   currentAudio.play().catch(e => {
-    btn.textContent = '▶️ Putar Tilawah';
+    btn.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:4px"><polygon points="5 3 19 12 5 21 5 3"/></svg>Putar Tilawah';
     console.warn('[Audio] Play error:', e.message);
   });
 
@@ -817,7 +817,7 @@ export function openKajian(id) {
   const modal = document.getElementById('kajian-modal');
   if (!modal) return;
 
-  document.getElementById('kajian-modal-emoji').textContent = kajian.emoji;
+  document.getElementById('kajian-modal-emoji').innerHTML = getKajianIconSvg(kajian.category);
   document.getElementById('kajian-modal-cat').textContent   = kajian.category;
   document.getElementById('kajian-modal-title').textContent = kajian.title;
   document.getElementById('kajian-modal-src').textContent   = kajian.source;
@@ -850,7 +850,7 @@ export function showDoa(idx) {
   const modal = document.getElementById('doa-modal');
   if (!modal || !doa) return;
 
-  document.getElementById('doa-modal-emoji').textContent  = doa.emoji;
+  document.getElementById('doa-modal-emoji').innerHTML = getDoaIconSvg(doa.cat);
   document.getElementById('doa-modal-name').textContent   = doa.name;
   document.getElementById('doa-modal-ar').textContent     = doa.arabic;
   document.getElementById('doa-modal-lat').textContent    = doa.latin;

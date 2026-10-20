@@ -237,10 +237,10 @@ async function callChatAPI(history, ctx) {
   const hasMood = !!ctx.mood;
 
   const phaseNames = {
-    mens: 'Menstruasi 🩸',
-    foll: 'Folikular 🌱',
+    mens: 'Menstruasi',
+    foll: 'Folikular',
     ovul: 'Ovulasi ⭐',
-    lute: 'Luteal 🌙',
+    lute: 'Luteal',
   };
   const cycleInfo = ctx.cyclePhase
     ? `${phaseNames[ctx.cyclePhase] || ctx.cyclePhase}${ctx.dayOfCycle ? ', hari ke-' + ctx.dayOfCycle : ''}`
@@ -443,9 +443,9 @@ function appendMessage(role, text, animate = false, articleIdx = null) {
       const artEl = document.createElement('div');
       artEl.className = 'chat-art-rec';
       artEl.innerHTML = `
-        <div class="chat-art-label">📖 Bacaan pendukung</div>
+        <div class="chat-art-label"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>Bacaan Pendukung</div>
         <div class="chat-art-card" onclick="window._openArt(${articleIdx})">
-          <span class="chat-art-em" style="font-size:16px;">📚</span>
+          <span class="chat-art-em" style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;background:rgba(255,45,85,0.08)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ff2d55" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span>
           <div>
             <div class="chat-art-title">${art.title}</div>
             <div class="chat-art-src">${art.source} · ${art.readTime}</div>
