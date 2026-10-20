@@ -23,7 +23,7 @@
       <img src="img/jes-memoji.svg" alt="Moodly" class="sp-memoji-logo">
     </div>
     <div class="sp-brand">mood<span style="color:#ff2d55">ly</span></div>
-    <div class="sp-tagline">Ruang aman untuk perasaanmu</div>
+
     <div class="sp-loader-row">
       <div class="sp-loader-dot"></div>
       <div class="sp-loader-dot"></div>
@@ -76,6 +76,10 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V10l7-7 7 7v11M9 21v-6h6v6"/></svg>
         Rohani
       </button>
+      <button class="hero-pill-btn p-green" onclick="window._openReminderModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34c759" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Pengingat
+      </button>
     </div>
   </div>
 
@@ -95,6 +99,9 @@
       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
     </div>
   </div>
+
+  <!-- Daily Reminder & Task Automation -->
+  <div id="reminder-widget-wrap"></div>
 
   <!-- Cycle banner -->
   <div id="home-cycle-banner" class="cycle-banner none" onclick="window._showScreen('cycle')"></div>
@@ -537,6 +544,84 @@
 </div>
 
 <!-- ═══════════════ SCRIPTS (ES Modules) ═══════════════ -->
+
+<!-- ═══════════════ REMINDER & TASK MODAL (iOS BOTTOM SHEET) ═══════════════ -->
+<div id="reminder-modal" class="modal-bg" onclick="if(event.target===this)window._closeReminderModal()">
+  <div class="modal-sheet rem-sheet">
+    <div class="sh-handle"></div>
+    <div class="rem-sheet-header">
+      <div class="rem-sheet-title-box">
+        <div class="rem-sheet-icon">
+          <img src="img/3d/3d-clock.png" alt="Clock" class="rem-sheet-3d">
+        </div>
+        <div>
+          <div class="sh-title">Pengingat & Agenda</div>
+          <div class="sh-sub">Sinkronisasi otomatis dengan Google Gmail API</div>
+        </div>
+      </div>
+      <button class="rem-close-btn" onclick="window._closeReminderModal()">✕</button>
+    </div>
+
+    <input type="hidden" id="rem-modal-id">
+
+    <!-- Quick Presets -->
+    <div class="rem-preset-lbl">Template Cepat:</div>
+    <div class="rem-presets">
+      <span class="rem-preset-chip" onclick="window._applyReminderPreset('Minum Air & Hidrasi Tubuh', 'Self-care')">Minum Air</span>
+      <span class="rem-preset-chip" onclick="window._applyReminderPreset('Minum Obat / Vitamin', 'Kesehatan')">Obat & Vitamin</span>
+      <span class="rem-preset-chip" onclick="window._applyReminderPreset('Istirahat Sejenak & Meditasi', 'Self-care')">Rehat Sejenak</span>
+      <span class="rem-preset-chip" onclick="window._applyReminderPreset('Tugas / Pekerjaan Prioritas', 'Tugas')">Tugas & Kerja</span>
+      <span class="rem-preset-chip" onclick="window._applyReminderPreset('Refleksi & Journaling', 'Refleksi')">Journaling</span>
+    </div>
+
+    <!-- Title Input -->
+    <label class="rem-lbl">Judul Pengingat</label>
+    <input type="text" id="rem-modal-title" class="txt-in rem-input" placeholder="Misal: Minum vitamin, selesaikan tugas..." maxlength="60">
+
+    <!-- Category & Schedule Grid -->
+    <div class="rem-grid-row">
+      <div class="rem-col">
+        <label class="rem-lbl">Kategori</label>
+        <select id="rem-modal-cat" class="rem-select">
+          <option value="Self-care">Self-care</option>
+          <option value="Kesehatan">Kesehatan</option>
+          <option value="Tugas">Tugas & Kerja</option>
+          <option value="Refleksi">Refleksi & Doa</option>
+          <option value="Ibadah">Ibadah</option>
+        </select>
+      </div>
+      <div class="rem-col">
+        <label class="rem-lbl">Tanggal</label>
+        <input type="date" id="rem-modal-date" class="rem-select">
+      </div>
+      <div class="rem-col">
+        <label class="rem-lbl">Jam</label>
+        <input type="time" id="rem-modal-time" class="rem-select">
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <label class="rem-lbl" style="margin-top:10px">Catatan Tambahan (Opsional)</label>
+    <textarea id="rem-modal-note" class="rem-textarea" placeholder="Detail atau pesan penyemangat untuk dirimu..." rows="2"></textarea>
+
+    <!-- Email Automation Toggle -->
+    <div class="rem-email-toggle-row">
+      <div class="ret-left">
+        <div class="ret-title">Kirim Notifikasi Email (Gmail)</div>
+        <div class="ret-sub">Otomatis kirim ke erlanigwork@gmail.com</div>
+      </div>
+      <label class="ret-switch">
+        <input type="checkbox" id="rem-modal-email" checked>
+        <span class="ret-slider"></span>
+      </label>
+    </div>
+
+    <button class="cta rem-save-cta" onclick="window._saveReminderFromModal()">
+      Simpan Pengingat ✓
+    </button>
+  </div>
+</div>
+
 <script type="module" src="app.js"></script>
 
 <section class="screen" id="safeplace">

@@ -22,13 +22,13 @@ import {
    CONSTANTS
 ══════════════════════════════ */
 export const PHASES = [
-  { id:'mens', name:'Menstruasi', emoji:'🩸', color:'#ff6b8a',
+  { id:'mens', name:'Menstruasi', emoji:'🩸', icon3d:'img/3d/3d-heart.png', color:'#ff2d55',
     tip:'Istirahat lebih banyak, minum air hangat, dan kompres perut jika kram. Rawat dirimu dengan penuh kasih hari ini.' },
-  { id:'foll', name:'Folikular',  emoji:'🌱', color:'#f59e0b',
+  { id:'foll', name:'Folikular',  emoji:'🌱', icon3d:'img/3d/3d-sun.png',   color:'#ff9500',
     tip:'Energi mulai meningkat. Waktu yang tepat untuk memulai rutinitas baru atau berolahraga ringan.' },
-  { id:'ovul', name:'Ovulasi',    emoji:'⭐', color:'#8b5cf6',
+  { id:'ovul', name:'Ovulasi',    emoji:'⭐', icon3d:'img/3d/3d-star.png',  color:'#af52de',
     tip:'Puncak energi dan suasana hati cerah. Manfaatkan momen ini untuk berinteraksi dan beraktivitas optimal.' },
-  { id:'lute', name:'Luteal',     emoji:'🌙', color:'#3b82f6',
+  { id:'lute', name:'Luteal',     emoji:'🌙', icon3d:'img/3d/3d-clock.png', color:'#5856d6',
     tip:'Energi berangsur turun. Prioritaskan relaksasi, kurangi kafein, dan berikan tubuhmu waktu jeda yang cukup.' },
 ];
 
@@ -364,34 +364,118 @@ function renderPhaseCard(info) {
   const wrap = document.getElementById('phase-card-wrap');
   if (!wrap) return;
   const active = getActivePeriod();
+
   if (active) {
     const dayNum = getDayOfPeriod(active);
     const todayLog = getTodayLog(active.id);
     const flowTxt = todayLog?.flow ? ` · ${todayLog.flow}` : '';
-    wrap.innerHTML = `<div class="phase-card mens">
-      <div class="phase-ring" style="display:flex;align-items:center;justify-content:center"><svg width="36" height="36" viewBox="0 0 24 24" fill="var(--mens)"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg></div>
-      <div class="phase-name">Sedang Menstruasi</div>
-      <div class="phase-title">Hari ke-${dayNum}</div>
-      <div class="phase-day">Mulai ${fmtDate(active.startDate)}${flowTxt}</div>
+    const expectedDur = calcAvgDuration() || 5;
+    const progressPct = Math.min(100, Math.round((dayNum / expectedDur) * 100));
+    const circumference = 289; // 2 * Math.PI * 46
+    const strokeOffset = circumference - (progressPct / 100) * circumference;
+
+    wrap.innerHTML = `<div class="phase-card-pro mens">
+      <div class="phase-card-silhouette">
+        <svg width="220" height="220" viewBox="0 0 200 200" fill="none">
+          <path d="M100 20C60 60 40 90 40 120C40 155 67 180 100 180C133 180 160 155 160 120C160 90 140 60 100 20Z" fill="rgba(255,45,85,0.04)"/>
+          <circle cx="100" cy="115" r="70" stroke="rgba(255,45,85,0.06)" stroke-width="1.5" stroke-dasharray="4 6"/>
+        </svg>
+      </div>
+
+      <div class="phase-hero-top">
+        <span class="phase-pill-badge mens">Sedang Menstruasi</span>
+      </div>
+
+      <div class="phase-dial-wrap">
+        <svg class="phase-dial-svg" width="118" height="118" viewBox="0 0 118 118">
+          <circle cx="59" cy="59" r="46" class="phase-dial-bg" />
+          <circle cx="59" cy="59" r="46" class="phase-dial-progress mens"
+                  style="stroke-dasharray: ${circumference}; stroke-dashoffset: ${strokeOffset};" />
+        </svg>
+        <div class="phase-dial-center">
+          <img src="img/3d/3d-heart.png" alt="Menstruasi" class="phase-dial-3d-ico">
+        </div>
+      </div>
+
+      <div class="phase-hero-title">Hari ke-${dayNum}</div>
+      <div class="phase-hero-sub">Mulai ${fmtDate(active.startDate)}${flowTxt}</div>
+
+      <div class="phase-metrics-row">
+        <div class="pm-col">
+          <div class="pm-lbl">Estimasi Durasi</div>
+          <div class="pm-val">${expectedDur} Hari</div>
+        </div>
+        <div class="pm-div"></div>
+        <div class="pm-col">
+          <div class="pm-lbl">Peluang Hamil</div>
+          <div class="pm-val">Sangat Rendah</div>
+        </div>
+      </div>
     </div>`;
     return;
   }
+
   if (!info) {
-    wrap.innerHTML = `<div class="phase-card none">
-      <div class="phase-ring" style="display:flex;align-items:center;justify-content:center;background:var(--gl)"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="var(--mens)" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
-      <div class="phase-name" style="color:var(--muted)">Belum ada data siklus</div>
-      <div class="phase-title" style="color:var(--text);font-size:18px">Tap tombol di bawah untuk mulai</div>
-      <div class="phase-day" style="color:var(--muted)">Tracking dimulai dari hari pertama mensmu</div>
+    wrap.innerHTML = `<div class="phase-card-pro none">
+      <div class="phase-card-silhouette">
+        <svg width="220" height="220" viewBox="0 0 200 200" fill="none">
+          <circle cx="100" cy="100" r="75" stroke="rgba(255,45,85,0.05)" stroke-width="2" stroke-dasharray="6 8"/>
+        </svg>
+      </div>
+      <div class="phase-dial-wrap">
+        <div class="phase-dial-center" style="background:#fff5f8;">
+          <img src="img/3d/3d-heart.png" alt="Mulai" class="phase-dial-3d-ico" style="filter:grayscale(0.35) opacity(0.85);">
+        </div>
+      </div>
+      <div class="phase-hero-title" style="font-size:18px;margin-top:8px">Mulai Tracking Siklus</div>
+      <div class="phase-hero-sub">Catat hari pertama menstruasi untuk menghitung fase tubuhmu</div>
     </div>`;
     return;
   }
-  const phase    = PHASES.find(p => p.id === info.phase);
+
+  const phase = PHASES.find(p => p.id === info.phase) || PHASES[0];
   const daysLeft = info.len - info.dayOfCycle + 1;
-  wrap.innerHTML = `<div class="phase-card ${info.phase}">
-    <div class="phase-ring">${phase.emoji}</div>
-    <div class="phase-name">Fase ${phase.name}</div>
-    <div class="phase-title">Hari ke-${info.dayOfCycle}</div>
-    <div class="phase-day">dari siklus ${info.len} hari · ${daysLeft} hari ke fase berikutnya</div>
+  const progressPct = Math.min(100, Math.round((info.dayOfCycle / info.len) * 100));
+  const circumference = 289;
+  const strokeOffset = circumference - (progressPct / 100) * circumference;
+
+  wrap.innerHTML = `<div class="phase-card-pro ${info.phase}">
+    <div class="phase-card-silhouette">
+      <svg width="220" height="220" viewBox="0 0 200 200" fill="none">
+        <path d="M100 25C65 65 45 95 45 125C45 158 70 182 100 182C130 182 155 158 155 125C155 95 135 65 100 25Z" fill="rgba(255,45,85,0.035)"/>
+        <circle cx="100" cy="120" r="72" stroke="rgba(255,45,85,0.06)" stroke-width="1.5" stroke-dasharray="4 6"/>
+      </svg>
+    </div>
+
+    <div class="phase-hero-top">
+      <span class="phase-pill-badge ${info.phase}">Fase ${phase.name}</span>
+    </div>
+
+    <div class="phase-dial-wrap">
+      <svg class="phase-dial-svg" width="118" height="118" viewBox="0 0 118 118">
+        <circle cx="59" cy="59" r="46" class="phase-dial-bg" />
+        <circle cx="59" cy="59" r="46" class="phase-dial-progress ${info.phase}"
+                style="stroke-dasharray: ${circumference}; stroke-dashoffset: ${strokeOffset};" />
+      </svg>
+      <div class="phase-dial-center">
+        <img src="${phase.icon3d}" alt="${phase.name}" class="phase-dial-3d-ico">
+      </div>
+    </div>
+
+    <div class="phase-hero-title">Hari ke-${info.dayOfCycle}</div>
+    <div class="phase-hero-sub">dari siklus ${info.len} hari · ${daysLeft} hari ke fase berikutnya</div>
+
+    <div class="phase-metrics-row">
+      <div class="pm-col">
+        <div class="pm-lbl">Panjang Siklus</div>
+        <div class="pm-val">${info.len} Hari</div>
+      </div>
+      <div class="pm-div"></div>
+      <div class="pm-col">
+        <div class="pm-lbl">Fase Selanjutnya</div>
+        <div class="pm-val">${daysLeft} Hari Lagi</div>
+      </div>
+    </div>
   </div>`;
 }
 
@@ -576,8 +660,8 @@ function renderPhaseMiniCards(info) {
     const follEnd = dur + Math.round((len - dur) * 0.35);
     const ovulEnd = follEnd + 3;
     const ranges  = { mens:`H1–${dur}`, foll:`H${dur+1}–${follEnd}`, ovul:`H${follEnd+1}–${ovulEnd}`, lute:`H${ovulEnd+1}–${len}` };
-    return `<div class="ph-mini ${p.id}"${active ? ' style="box-shadow:0 3px 12px rgba(0,0,0,.1)"' : ''}>
-      <div class="ph-mini-ico">${p.emoji}</div>
+    return `<div class="ph-mini ${p.id}"${active ? ' style="box-shadow:0 4px 16px rgba(255,45,85,.12);border-color:rgba(255,45,85,0.3)"' : ''}>
+      <div class="ph-mini-ico"><img src="${p.icon3d}" alt="${p.name}" class="ph-mini-3d"></div>
       <div class="ph-mini-name ${p.id}">${p.name}</div>
       <div class="ph-mini-day">${ranges[p.id]}</div>
       ${active ? `<div class="ph-mini-tip" style="color:${p.color}">← Kamu di sini</div>` : ''}
@@ -1246,35 +1330,35 @@ export function renderHomeCycleBanner() {
     const needsLog = !getTodayLog(active.id);
     const missing  = getMissingDates(active).filter(ds => ds !== fmtDateInput(new Date())).length;
     el.className = 'cycle-banner mens';
-    el.innerHTML = `<div class="cb-ico">🩸</div>
+    el.innerHTML = `<div class="cb-ico"><img src="img/3d/3d-heart.png" alt="Mens" class="cb-3d-ico"></div>
       <div class="cb-body">
         <div class="cb-tag mens">Sedang Menstruasi · Hari ke-${dayNum}</div>
         <div class="cb-title">${needsLog ? 'Belum isi log hari ini' : 'Log harian sudah tercatat ✓'}</div>
         <div class="cb-sub">${needsLog ? 'Tap untuk isi kondisi hari ini →' : (missing ? `${missing} hari terlewat belum diisi →` : 'Lihat detail siklus →')}</div>
-      </div><div class="cb-arr" style="color:#ff6b8a">🩸</div>`;
+      </div><div class="cb-arr" style="color:#ff2d55"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg></div>`;
     return;
   }
 
   if (!info) {
     el.className = 'cycle-banner none';
-    el.innerHTML = `<div class="cb-ico">🌸</div>
+    el.innerHTML = `<div class="cb-ico"><img src="img/3d/3d-heart.png" alt="Cycle" class="cb-3d-ico"></div>
       <div class="cb-body">
         <div class="cb-tag none">Cycle Tracker</div>
         <div class="cb-title">Mulai tracking siklus menstruasimu</div>
         <div class="cb-sub">Tap untuk memulai →</div>
-      </div><div class="cb-arr">›</div>`;
+      </div><div class="cb-arr"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg></div>`;
     return;
   }
 
-  const phase  = PHASES.find(p => p.id === info.phase);
+  const phase  = PHASES.find(p => p.id === info.phase) || PHASES[0];
   const titles = { mens:'Fase Menstruasi', foll:'Energi Meningkat', ovul:'Puncak Energi', lute:'Fase Self-Care' };
   el.className = `cycle-banner ${info.phase}`;
-  el.innerHTML = `<div class="cb-ico">${phase.emoji}</div>
+  el.innerHTML = `<div class="cb-ico"><img src="${phase.icon3d || 'img/3d/3d-star.png'}" alt="${phase.name}" class="cb-3d-ico"></div>
     <div class="cb-body">
       <div class="cb-tag ${info.phase}">Fase ${phase.name} · H${info.dayOfCycle}</div>
-      <div class="cb-title">${titles[info.phase]}</div>
+      <div class="cb-title">${titles[info.phase] || phase.name}</div>
       <div class="cb-sub">Lihat perkiraan siklus →</div>
-    </div><div class="cb-arr" style="color:${phase.color}">›</div>`;
+    </div><div class="cb-arr" style="color:${phase.color}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg></div>`;
 }
 
 /* ══════════════════════════════

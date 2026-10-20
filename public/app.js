@@ -21,6 +21,7 @@ import { initChat, sendMessage, buildQuickReplies } from './chat.js';
 import { initNearby, findNearby, filterNearby, refreshNearby, searchNearby } from './nearby.js';
 import { openStories, closeStories } from './stories.js';
 import { initSafePlace } from './safeplace.js';
+import { initReminders, renderReminderWidget } from './reminder.js';
 
 /* ════════════════
    GLOBAL STATE
@@ -66,6 +67,7 @@ async function boot() {
 
   // Load cycle data
   await initCycle();
+  initReminders();
 
   // Build static UI
   buildCheckinUI();
@@ -217,6 +219,7 @@ function updateHome() {
   }
 
   renderHomeCycleBanner();
+  renderReminderWidget();
   buildHomePreview();
   initNearby();
 }

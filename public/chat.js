@@ -285,7 +285,11 @@ ATURAN RESPONS:
     ...history.slice(-14),
   ];
 
-  const aiConfig = await loadAIConfig().catch(() => ({ groqKey: '', geminiKey: '' }));
+  const loadedConfig = await loadAIConfig().catch(() => ({ groqKey: '', geminiKey: '' }));
+  const aiConfig = {
+    groqKey: loadedConfig.groqKey || '',
+    geminiKey: loadedConfig.geminiKey || '',
+  };
 
   // 1. Coba Serverless Endpoint /api/chat terlebih dahulu
   let raw = '';
@@ -313,7 +317,43 @@ ATURAN RESPONS:
     console.warn('[chat] /api/chat unreachable, testing direct client API:', err.message);
   }
 
-  // 2. Direct Client-side Groq jika key tersedia dan serverless belum merespons
+  // 2. PRIMARY: Direct Client-side Google AI Studio (Gemini)
+  const geminiKeyToUse = aiConfig.geminiKey || '';
+  if (!apiSuccess && geminiKeyToUse) {
+    try {
+      const chatMsgs = history.slice(-14).map(m => ({
+        role: m.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: m.content }]
+      }));
+      const gModels = ['gemini-flash-latest', 'gemini-1.5-flash'];
+      for (const mName of gModels) {
+        try {
+          const gUrl = `https://generativelanguage.googleapis.com/v1beta/models/${mName}:generateContent?key=${geminiKeyToUse}`;
+          const gemRes = await fetch(gUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              system_instruction: { parts: [{ text: systemPrompt }] },
+              contents: chatMsgs,
+              generationConfig: {
+                temperature: 0.75,
+                maxOutputTokens: 600,
+              }
+            })
+          });
+          if (gemRes.ok) {
+            const gemData = await gemRes.json();
+            raw = gemData.candidates?.[0]?.content?.parts?.[0]?.text || '';
+            if (raw) { apiSuccess = true; break; }
+          }
+        } catch {}
+      }
+    } catch (gme) {
+      console.warn('[chat] Direct Gemini error:', gme.message);
+    }
+  }
+
+  // 3. FALLBACK: Direct Client-side Groq jika key tersedia
   if (!apiSuccess && aiConfig.groqKey) {
     try {
       const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -336,37 +376,6 @@ ATURAN RESPONS:
       }
     } catch (ge) {
       console.warn('[chat] Direct Groq error:', ge.message);
-    }
-  }
-
-  // 3. Direct Client-side Gemini jika key tersedia
-  if (!apiSuccess && aiConfig.geminiKey) {
-    try {
-      const chatMsgs = history.slice(-14).map(m => ({
-        role: m.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: m.content }]
-      }));
-      const gUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${aiConfig.geminiKey}`;
-      const gemRes = await fetch(gUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          system_instruction: { parts: [{ text: systemPrompt }] },
-          contents: chatMsgs,
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 500,
-            responseMimeType: 'application/json',
-          }
-        })
-      });
-      if (gemRes.ok) {
-        const gemData = await gemRes.json();
-        raw = gemData.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        if (raw) apiSuccess = true;
-      }
-    } catch (gme) {
-      console.warn('[chat] Direct Gemini error:', gme.message);
     }
   }
 
