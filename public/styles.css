@@ -714,7 +714,7 @@ html, body {
   visibility: hidden; opacity: 0;
   transition: opacity .22s, visibility .22s;
 }
-.modal-bg.show { visibility: visible; opacity: 1; }
+.modal-bg.show, .modal-bg.open { visibility: visible; opacity: 1; }
 .modal-sheet {
   background: var(--white); border-radius: 26px 26px 0 0;
   padding: 18px 18px max(env(safe-area-inset-bottom),30px);
@@ -724,7 +724,7 @@ html, body {
   box-shadow: 0 -6px 32px rgba(0,0,0,.11);
   overflow-y: auto; max-height: 90dvh;
 }
-.modal-bg.show .modal-sheet { transform: none; }
+.modal-bg.show .modal-sheet, .modal-bg.open .modal-sheet { transform: none; }
 .sh-handle { width: 34px; height: 4px; border-radius: 2px; background: var(--border); margin: 0 auto 16px; }
 .sh-title { font-size: 21px; font-weight: 800; letter-spacing: -.02em; margin-bottom: 4px; }
 .sh-sub { font-size: 13px; color: var(--muted); margin-bottom: 16px; line-height: 1.5; }

@@ -251,12 +251,13 @@ export function openReminderModal(id = null) {
   }
 
   toggleReminderEmailInput();
+  modal.classList.add('show');
   modal.classList.add('open');
 }
 
 export function closeReminderModal() {
   const modal = document.getElementById('reminder-modal');
-  if (modal) modal.classList.remove('open');
+  if (modal) { modal.classList.remove('show'); modal.classList.remove('open'); }
 }
 
 export function toggleReminderEmailInput() {
@@ -289,15 +290,20 @@ export function saveReminderFromModal() {
     return;
   }
 
-  // If email notification is enabled, ensure email is provided
+  let finalSendEmail = sendEmail;
   if (sendEmail) {
-    if (!userEmail || !userEmail.includes('@') || !userEmail.includes('.')) {
-      window._moodlyToast?.('Mohon masukkan alamat email yang valid untuk menerima pengingat');
-      document.getElementById('rem-modal-user-email')?.focus();
-      return;
+    if (userEmail && userEmail.includes('@')) {
+      setUserEmail(userEmail);
+    } else {
+      const saved = getUserEmail();
+      if (saved) {
+        userEmail = saved;
+      } else {
+        // If email not provided yet, still save the reminder smoothly!
+        finalSendEmail = false;
+        window._moodlyToast?.('Pengingat tersimpan di aplikasi ✓ (Kirim email dilewati)');
+      }
     }
-    // Save email into localStorage so user never has to re-type it!
-    setUserEmail(userEmail);
   }
 
   if (id) {
@@ -309,7 +315,7 @@ export function saveReminderFromModal() {
       item.date = date;
       item.time = time;
       item.note = note;
-      item.sendEmail = sendEmail;
+      item.sendEmail = finalSendEmail;
       item.userEmail = userEmail || getUserEmail();
     }
   } else {
@@ -322,7 +328,7 @@ export function saveReminderFromModal() {
       time,
       note,
       userEmail: userEmail || getUserEmail(),
-      sendEmail,
+      sendEmail: finalSendEmail,
       done: false,
       emailSent: false,
       createdAt: Date.now(),
