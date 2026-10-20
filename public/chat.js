@@ -102,7 +102,7 @@ export async function sendMessage(text) {
   chatHistory.push({ role: 'user', content: text });
 
   setInputState(false);
-  showTypingIndicator();
+  showTypingIndicator(text);
 
   try {
     const { reply, articleIdx, newFacts } = await callChatAPI(chatHistory, chatContext);
@@ -297,14 +297,15 @@ ATURAN RESPONS:
 
   try {
     const res = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        messages,
-        apiKey: aiConfig.groqKey || undefined,
-        geminiKey: aiConfig.geminiKey || undefined,
-      }),
-    });
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages,
+          apiKey: aiConfig.groqKey || undefined,
+          geminiKey: aiConfig.geminiKey || undefined,
+        }),
+        signal: AbortSignal.timeout(6000)
+      });
 
     if (res.ok) {
       const data = await res.json();
@@ -497,6 +498,7 @@ function showTypingIndicator() {
 }
 
 function hideTypingIndicator() {
+  clearTimeout(typingWatchdog);
   isTyping = false;
   document.getElementById('chat-typing')?.remove();
 }

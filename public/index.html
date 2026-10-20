@@ -604,16 +604,23 @@
     <label class="rem-lbl" style="margin-top:10px">Catatan Tambahan (Opsional)</label>
     <textarea id="rem-modal-note" class="rem-textarea" placeholder="Detail atau pesan penyemangat untuk dirimu..." rows="2"></textarea>
 
-    <!-- Email Automation Toggle -->
+    <!-- Email Automation Toggle & User Email Input -->
     <div class="rem-email-toggle-row">
       <div class="ret-left">
         <div class="ret-title">Kirim Notifikasi Email (Gmail)</div>
-        <div class="ret-sub">Otomatis kirim ke erlanigwork@gmail.com</div>
+        <div class="ret-sub">Otomatis kirim dari Moodly ke email kamu</div>
       </div>
       <label class="ret-switch">
-        <input type="checkbox" id="rem-modal-email" checked>
+        <input type="checkbox" id="rem-modal-email" checked onchange="window._toggleReminderEmailInput?.()">
         <span class="ret-slider"></span>
       </label>
+    </div>
+
+    <!-- Field Email Pengguna (Penerima) -->
+    <div id="rem-email-field-wrap" style="margin-top:6px; margin-bottom:14px; text-align:left;">
+      <label class="rem-lbl">Email Kamu (Penerima Notifikasi)</label>
+      <input type="email" id="rem-modal-user-email" class="rem-select" placeholder="Masukkan email kamu (cth: kamu@gmail.com)" autocomplete="email">
+      <div style="font-size:11px; color:#86868b; margin-top:4px;">Pengingat akan dikirim dari sistem Moodly ke email kamu di atas.</div>
     </div>
 
     <button class="cta rem-save-cta" onclick="window._saveReminderFromModal()">

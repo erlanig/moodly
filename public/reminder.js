@@ -4,10 +4,21 @@
    ═══════════════════════════════════════ */
 
 const STORAGE_KEY = 'moodly_reminders_v2';
-const DEFAULT_RECIPIENT = 'erlanigwork@gmail.com';
+const USER_EMAIL_KEY = 'moodly_user_email';
 
 let reminders = [];
 let currentFilter = 'all'; // 'all', 'today', 'completed'
+
+/* ──────────── USER EMAIL HELPERS ──────────── */
+export function getUserEmail() {
+  return (localStorage.getItem(USER_EMAIL_KEY) || '').trim();
+}
+
+export function setUserEmail(email) {
+  if (email && email.includes('@')) {
+    localStorage.setItem(USER_EMAIL_KEY, email.trim().toLowerCase());
+  }
+}
 
 /* ──────────── INITIALIZATION ──────────── */
 export function initReminders() {
@@ -32,6 +43,7 @@ function saveToStorage() {
 
 function getInitialReminders() {
   const todayStr = new Date().toISOString().split('T')[0];
+  const userEmail = getUserEmail();
   return [
     {
       id: 'rem_1',
@@ -40,6 +52,7 @@ function getInitialReminders() {
       date: todayStr,
       time: '14:30',
       note: 'Rehat mata 5 menit dan tarik napas dalam.',
+      userEmail: userEmail,
       sendEmail: true,
       done: false,
       emailSent: false,
@@ -52,6 +65,7 @@ function getInitialReminders() {
       date: todayStr,
       time: '20:00',
       note: 'Tuliskan 3 hal yang disyukuri hari ini.',
+      userEmail: userEmail,
       sendEmail: true,
       done: false,
       emailSent: false,
@@ -74,6 +88,7 @@ export function renderReminderWidget() {
   });
 
   const activeCount = reminders.filter(r => !r.done).length;
+  const savedEmail = getUserEmail();
 
   wrap.innerHTML = `
     <div class="reminder-card">
@@ -84,7 +99,7 @@ export function renderReminderWidget() {
           </div>
           <div>
             <div class="rc-title">Pengingat & Agenda</div>
-            <div class="rc-subtitle">${activeCount} tugas aktif · Terhubung Google Automation</div>
+            <div class="rc-subtitle">${activeCount} aktif ${savedEmail ? '· ' + savedEmail : '· Notifikasi Email Siap'}</div>
           </div>
         </div>
         <button class="rc-add-btn" onclick="window._openReminderModal()">
@@ -112,7 +127,7 @@ export function renderReminderWidget() {
             <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
             <polyline points="22,6 12,13 2,6"/>
           </svg>
-          Kirim Ringkasan Agenda ke Gmail
+          Kirim Ringkasan Agenda ke Email Saya
         </button>
       </div>
     </div>
@@ -223,14 +238,33 @@ export function openReminderModal(id = null) {
   document.getElementById('rem-modal-date').value = existing ? existing.date : todayStr;
   document.getElementById('rem-modal-time').value = existing ? existing.time : timeStr;
   document.getElementById('rem-modal-note').value = existing ? (existing.note || '') : '';
-  document.getElementById('rem-modal-email').checked = existing ? existing.sendEmail !== false : true;
 
+  const sendEmailCheckbox = document.getElementById('rem-modal-email');
+  if (sendEmailCheckbox) {
+    sendEmailCheckbox.checked = existing ? existing.sendEmail !== false : true;
+  }
+
+  // Pre-fill user email input
+  const emailInput = document.getElementById('rem-modal-user-email');
+  if (emailInput) {
+    emailInput.value = existing?.userEmail || getUserEmail();
+  }
+
+  toggleReminderEmailInput();
   modal.classList.add('open');
 }
 
 export function closeReminderModal() {
   const modal = document.getElementById('reminder-modal');
   if (modal) modal.classList.remove('open');
+}
+
+export function toggleReminderEmailInput() {
+  const isChecked = document.getElementById('rem-modal-email')?.checked;
+  const wrap = document.getElementById('rem-email-field-wrap');
+  if (wrap) {
+    wrap.style.display = isChecked ? 'block' : 'none';
+  }
 }
 
 export function applyReminderPreset(title, cat) {
@@ -248,10 +282,22 @@ export function saveReminderFromModal() {
   const time = document.getElementById('rem-modal-time')?.value || '';
   const note = document.getElementById('rem-modal-note')?.value?.trim() || '';
   const sendEmail = document.getElementById('rem-modal-email')?.checked ?? true;
+  const userEmail = document.getElementById('rem-modal-user-email')?.value?.trim() || '';
 
   if (!title) {
     window._moodlyToast?.('Mohon isi judul pengingat');
     return;
+  }
+
+  // If email notification is enabled, ensure email is provided
+  if (sendEmail) {
+    if (!userEmail || !userEmail.includes('@') || !userEmail.includes('.')) {
+      window._moodlyToast?.('Mohon masukkan alamat email yang valid untuk menerima pengingat');
+      document.getElementById('rem-modal-user-email')?.focus();
+      return;
+    }
+    // Save email into localStorage so user never has to re-type it!
+    setUserEmail(userEmail);
   }
 
   if (id) {
@@ -264,6 +310,7 @@ export function saveReminderFromModal() {
       item.time = time;
       item.note = note;
       item.sendEmail = sendEmail;
+      item.userEmail = userEmail || getUserEmail();
     }
   } else {
     // Add new
@@ -274,6 +321,7 @@ export function saveReminderFromModal() {
       date,
       time,
       note,
+      userEmail: userEmail || getUserEmail(),
       sendEmail,
       done: false,
       emailSent: false,
@@ -286,10 +334,9 @@ export function saveReminderFromModal() {
   closeReminderModal();
   window._moodlyToast?.('Pengingat berhasil disimpan ✓');
 
-  // If sendEmail is enabled and datetime is within next 10 mins or today, offer instant test
   if (sendEmail) {
     setTimeout(() => {
-      window._moodlyToast?.('Email reminder terjadwal via Google OAuth 📧');
+      window._moodlyToast?.(`Email reminder akan dikirim ke ${userEmail || getUserEmail()} 📧`);
     }, 1500);
   }
 }
@@ -299,7 +346,14 @@ export async function sendEmailNow(id) {
   const item = reminders.find(r => r.id === id);
   if (!item) return;
 
-  window._moodlyToast?.('Mengirim email via Google Gmail API...');
+  const targetEmail = item.userEmail || getUserEmail();
+  if (!targetEmail || !targetEmail.includes('@')) {
+    openReminderModal(id);
+    window._moodlyToast?.('Masukkan email kamu terlebih dahulu agar notifikasi terkirim');
+    return;
+  }
+
+  window._moodlyToast?.(`Mengirim pengingat ke ${targetEmail}...`);
 
   try {
     const res = await fetch('/api/reminder', {
@@ -307,12 +361,12 @@ export async function sendEmailNow(id) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         action: 'send_email',
-        to: DEFAULT_RECIPIENT,
+        to: targetEmail,
         title: item.title,
         note: item.note,
         datetime: `${item.date || ''} ${item.time || ''}`.trim(),
         category: item.category || 'Self-care',
-        userName: localStorage.getItem('moodly_uname') || 'Jes',
+        userName: localStorage.getItem('moodly_uname') || 'Sahabat Moodly',
       }),
     });
 
@@ -322,8 +376,8 @@ export async function sendEmailNow(id) {
       saveToStorage();
       window._moodlyAlert?.({
         icon: '✉️',
-        title: 'Email Terkirim!',
-        msg: `Notifikasi pengingat "${item.title}" berhasil dikirim otomatis ke ${DEFAULT_RECIPIENT} via Gmail API.`,
+        title: 'Pengingat Terkirim!',
+        msg: `Notifikasi "${item.title}" berhasil dikirim otomatis dari sistem Moodly ke email kamu (${targetEmail}).`,
         okTxt: 'Bagus Sekali',
       });
     } else {
@@ -341,7 +395,14 @@ export async function sendDailyAgendaEmail() {
     return;
   }
 
-  window._moodlyToast?.('Menyiapkan ringkasan agenda ke Gmail...');
+  const targetEmail = getUserEmail();
+  if (!targetEmail || !targetEmail.includes('@')) {
+    openReminderModal();
+    window._moodlyToast?.('Masukkan email kamu di form pengingat terlebih dahulu ya.');
+    return;
+  }
+
+  window._moodlyToast?.(`Mengirim ringkasan agenda ke ${targetEmail}...`);
 
   try {
     const res = await fetch('/api/reminder', {
@@ -349,9 +410,9 @@ export async function sendDailyAgendaEmail() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         action: 'send_summary',
-        to: DEFAULT_RECIPIENT,
+        to: targetEmail,
         reminders: reminders,
-        userName: localStorage.getItem('moodly_uname') || 'Jes',
+        userName: localStorage.getItem('moodly_uname') || 'Sahabat Moodly',
       }),
     });
 
@@ -360,7 +421,7 @@ export async function sendDailyAgendaEmail() {
       window._moodlyAlert?.({
         icon: '📋',
         title: 'Ringkasan Terkirim!',
-        msg: `Daftar agenda harianmu telah dikirimkan ke ${DEFAULT_RECIPIENT} secara otomatis.`,
+        msg: `Daftar seluruh agenda harianmu telah dikirimkan ke email kamu (${targetEmail}).`,
         okTxt: 'Sip!',
       });
     } else {
@@ -374,7 +435,6 @@ export async function sendDailyAgendaEmail() {
 
 /* ──────────── REAL-TIME BACKGROUND CHECKER ──────────── */
 function setupAutomationChecker() {
-  // Check every 30 seconds
   setInterval(() => {
     checkDueReminders();
   }, 30000);
@@ -388,11 +448,9 @@ function checkDueReminders() {
   reminders.forEach(r => {
     if (!r.done && !r.emailSent && r.sendEmail && r.date === todayStr && r.time) {
       if (r.time === currentTimeStr) {
-        // Trigger notification and auto email
         r.emailSent = true;
         saveToStorage();
 
-        // Browser notification if permitted
         if ('Notification' in window && Notification.permission === 'granted') {
           new Notification(`Moodly Reminder: ${r.title}`, {
             body: r.note || 'Waktunya menjalankan agendamu sekarang.',
@@ -400,14 +458,15 @@ function checkDueReminders() {
           });
         }
 
-        // Send automated email via Gmail API
-        sendEmailNow(r.id);
+        const targetEmail = r.userEmail || getUserEmail();
+        if (targetEmail && targetEmail.includes('@')) {
+          sendEmailNow(r.id);
+        }
       }
     }
   });
 }
 
-// Request notification permission smoothly
 export function requestNotificationPermission() {
   if ('Notification' in window && Notification.permission === 'default') {
     Notification.requestPermission();
@@ -418,6 +477,7 @@ export function requestNotificationPermission() {
 if (typeof window !== 'undefined') {
   window._openReminderModal = openReminderModal;
   window._closeReminderModal = closeReminderModal;
+  window._toggleReminderEmailInput = toggleReminderEmailInput;
   window._saveReminderFromModal = saveReminderFromModal;
   window._setReminderFilter = setReminderFilter;
   window._toggleReminderDone = toggleReminderDone;

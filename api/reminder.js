@@ -119,6 +119,7 @@ export default async function handler(req, res) {
 </html>`;
 
       const rawMsg = [
+        `From: Moodly <erlanigwork@gmail.com>`,
         `To: ${to}`,
         `Subject: ${utf8Subject}`,
         'MIME-Version: 1.0',
@@ -200,6 +201,7 @@ export default async function handler(req, res) {
 </html>`;
 
       const rawMsg = [
+        `From: Moodly <erlanigwork@gmail.com>`,
         `To: ${to}`,
         `Subject: ${utf8Subject}`,
         'MIME-Version: 1.0',
