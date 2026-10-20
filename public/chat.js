@@ -455,10 +455,10 @@ function appendMessage(role, text, animate = false, articleIdx = null) {
       bubble.appendChild(artEl);
     }
 
-    const label = document.createElement('div');
-    label.innerHTML = `<svg width="8" height="8" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="#8e8e93" stroke-width="2" stroke-linejoin="round"/></svg>&nbsp;Jawaban diberikan oleh AI Jes`;
-    label.style.cssText = 'display:flex;align-items:center;gap:4px;font-size:9px;color:#8e8e93;font-weight:500;margin-top:10px;padding-top:8px;border-top:1px solid rgba(0,0,0,.06);white-space:nowrap;font-family:inherit';
-    bubble.appendChild(label);
+
+
+
+
 
   } else {
     bubble.textContent = text;

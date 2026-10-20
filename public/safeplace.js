@@ -1,3 +1,36 @@
+
+export function getDoaIconSvg(cat) {
+  switch(cat) {
+    case 'cemas':
+      return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff2d55" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>';
+    case 'harian':
+      return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff9500" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>';
+    case 'lapang':
+      return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>';
+    case 'sedih':
+      return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round"><path d="M17.5 19H9a7 7 0 116.71-9h1.79a4.5 4.5 0 110 9z"/></svg>';
+    case 'syukur':
+      return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+    default:
+      return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15z"/></svg>';
+  }
+}
+
+export function getKajianIconSvg(cat) {
+  if (cat.includes('Ketenangan') || cat.includes('Tawakkal')) {
+    return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff2d55" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>';
+  }
+  if (cat.includes('Doa') || cat.includes('Dzikir')) {
+    return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff9500" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>';
+  }
+  if (cat.includes('Syukur')) {
+    return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+  }
+  if (cat.includes('Compassion') || cat.includes('Hubungan')) {
+    return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>';
+  }
+  return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>';
+}
 /* ═══════════════════════════════════════
    MOODLY — safeplace.js (v2 Enhanced)
    Safe Place: Rohani — 114 Surah, Audio Tilawah,
@@ -401,11 +434,26 @@ async function fetchPrayerTimes(lat, lon) {
 }
 
 const PRAYER_NAMES = {
-  Fajr: { label: 'Subuh', emoji: '🌅' },
-  Dhuhr: { label: 'Dzuhur', emoji: '☀️' },
-  Asr: { label: 'Ashar', emoji: '🌤️' },
-  Maghrib: { label: 'Maghrib', emoji: '🌇' },
-  Isha: { label: 'Isya', emoji: '🌙' },
+  Fajr: {
+    label: 'Subuh',
+    svg: '<path d="M12 2v4M4.93 4.93l2.83 2.83M2 12h4M4.93 19.07l2.83-2.83M12 18a6 6 0 100-12 6 6 0 000 12z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'
+  },
+  Dhuhr: {
+    label: 'Dzuhur',
+    svg: '<circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'
+  },
+  Asr: {
+    label: 'Ashar',
+    svg: '<circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M19.07 4.93l-1.41 1.41" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'
+  },
+  Maghrib: {
+    label: 'Maghrib',
+    svg: '<path d="M17 18a5 5 0 00-10 0M12 2v7M4.22 10.22l2.12 2.12M19.78 10.22l-2.12 2.12M1 18h22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'
+  },
+  Isha: {
+    label: 'Isya',
+    svg: '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
+  },
 };
 
 /* ════════════════
@@ -437,7 +485,7 @@ function renderSafePlace() {
           Rohani & Ketenangan Jiwa
         </div>
         <div style="font-size:22px; font-weight:800; color:var(--text); display:flex; align-items:center; gap:6px; letter-spacing:-0.5px;">
-          Safe Place <span style="font-size:20px;">🌸</span>
+          Safe Place
         </div>
       </div>
     </div>
@@ -449,9 +497,9 @@ function renderSafePlace() {
           <div style="font-size:12px; color:rgba(255,255,255,.8); font-weight:600;">${greeting}</div>
           <div style="font-size:24px; font-weight:800; font-family:serif; direction:rtl; color:#fff;">${arabGreeting}</div>
         </div>
-        <div style="font-size:36px; filter:drop-shadow(0 4px 12px rgba(0,0,0,0.15));">🕌</div>
+        <div class="sp-hero-ic"><img src="img/3d/3d-star.png" style="width:40px;height:40px;object-fit:contain" alt=""></div>
       </div>
-      <div style="font-size:13px; color:rgba(255,255,255,.9); margin-bottom:12px;">Hati yang tenang dimulai dari mengingat-Nya 🤍</div>
+      <div style="font-size:13px; color:rgba(255,255,255,.9); margin-bottom:12px;">Hati yang tenang dimulai dari mengingat-Nya.</div>
 
       <div class="sp-quote-box">
         <div style="font-size:17px; font-weight:700; text-align:right; direction:rtl; line-height:1.7; font-family:serif; margin-bottom:6px;">
@@ -460,12 +508,12 @@ function renderSafePlace() {
         <div style="font-size:12px; font-style:italic; opacity:0.95; line-height:1.5; margin-bottom:4px;">
           "Boleh jadi kamu membenci sesuatu, padahal ia amat baik bagimu"
         </div>
-        <div style="font-size:11px; opacity:0.8; font-weight:700;">📖 QS. Al-Baqarah: 216</div>
+        <div style="font-size:11px; opacity:0.8; font-weight:700;">QS. Al-Baqarah: 216</div>
       </div>
     </div>
 
     <!-- SECTION: JADWAL SHOLAT -->
-    <div class="slbl">🕐 Jadwal Sholat</div>
+    <div class="slbl"><img src="img/3d/3d-clock.png" class="slbl-3d" alt=""> Jadwal Sholat</div>
     <div class="sp-prayer-card" id="sp-prayer-card">
       <div class="sp-prayer-loading">
         <div class="sp-prayer-dots"><span></span><span></span><span></span></div>
@@ -474,14 +522,16 @@ function renderSafePlace() {
     </div>
 
     <!-- SECTION: DIGITAL TASBIH -->
-    <div class="slbl">📿 Tasbih Digital</div>
+    <div class="slbl"><img src="img/3d/3d-target.png" class="slbl-3d" alt=""> Tasbih Digital</div>
     <div class="sp-tasbih-container">
       <div class="sp-tasbih-header">
         <div>
           <div id="tasbih-active-name" style="font-weight:800;font-size:16px;color:var(--text)">Subhanallah</div>
           <div id="tasbih-active-arti" style="font-size:12px;color:var(--muted)">Maha Suci Allah</div>
         </div>
-        <button onclick="window._resetTasbih()" class="sp-tasbih-reset-btn">🔄 Reset</button>
+        <button onclick="window._resetTasbih()" class="sp-tasbih-reset-btn">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:3px"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>Reset
+  </button>
       </div>
 
       <!-- Preset Pills -->
@@ -508,7 +558,7 @@ function renderSafePlace() {
     </div>
 
     <!-- SECTION: AL-QURAN 114 SURAH -->
-    <div class="slbl">📖 Al-Qur'an (114 Surah)</div>
+    <div class="slbl"><img src="img/3d/3d-star.png" class="slbl-3d" alt=""> Al-Qur'an (114 Surah)</div>
     <div class="sp-quran-box">
       <!-- Search & Filters -->
       <div class="sp-quran-controls">
@@ -518,9 +568,9 @@ function renderSafePlace() {
         </div>
         <div class="sp-filter-chips">
           <button class="sp-chip active" onclick="window._setSurahFilter('all', this)">Semua (114)</button>
-          <button class="sp-chip" onclick="window._setSurahFilter('fav', this)">❤️ Favorit</button>
-          <button class="sp-chip" onclick="window._setSurahFilter('Meccan', this)">🕋 Makkiyah</button>
-          <button class="sp-chip" onclick="window._setSurahFilter('Medinan', this)">🕌 Madaniyah</button>
+          <button class="sp-chip" onclick="window._setSurahFilter('fav', this)">Favorit</button>
+          <button class="sp-chip" onclick="window._setSurahFilter('Meccan', this)">Makkiyah</button>
+          <button class="sp-chip" onclick="window._setSurahFilter('Medinan', this)">Madaniyah</button>
         </div>
       </div>
 
@@ -531,30 +581,32 @@ function renderSafePlace() {
     </div>
 
     <!-- SECTION: KAJIAN -->
-    <div class="slbl">💡 Kajian Pencerah Jiwa</div>
+    <div class="slbl"><img src="img/3d/3d-fire.png" class="slbl-3d" alt=""> Kajian Pencerah Jiwa</div>
     <div class="sp-kajian-list">
       ${KAJIAN_LIST.map(k => `
         <div class="sp-kajian-card" onclick="window._openKajian('${k.id}')">
           <div class="sp-kajian-top">
-            <span class="sp-kajian-em">${k.emoji}</span>
+            <div class="sp-kajian-ic">${getKajianIconSvg(k.category)}</div>
             <div class="sp-kajian-meta">
               <div class="sp-kajian-cat">${k.category}</div>
               <div class="sp-kajian-title">${k.title}</div>
             </div>
             <div class="sp-kajian-time">${k.readTime}</div>
           </div>
-          <div class="sp-kajian-src">📚 ${k.source}</div>
+          <div class="sp-kajian-src">${k.source}</div>
         </div>
       `).join('')}
     </div>
 
     <!-- SECTION: DOA HARIAN -->
-    <div class="slbl">🤲 Doa Pilihan Penenang Jiwa</div>
+    <div class="slbl"><img src="img/3d/3d-heart.png" class="slbl-3d" alt=""> Doa Pilihan Penenang Jiwa</div>
     <div class="sp-doa-grid">
       ${DOA_LIST.map((d,i) => `
         <button class="sp-doa-btn" onclick="window._showDoa(${i})">
-          <span style="font-size:22px">${d.emoji}</span>
-          <span style="font-size:12px;font-weight:700;color:var(--text);line-height:1.3">${d.name}</span>
+          <div class="sp-doa-ic">
+            ${getDoaIconSvg(d.cat)}
+          </div>
+          <div class="sp-doa-title">${d.name}</div>
         </button>
       `).join('')}
     </div>
@@ -619,7 +671,9 @@ function renderSurahGrid() {
           <div class="sp-surah-arti">${s.englishNameTranslation} · ${s.numberOfAyahs} ayat</div>
         </div>
         <button class="sp-surah-fav-btn" onclick="event.stopPropagation(); window._toggleFavSurah(${s.number})">
-          ${isFav ? '❤️' : '🤍'}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="${isFav ? '#ff2d55' : 'none'}" stroke="${isFav ? '#ff2d55' : '#8e8e93'}" stroke-width="2">
+            <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+          </svg>
         </button>
       </div>
     `;
@@ -876,7 +930,7 @@ function renderPrayerTimes(timings, cityName) {
     <div class="sp-next-prayer">
       <div>
         <div class="sp-next-label">Sholat Berikutnya</div>
-        <div class="sp-next-name">${nextPrayer.emoji} ${nextPrayer.label}</div>
+        <div class="sp-next-name"><span class="sp-next-svg" style="display:inline-flex;vertical-align:middle;margin-right:6px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none">${nextPrayer.svg}</svg></span>${nextPrayer.label}</div>
         <div class="sp-next-time">${nextPrayer.time} WIB</div>
       </div>
       <div class="sp-next-countdown">${countdownStr}</div>
@@ -887,7 +941,7 @@ function renderPrayerTimes(timings, cityName) {
         const isPast = p.minutes < nowMinutes;
         const isNext = p.key === nextPrayer.key;
         return `<div class="sp-prayer-item ${isNext ? 'sp-prayer-next' : ''} ${isPast ? 'sp-prayer-past' : ''}">
-          <span class="sp-pi-em">${p.emoji}</span>
+          <span class="sp-pi-em"><svg width="18" height="18" viewBox="0 0 24 24" fill="none">${p.svg}</svg></span>
           <div class="sp-pi-name">${p.label}</div>
           <div class="sp-pi-time">${p.time}</div>
           ${isPast ? '<div class="sp-pi-done">✓</div>' : ''}

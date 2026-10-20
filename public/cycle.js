@@ -700,8 +700,8 @@ export async function renderAIPrediction(forceRefresh = false) {
     el.innerHTML = `
       <div class="ai-pred-empty">
         <div class="ape-ico">🔮</div>
-        <div class="ape-title">Prediksi AI</div>
-        <div class="ape-sub">Catat setidaknya 1 periode yang selesai<br>untuk mendapat prediksi cerdas dari AI</div>
+        <div class="ape-title">Prediksi Siklus</div>
+        <div class="ape-sub">Catat setidaknya 1 periode yang selesai<br>untuk melihat perkiraan siklus berikutnya</div>
       </div>`;
     return;
   }
@@ -717,7 +717,7 @@ export async function renderAIPrediction(forceRefresh = false) {
   el.innerHTML = `
     <div class="ai-pred-loading">
       <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-      <div style="font-size:12px;color:var(--muted);margin-top:8px">AI memprediksi siklus berikutnya…</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:8px">Menghitung perkiraan siklus berikutnya…</div>
     </div>`;
 
   const data = await _fetchAIPrediction(completed, active);
@@ -742,7 +742,7 @@ function _renderAIPredData(el, d) {
     <div class="ai-pred-card">
       <div class="apc-header">
         <div class="apc-title-row">
-          <span class="apc-badge">🔮 Prediksi AI</span>
+          <span class="apc-badge">✨ Prediksi Siklus</span>
           <button class="apc-refresh" onclick="window._refreshAIPred()">↻</button>
         </div>
         <div class="apc-motivasi">${d.motivasi || ''}</div>
@@ -792,7 +792,7 @@ function _renderAIPredFallback(el) {
       <div class="apc-header">
         <div class="apc-title-row">
           <span class="apc-badge">📅 Prediksi</span>
-          <button class="apc-refresh" onclick="window._refreshAIPred()">↻ AI</button>
+          <button class="apc-refresh" onclick="window._refreshAIPred()">↻ Hitung Ulang</button>
         </div>
         <div class="apc-motivasi">Kamu luar biasa sudah tracking siklus ini 🌸</div>
       </div>
@@ -812,7 +812,7 @@ function _renderAIPredFallback(el) {
             <div class="apc-row-val">${fmt(fertStart)} – ${fmt(addDays(ovul, 1))}</div>
           </div>
         </div>
-        <div class="apc-note">Rata-rata siklus: ${avgLen} hari · ${avgDur} hari mens. Aktifkan Groq untuk prediksi AI yang lebih cerdas.</div>
+        <div class="apc-note">Rata-rata siklus: ${avgLen} hari · ${avgDur} hari durasi menstruasi.</div>
       </div>
     </div>`;
 }
@@ -1265,7 +1265,7 @@ export function renderHomeCycleBanner() {
     <div class="cb-body">
       <div class="cb-tag ${info.phase}">Fase ${phase.name} · H${info.dayOfCycle}</div>
       <div class="cb-title">${titles[info.phase]}</div>
-      <div class="cb-sub">Lihat prediksi AI →</div>
+      <div class="cb-sub">Lihat perkiraan siklus →</div>
     </div><div class="cb-arr" style="color:${phase.color}">›</div>`;
 }
 

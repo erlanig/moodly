@@ -86,7 +86,12 @@ function renderStoryPreview() {
   const timeStr = now.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' });
 
   // Intensity bar fill
-  const intMap = { 'Ringan': 33, 'Lumayan': 66, 'Berat': 100 };
+  const intMap = {
+    'Ringan': 33, 'Lumayan': 66, 'Berat': 100,
+    'Tenang & Bersyukur': 33, 'Cukup Bersemangat': 66, 'Puncak Bahagia': 100,
+    'Santai & Mengalir': 33, 'Cukup Seimbang': 66, 'Penuh Perenungan': 100,
+    'Masih Terkendali': 33, 'Cukup Menguras': 66, 'Sangat Menyesakkan': 100,
+  };
   const intPct = intMap[currentEntry.intensity] || 50;
 
   // Causes chips

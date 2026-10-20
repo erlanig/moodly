@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════
    MOODLY — checkin.js
-   Mood check-in: 3-step flow
+   Mood check-in: 3-step flow (Adaptive & Positive)
    ═══════════════════════════════════════ */
 
 import { addEntry } from './firebase.js';
@@ -30,11 +30,82 @@ export const CAUSES = [
   {svg:'<circle cx="12" cy="12" r="10" stroke="#ff2d55" stroke-width="1.8"/><path d="M12 16v-4M12 8h.01" stroke="#ff2d55" stroke-width="2" stroke-linecap="round"/>',n:'Ga tau'},
 ];
 
-export const INTENSITIES = [
-  {l:'Ringan', svg:'<path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke="#ff2d55" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="4" stroke="#ff2d55" stroke-width="2"/>'},
-  {l:'Lumayan',svg:'<circle cx="12" cy="12" r="10" stroke="#f57c00" stroke-width="2"/><path d="M8 15s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01" stroke="#f57c00" stroke-width="2" stroke-linecap="round"/>'},
-  {l:'Berat',  svg:'<circle cx="12" cy="12" r="10" stroke="#e53935" stroke-width="2"/><path d="M16 16s-1.5-2-4-2-4 2-4 2M9 9h.01M15 9h.01" stroke="#e53935" stroke-width="2" stroke-linecap="round"/>'},
-];
+export const INTENSITY_PRESETS = {
+  positive: {
+    title: 'Energi Perasaanmu',
+    hint: 'Seberapa kuat energi positif yang kamu rasakan sekarang?',
+    options: [
+      {
+        l: 'Tenang & Bersyukur',
+        sub: 'Adem, damai di hati, dan bersahaja',
+        color: '#10b981',
+        svg: '<path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" stroke="#10b981" stroke-width="2" stroke-linecap="round"/>'
+      },
+      {
+        l: 'Cukup Bersemangat',
+        sub: 'Aktif, produktif, dan ceria hari ini',
+        color: '#ff9500',
+        svg: '<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="#ff9500" stroke-width="2" stroke-linejoin="round"/>'
+      },
+      {
+        l: 'Puncak Bahagia',
+        sub: 'Penuh sukacita, antusias & berenergi',
+        color: '#ff2d55',
+        svg: '<path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" stroke="#ff2d55" stroke-width="2" stroke-linejoin="round"/>'
+      }
+    ]
+  },
+  neutral: {
+    title: 'Ritme Harimu',
+    hint: 'Bagaimana alur dan ritme harimu berjalan?',
+    options: [
+      {
+        l: 'Santai & Mengalir',
+        sub: 'Rileks, tanpa banyak beban pikiran',
+        color: '#0ea5e9',
+        svg: '<path d="M5 12h14M12 5l7 7-7 7" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
+      },
+      {
+        l: 'Cukup Seimbang',
+        sub: 'Semua berjalan normal dan stabil',
+        color: '#f59e0b',
+        svg: '<circle cx="12" cy="12" r="10" stroke="#f59e0b" stroke-width="2"/><path d="M8 12h8" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>'
+      },
+      {
+        l: 'Penuh Perenungan',
+        sub: 'Banyak berpikir tenang dan introspeksi',
+        color: '#8b5cf6',
+        svg: '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
+      }
+    ]
+  },
+  difficult: {
+    title: 'Beban Perasaan',
+    hint: 'Seberapa dalam perasaan ini memengaruhimu?',
+    options: [
+      {
+        l: 'Masih Terkendali',
+        sub: 'Bisa diatasi perlahan, butuh sedikit jeda',
+        color: '#3b82f6',
+        svg: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="#3b82f6" stroke-width="2" stroke-linejoin="round"/>'
+      },
+      {
+        l: 'Cukup Menguras',
+        sub: 'Mulai lelah dan butuh waktu rehat',
+        color: '#f59e0b',
+        svg: '<circle cx="12" cy="12" r="10" stroke="#f59e0b" stroke-width="2"/><path d="M12 8v4M12 16h.01" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>'
+      },
+      {
+        l: 'Sangat Menyesakkan',
+        sub: 'Terasa berat, butuh teman curhat & istirahat',
+        color: '#ef4444',
+        svg: '<circle cx="12" cy="12" r="10" stroke="#ef4444" stroke-width="2"/><path d="M15 9l-6 6M9 9l6 6" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>'
+      }
+    ]
+  }
+};
+
+export const INTENSITIES = INTENSITY_PRESETS.difficult.options;
 
 /* ════════════════
    STATE
@@ -43,6 +114,49 @@ let cur = { mood: null, causes: [], intensity: null };
 let onSubmitCallback = null;
 
 const CI_TITLES = ['','Mood kamu sekarang?','Apa yang paling ngaruh?','Seberapa intens?'];
+
+export function renderIntensityOptions() {
+  const ir = document.getElementById('int-row');
+  if (!ir) return;
+  ir.innerHTML = '';
+
+  let group = 'difficult';
+  if (cur.mood) {
+    if (['Happy', 'Oke'].includes(cur.mood.l)) group = 'positive';
+    else if (cur.mood.l === 'Biasa') group = 'neutral';
+  }
+  const config = INTENSITY_PRESETS[group];
+
+  const hintEl = document.querySelector('#st3 .step-hint');
+  if (hintEl) hintEl.textContent = config.hint;
+
+  config.options.forEach(opt => {
+    const el = document.createElement('div');
+    el.className = 'int-btn' + (cur.intensity === opt.l ? ' sel' : '');
+    el.innerHTML = `
+      <div class="int-btn-icon" style="background:${opt.color}15">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">${opt.svg}</svg>
+      </div>
+      <div class="int-btn-info">
+        <div class="int-btn-title">${opt.l}</div>
+        <div class="int-btn-sub">${opt.sub}</div>
+      </div>
+      <div class="int-btn-check">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>
+    `;
+    el.onclick = () => {
+      document.querySelectorAll('.int-btn').forEach(x => x.classList.remove('sel'));
+      el.classList.add('sel');
+      cur.intensity = opt.l;
+      const b3 = document.getElementById('btn3');
+      if (b3) b3.disabled = false;
+    };
+    ir.appendChild(el);
+  });
+}
 
 /* ════════════════
    BUILD UI (once)
@@ -82,18 +196,7 @@ export function buildCheckinUI() {
   });
 
   /* intensity */
-  const ir = document.getElementById('int-row');
-  ir.innerHTML = '';
-  INTENSITIES.forEach(t => {
-    const el = document.createElement('button'); el.className = 'int-btn';
-    el.innerHTML = `<svg viewBox="0 0 24 24" fill="none">${t.svg}</svg>${t.l}`;
-    el.onclick = () => {
-      document.querySelectorAll('.int-btn').forEach(x => x.classList.remove('sel'));
-      el.classList.add('sel'); cur.intensity = t.l;
-      document.getElementById('btn3').disabled = false;
-    };
-    ir.appendChild(el);
-  });
+  renderIntensityOptions();
 }
 
 /* ════════════════
@@ -120,7 +223,18 @@ export function goStep(n) {
     else if (i === n) seg.classList.add('on');
   });
   document.getElementById('ci-num').textContent  = `${n} / 3`;
-  document.getElementById('ci-title').textContent = CI_TITLES[n];
+
+  if (n === 3) {
+    renderIntensityOptions();
+    let group = 'difficult';
+    if (cur.mood) {
+      if (['Happy', 'Oke'].includes(cur.mood.l)) group = 'positive';
+      else if (cur.mood.l === 'Biasa') group = 'neutral';
+    }
+    document.getElementById('ci-title').textContent = INTENSITY_PRESETS[group].title;
+  } else {
+    document.getElementById('ci-title').textContent = CI_TITLES[n];
+  }
 }
 
 /* ════════════════
@@ -171,7 +285,7 @@ export async function submitCheckin(entries) {
   }, 2200); // muncul setelah success toast hilang
 
 
-  // Tunjukkan tombol chat ke AI setelah check-in
+  // Tunjukkan tombol chat ke Jes setelah check-in
   const chatBtn = document.getElementById('post-checkin-chat');
   if (chatBtn) {
     chatBtn.dataset.mood      = JSON.stringify(cur.mood);

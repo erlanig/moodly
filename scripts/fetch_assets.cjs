@@ -72,6 +72,13 @@ const threeDIcons = [
   { comp: 'ChatBubble', file: '3d-chat.png' },
   { comp: 'Trophy', file: '3d-trophy.png' },
   { comp: 'Target', file: '3d-target.png' },
+  { comp: 'Shield', file: '3d-shield.png' },
+  { comp: 'Notebook', file: '3d-book.png' },
+  { comp: 'Bulb', file: '3d-bulb.png' },
+  { comp: 'Bell', file: '3d-bell.png' },
+  { comp: 'Moon', file: '3d-moon.png' },
+  { comp: 'TeaCup', file: '3d-cup.png' },
+  { comp: 'Umbrella', file: '3d-umbrella.png' },
 ];
 
 async function main() {
