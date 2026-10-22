@@ -3328,43 +3328,44 @@ html, body {
 
 /* ─── EXCLUSIVE BIRTHDAY DATE CAMPAIGN BANNER (BLIBLI / BP STYLE) ─── */
 .bday-promo-card {
-  margin-bottom: 16px;
+  position: relative;
+  margin-top: 14px;
+  margin-bottom: 20px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   flex-shrink: 0;
 }
 .bday-promo-card:active {
   transform: scale(0.98);
 }
+
+/* Layer 1: Base Gradient Card */
 .bpc-banner {
   position: relative;
   background: linear-gradient(135deg, #be123c 0%, #ff2d55 52%, #ff4b72 100%);
   border-radius: 22px;
   padding: 18px 16px 16px;
   color: #ffffff;
-  overflow: hidden;
   box-shadow: 0 10px 28px rgba(255, 45, 85, 0.26), 0 2px 8px rgba(255, 45, 85, 0.12);
   display: flex;
-  align-items: stretch;
-  justify-content: space-between;
   min-height: 160px;
+  overflow: visible; /* 2-LAYER: Let 3D art burst out! */
 }
 .bpc-glow {
   position: absolute;
-  top: -50px; right: 20px;
-  width: 180px; height: 180px;
+  top: -40px; right: 20px;
+  width: 160px; height: 160px;
   border-radius: 50%;
   background: radial-gradient(circle, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0) 70%);
   pointer-events: none;
 }
 .bpc-content {
-  flex: 1;
+  width: 62%;
   z-index: 2;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding-right: 10px;
 }
 .bpc-top-tag {
   display: flex; align-items: center; gap: 6px;
@@ -3423,30 +3424,42 @@ html, body {
   stroke: #ff2d55;
 }
 
-/* 3D Asset on Right Side bursting out */
-.bpc-art-wrap {
-  width: 124px;
-  position: relative;
+/* Layer 2: Floating & Protruding 3D Asset */
+.bpc-art-layer {
+  position: absolute;
+  right: -6px;
+  top: -16px;
+  width: 148px;
+  height: 188px;
+  z-index: 5; /* Sits ON TOP of Layer 1 */
+  pointer-events: none;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  z-index: 2;
-  flex-shrink: 0;
 }
-.bpc-3d-img {
-  width: 128px;
-  height: 128px;
+.bpc-3d-floating {
+  width: 142px;
+  height: 142px;
   object-fit: cover;
-  border-radius: 18px;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3), 0 0 0 2px rgba(255, 255, 255, 0.25);
-  transform: perspective(600px) rotateY(-8deg) rotateX(4deg);
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 20px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.32), 0 2px 8px rgba(0, 0, 0, 0.2), 0 0 0 3px rgba(255, 255, 255, 0.4);
+  transform: perspective(700px) rotateY(-10deg) rotateX(6deg) translateY(-2px);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
 }
-.bday-promo-card:hover .bpc-3d-img {
-  transform: perspective(600px) rotateY(-2deg) rotateX(2deg) scale(1.05);
+.bday-promo-card:hover .bpc-3d-floating {
+  transform: perspective(700px) rotateY(-2deg) rotateX(2deg) translateY(-6px) scale(1.05);
+}
+.bpc-reflection-shadow {
+  width: 110px;
+  height: 12px;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0) 70%);
+  margin-top: 8px;
+  border-radius: 50%;
+  filter: blur(2px);
 }
 
-/* Bottom carousel subbar (like #NOBLABLADIBLIBLI in uploaded image) */
+/* Bottom carousel subbar */
 .bpc-footer {
   display: flex; align-items: center; justify-content: space-between;
   padding: 6px 10px 0;
@@ -3472,7 +3485,6 @@ html, body {
   background: #ff2d55;
 }
 
-/* ─── 3D HERO BANNERS FOR OTHER SCREENS ─── */
 .insight-3d-hero,
 .news-3d-spotlight {
   background: #ffffff;

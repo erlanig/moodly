@@ -806,11 +806,7 @@ export async function renderAIPrediction(forceRefresh = false) {
   if (aiPredLoading) return;
   aiPredLoading = true;
 
-  el.innerHTML = `
-    <div class="ai-pred-loading">
-      <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-      <div style="font-size:12px;color:var(--muted);margin-top:8px">Menghitung perkiraan siklus berikutnya…</div>
-    </div>`;
+  _renderAIPredFallback(el);
 
   const data = await _fetchAIPrediction(completed, active);
   aiPredLoading = false;
@@ -987,13 +983,7 @@ export async function renderFoodRecommendation(forceRefresh = false) {
   if (foodLoading) return;
   foodLoading = true;
 
-  el.innerHTML = `
-    <div class="food-rec-inner">
-      <div class="ldwrap" style="padding:20px 0">
-        <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-        <div class="ld-txt">Menyiapkan rekomendasi nutrisi untuk fase ini…</div>
-      </div>
-    </div>`;
+  _renderFoodData(el, { items: _fallbackFood(phase), drinks: _fallbackDrink(phase), motivasi: _fallbackMotivasi(phase) }, phase);
 
   const todayLog = active ? getTodayLog(active.id) : null;
   const result   = await _fetchFoodFromGroq(phase, todayLog?.symptoms || [], todayLog?.flow || null);

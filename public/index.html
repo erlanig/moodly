@@ -94,8 +94,9 @@
     </div>
   </div>
 
-  <!-- Special Birthday Date Promotional Banner (Blibli / BP Rewards Style with 3dgiur.png) -->
+  <!-- Special Birthday Date Promotional Banner (2-LAYER BP / Blibli Style with Protruding 3D) -->
   <div class="bday-promo-card" id="home-date-pill" onclick="window._openDateInvitation()">
+    <!-- LAYER 1: Base Gradient Card -->
     <div class="bpc-banner">
       <div class="bpc-glow"></div>
       
@@ -117,7 +118,7 @@
           </div>
           <div class="bpc-chip">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            <span>Giur Bistro, Jl. Aria Jipang Bandung</span>
+            <span>Giur Bistro, Jl. Aria Jipang</span>
           </div>
           <div class="bpc-chip bpc-chip-accent">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
@@ -132,12 +133,15 @@
           </div>
         </div>
       </div>
-
-      <div class="bpc-art-wrap">
-        <img src="img/3dgiur.png" alt="Giur Bistro 3D" class="bpc-3d-img">
-      </div>
     </div>
 
+    <!-- LAYER 2: Protruding 3D Render Overlapping the Card -->
+    <div class="bpc-art-layer">
+      <img src="img/3dgiur.png" alt="Giur Bistro 3D" class="bpc-3d-floating">
+      <div class="bpc-reflection-shadow"></div>
+    </div>
+
+    <!-- Bottom subbar -->
     <div class="bpc-footer">
       <div class="bpc-hashtag">#GIURBISTROBANDUNG <span>| 24 Okt 2026</span></div>
       <div class="bpc-dots">
@@ -788,11 +792,11 @@
 <div id="birthday-date-modal" onclick="if(event.target===this)window._closeDateInvitation()">
   <div class="bday-card">
     <!-- Subtle Watermark Silhouette di Belakang Kartu -->
-    <div class="bday-card-watermark" style="background-image: url('img/3dgiur.png');"></div>
+    <div class="bday-card-watermark" style="background-image: url('img/giur.png');"></div>
 
     <!-- Header dengan Siluet Background Giur Bistro -->
     <div class="bday-hero-img-box">
-      <div class="bday-silhouette-bg" style="background-image: url('img/3dgiur.png');"></div>
+      <div class="bday-silhouette-bg" style="background-image: url('img/giur.png');"></div>
       <div class="bday-hero-gradient"></div>
 
       <div class="bday-badge-top">
