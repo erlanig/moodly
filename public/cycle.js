@@ -1164,7 +1164,7 @@ export function openDailyLog(periodId, dateStr) {
   ensureStyles();
   const period = periodId ? periods.find(p => p.id === periodId) : getActivePeriod();
   if (!period) {
-    window._moodlyAlert?.({ icon:'🩸', title:'Tidak ada periode aktif', msg:'Tap "Mulai Menstruasi" untuk memulai periode baru.' });
+    window._moodlyAlert?.({ icon:'img/3d/3d-heart.png', title:'Tidak ada periode aktif', msg:'Tap "Mulai Menstruasi" untuk memulai periode baru.' });
     return;
   }
 
