@@ -372,4 +372,24 @@ export async function saveAIConfig({ groqKey, geminiKey }) {
   }
 }
 
+
+/* ════════════════
+   REMINDERS (CLOUD SYNC FOR CRON)
+════════════════ */
+export async function saveReminderToCloud(item) {
+  try {
+    await setDoc(doc(db, 'reminders', item.id), item);
+  } catch (e) {
+    console.warn('[firebase] saveReminder error:', e.message);
+  }
+}
+
+export async function deleteReminderFromCloud(id) {
+  try {
+    await deleteDoc(doc(db, 'reminders', id));
+  } catch (e) {
+    console.warn('[firebase] deleteReminder error:', e.message);
+  }
+}
+
 export { db, DEVICE_ID, DEFAULT_PASSCODE };

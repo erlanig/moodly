@@ -1,3 +1,4 @@
+import { saveReminderToCloud, deleteReminderFromCloud } from './firebase.js';
 /* ═══════════════════════════════════════
    MOODLY — reminder.js
    Smart Reminder & Task Automation with Google Gmail API
@@ -337,6 +338,8 @@ export function saveReminderFromModal() {
   }
 
   saveToStorage();
+  const savedItem = id ? reminders.find(r => r.id === id) : newItem;
+  if (savedItem) saveReminderToCloud(savedItem);
   closeReminderModal();
   window._moodlyToast?.('Pengingat berhasil disimpan ✓');
 

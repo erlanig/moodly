@@ -37,20 +37,20 @@ export default async function handler(req, res) {
     return res.status(204).end();
   }
 
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed. Use POST.' });
+  if (req.method !== 'POST' && req.method !== 'GET') {
+    return res.status(405).json({ error: 'Method not allowed. Use GET or POST.' });
   }
 
-  const {
-    action = 'send_email',
-    to = DEFAULT_EMAIL,
-    title = 'Pengingat Moodly',
-    note = '',
-    datetime = '',
-    category = 'Self-care',
-    reminders = [],
-    userName = 'Sahabat Moodly',
-  } = req.body || {};
+  const body = req.body || {};
+  const query = req.query || {};
+  const action = query.action || body.action || (req.method === 'GET' ? 'cron_dispatch' : 'send_email');
+  const to = body.to || query.to || DEFAULT_EMAIL;
+  const title = body.title || query.title || 'Pengingat Moodly';
+  const note = body.note || query.note || '';
+  const datetime = body.datetime || query.datetime || '';
+  const category = body.category || query.category || 'Self-care';
+  const reminders = body.reminders || [];
+  const userName = body.userName || query.userName || 'Sahabat Moodly';
 
   try {
     const accessToken = await getAccessToken();
@@ -227,6 +227,119 @@ export default async function handler(req, res) {
 
       const sendData = await sendRes.json();
       return res.status(200).json({ success: true, messageId: sendData.id });
+    }
+
+    
+    if (action === 'cron_dispatch') {
+      // 1. Fetch all pending reminders from Firestore
+      const fsRes = await fetch('https://firestore.googleapis.com/v1/projects/moodly-26/databases/(default)/documents/reminders');
+      if (!fsRes.ok) {
+        const errText = await fsRes.text();
+        return res.status(200).json({ success: true, message: 'No documents or Firestore closed', raw: errText.slice(0, 100) });
+      }
+
+      const fsData = await fsRes.json();
+      const docs = fsData.documents || [];
+      const nowWIB = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
+      const todayStr = nowWIB.toISOString().split('T')[0];
+      const currentHour = nowWIB.getHours();
+      const currentMinute = nowWIB.getMinutes();
+      const currentTimeNum = currentHour * 60 + currentMinute;
+
+      let sentCount = 0;
+
+      for (const doc of docs) {
+        try {
+          const f = doc.fields || {};
+          const docId = doc.name.split('/').pop();
+          const remTitle = f.title?.stringValue || 'Pengingat Harian';
+          const remNote = f.note?.stringValue || '';
+          const remDate = f.date?.stringValue || '';
+          const remTime = f.time?.stringValue || '';
+          const remCat = f.category?.stringValue || 'Self-care';
+          const remUser = f.userName?.stringValue || 'Sahabat Moodly';
+          const targetEmail = f.userEmail?.stringValue || '';
+          const sendEmail = f.sendEmail ? f.sendEmail.booleanValue : true;
+          const emailSent = f.emailSent ? f.emailSent.booleanValue : false;
+
+          if (!sendEmail || emailSent || !targetEmail || !targetEmail.includes('@')) {
+            continue;
+          }
+
+          // Check if due: date is past or today, and time is past or current
+          let isDue = false;
+          if (remDate) {
+            if (remDate < todayStr) {
+              isDue = true;
+            } else if (remDate === todayStr) {
+              if (remTime) {
+                const [h, m] = remTime.split(':').map(Number);
+                const remTimeNum = (h || 0) * 60 + (m || 0);
+                if (currentTimeNum >= remTimeNum) {
+                  isDue = true;
+                }
+              } else {
+                isDue = true;
+              }
+            }
+          }
+
+          if (isDue) {
+            // Send the email via Gmail API
+            const emailSubject = `💖 Pengingat Moodly: ${remTitle}`;
+            const utf8Subject = `=?UTF-8?B?${Buffer.from(emailSubject).toString('base64')}?=`;
+            const htmlBody = `<!DOCTYPE html><html><body style="font-family:sans-serif;background:#fff5f8;padding:24px;">
+              <div style="max-width:480px;margin:0 auto;background:#fff;border-radius:20px;padding:28px;border:1px solid #ffd1dc;">
+                <div style="color:#ff2d55;font-weight:800;font-size:18px;margin-bottom:12px;">moodly reminder</div>
+                <h2 style="color:#1c1c1e;margin-top:0;">${remTitle}</h2>
+                <div style="color:#8e8e93;font-size:13px;margin-bottom:16px;">Jadwal: ${remDate} ${remTime}</div>
+                <div style="background:#fff0f3;border-left:4px solid #ff2d55;padding:14px;border-radius:10px;margin-bottom:18px;color:#333;">
+                  ${remNote || 'Waktunya menjalankan agendamu sekarang. Tetap semangat dan rawat dirimu ya!'}
+                </div>
+                <p style="font-size:12px;color:#8e8e93;">Dikirim otomatis oleh Moodly App Scheduler.</p>
+              </div>
+            </body></html>`;
+
+            const rawMsg = [
+              `From: Moodly <erlanigwork@gmail.com>`,
+              `To: ${targetEmail}`,
+              `Subject: ${utf8Subject}`,
+              'MIME-Version: 1.0',
+              'Content-Type: text/html; charset=UTF-8',
+              '',
+              htmlBody,
+            ].join('\r\n');
+
+            const encoded = Buffer.from(rawMsg).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+
+            const sRes = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
+              method: 'POST',
+              headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+              body: JSON.stringify({ raw: encoded })
+            });
+
+            if (sRes.ok) {
+              sentCount++;
+              // Mark emailSent: true in Firestore
+              await fetch(`https://firestore.googleapis.com/v1/${doc.name}?updateMask.fieldPaths=emailSent`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fields: { emailSent: { booleanValue: true } } })
+              });
+            }
+          }
+        } catch (itemErr) {
+          console.warn('[cron] item dispatch error:', itemErr.message);
+        }
+      }
+
+      return res.status(200).json({
+        success: true,
+        action: 'cron_dispatch',
+        timeWIB: nowWIB.toISOString(),
+        documentsChecked: docs.length,
+        emailsSent: sentCount
+      });
     }
 
     return res.status(400).json({ error: 'Unknown action' });

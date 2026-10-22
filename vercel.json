@@ -1,8 +1,26 @@
 {
   "routes": [
-    { "src": "/", "dest": "/index.html" },
-    { "src": "/admin", "dest": "/admin.html" },
-    { "src": "/chat", "dest": "/chat.html" },
-    { "src": "/(.*)", "dest": "/$1" }
+    {
+      "src": "/",
+      "dest": "/index.html"
+    },
+    {
+      "src": "/admin",
+      "dest": "/admin.html"
+    },
+    {
+      "src": "/chat",
+      "dest": "/chat.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/reminder?action=cron_dispatch",
+      "schedule": "0 1 * * *"
+    }
   ]
 }
