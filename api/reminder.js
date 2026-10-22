@@ -3,19 +3,25 @@
    Vercel Serverless Function → Google OAuth (Gmail API) Automation
    ═══════════════════════════════════════ */
 
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-const GOOGLE_REFRESH_TOKEN = process.env.GOOGLE_REFRESH_TOKEN;
 const DEFAULT_EMAIL = process.env.REMINDER_TO_EMAIL || 'erlanigwork@gmail.com';
+const FIREBASE_API_KEY = process.env.FIREBASE_API_KEY || 'AIzaSyDG-EOW5wlRw7DMPoggax75cgIBRqrwsY4';
 
 async function getAccessToken() {
+  const clientId = process.env.GOOGLE_CLIENT_ID;
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  const refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
+
+  if (!clientId || !clientSecret || !refreshToken) {
+    throw new Error('Google OAuth credentials not configured. Please set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and GOOGLE_REFRESH_TOKEN in Vercel environment variables.');
+  }
+
   const res = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
-      client_id: GOOGLE_CLIENT_ID,
-      client_secret: GOOGLE_CLIENT_SECRET,
-      refresh_token: GOOGLE_REFRESH_TOKEN,
+      client_id: clientId,
+      client_secret: clientSecret,
+      refresh_token: refreshToken,
       grant_type: 'refresh_token',
     }),
   });
@@ -231,17 +237,25 @@ export default async function handler(req, res) {
 
     
     if (action === 'cron_dispatch') {
-      // 1. Fetch all pending reminders from Firestore
-      const fsRes = await fetch('https://firestore.googleapis.com/v1/projects/moodly-26/databases/(default)/documents/reminders');
+      // 1. Fetch all documents in users collection from Firestore using API key
+      const fsRes = await fetch(`https://firestore.googleapis.com/v1/projects/moodly-26/databases/(default)/documents/users?key=${FIREBASE_API_KEY}&pageSize=300`);
       if (!fsRes.ok) {
         const errText = await fsRes.text();
-        return res.status(200).json({ success: true, message: 'No documents or Firestore closed', raw: errText.slice(0, 100) });
+        return res.status(200).json({ success: true, message: 'Firestore query failed', raw: errText.slice(0, 100) });
       }
 
       const fsData = await fsRes.json();
-      const docs = fsData.documents || [];
+      const allDocs = fsData.documents || [];
+      const docs = allDocs.filter(d => {
+        const docId = d.name.split('/').pop();
+        return docId.startsWith('rem_');
+      });
+
       const nowWIB = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
-      const todayStr = nowWIB.toISOString().split('T')[0];
+      const year = nowWIB.getFullYear();
+      const month = String(nowWIB.getMonth() + 1).padStart(2, '0');
+      const day = String(nowWIB.getDate()).padStart(2, '0');
+      const todayStr = `${year}-${month}-${day}`;
       const currentHour = nowWIB.getHours();
       const currentMinute = nowWIB.getMinutes();
       const currentTimeNum = currentHour * 60 + currentMinute;
@@ -257,12 +271,12 @@ export default async function handler(req, res) {
           const remDate = f.date?.stringValue || '';
           const remTime = f.time?.stringValue || '';
           const remCat = f.category?.stringValue || 'Self-care';
-          const remUser = f.userName?.stringValue || 'Sahabat Moodly';
           const targetEmail = f.userEmail?.stringValue || '';
           const sendEmail = f.sendEmail ? f.sendEmail.booleanValue : true;
           const emailSent = f.emailSent ? f.emailSent.booleanValue : false;
+          const done = f.done ? f.done.booleanValue : false;
 
-          if (!sendEmail || emailSent || !targetEmail || !targetEmail.includes('@')) {
+          if (!sendEmail || emailSent || done || !targetEmail || !targetEmail.includes('@')) {
             continue;
           }
 
@@ -321,7 +335,7 @@ export default async function handler(req, res) {
             if (sRes.ok) {
               sentCount++;
               // Mark emailSent: true in Firestore
-              await fetch(`https://firestore.googleapis.com/v1/${doc.name}?updateMask.fieldPaths=emailSent`, {
+              await fetch(`https://firestore.googleapis.com/v1/${doc.name}?updateMask.fieldPaths=emailSent&key=${FIREBASE_API_KEY}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ fields: { emailSent: { booleanValue: true } } })
@@ -337,7 +351,7 @@ export default async function handler(req, res) {
         success: true,
         action: 'cron_dispatch',
         timeWIB: nowWIB.toISOString(),
-        documentsChecked: docs.length,
+        remindersFound: docs.length,
         emailsSent: sentCount
       });
     }

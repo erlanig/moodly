@@ -218,6 +218,9 @@ export function deleteReminder(id) {
     onConfirm: () => {
       reminders = reminders.filter(r => r.id !== id);
       saveToStorage();
+      if (typeof deleteReminderFromCloud === 'function') {
+        deleteReminderFromCloud(id);
+      }
       window._moodlyToast?.('Pengingat dihapus.');
     }
   });
@@ -307,6 +310,7 @@ export function saveReminderFromModal() {
     }
   }
 
+  let savedItem = null;
   if (id) {
     // Edit existing
     const item = reminders.find(r => r.id === id);
@@ -318,10 +322,11 @@ export function saveReminderFromModal() {
       item.note = note;
       item.sendEmail = finalSendEmail;
       item.userEmail = userEmail || getUserEmail();
+      savedItem = item;
     }
   } else {
     // Add new
-    const newItem = {
+    savedItem = {
       id: 'rem_' + Date.now(),
       title,
       category,
@@ -334,24 +339,42 @@ export function saveReminderFromModal() {
       emailSent: false,
       createdAt: Date.now(),
     };
-    reminders.unshift(newItem);
+    reminders.unshift(savedItem);
   }
 
   saveToStorage();
-  const savedItem = id ? reminders.find(r => r.id === id) : newItem;
-  if (savedItem) saveReminderToCloud(savedItem);
+  if (savedItem && typeof saveReminderToCloud === 'function') {
+    saveReminderToCloud(savedItem);
+  }
   closeReminderModal();
   window._moodlyToast?.('Pengingat berhasil disimpan ✓');
 
-  if (sendEmail) {
-    setTimeout(() => {
-      window._moodlyToast?.(`Email reminder akan dikirim ke ${userEmail || getUserEmail()} ✓`);
-    }, 1500);
+  // If time is now or has already passed today, dispatch immediately!
+  if (savedItem && savedItem.sendEmail && !savedItem.emailSent && savedItem.date && savedItem.time) {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const todayStr = `${year}-${month}-${day}`;
+    const [h, m] = savedItem.time.split(':').map(Number);
+    const remMinutes = (h || 0) * 60 + (m || 0);
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+    if ((savedItem.date < todayStr) || (savedItem.date === todayStr && remMinutes <= currentMinutes)) {
+      savedItem.emailSent = true;
+      saveToStorage();
+      if (typeof saveReminderToCloud === 'function') saveReminderToCloud(savedItem);
+      sendEmailNow(savedItem.id, true);
+    } else {
+      setTimeout(() => {
+        window._moodlyToast?.(`Email reminder akan dikirim ke ${savedItem.userEmail} pada jam ${savedItem.time} ✓`);
+      }, 1200);
+    }
   }
 }
 
 /* ──────────── GMAIL AUTOMATION API DISPATCH ──────────── */
-export async function sendEmailNow(id) {
+export async function sendEmailNow(id, isSilent = false) {
   const item = reminders.find(r => r.id === id);
   if (!item) return;
 
@@ -362,7 +385,9 @@ export async function sendEmailNow(id) {
     return;
   }
 
-  window._moodlyToast?.(`Mengirim pengingat ke ${targetEmail}...`);
+  if (!isSilent) {
+    window._moodlyToast?.(`Mengirim pengingat ke ${targetEmail}...`);
+  }
 
   try {
     const res = await fetch('/api/reminder', {
@@ -383,12 +408,19 @@ export async function sendEmailNow(id) {
     if (res.ok && data.success) {
       item.emailSent = true;
       saveToStorage();
-      window._moodlyAlert?.({
-        icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff2d55" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>',
-        title: 'Pengingat Terkirim!',
-        msg: `Notifikasi "${item.title}" berhasil dikirim otomatis dari sistem Moodly ke email kamu (${targetEmail}).`,
-        okTxt: 'Bagus Sekali',
-      });
+      if (typeof saveReminderToCloud === 'function') {
+        saveReminderToCloud(item);
+      }
+      if (isSilent) {
+        window._moodlyToast?.(`Pengingat "${item.title}" otomatis terkirim ke ${targetEmail} ✓`);
+      } else {
+        window._moodlyAlert?.({
+          icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff2d55" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>',
+          title: 'Pengingat Terkirim!',
+          msg: `Notifikasi "${item.title}" berhasil dikirim otomatis dari sistem Moodly ke email kamu (${targetEmail}).`,
+          okTxt: 'Bagus Sekali',
+        });
+      }
     } else {
       throw new Error(data.error?.message || data.error || 'Gagal mengirim email');
     }
@@ -451,25 +483,37 @@ function setupAutomationChecker() {
 
 function checkDueReminders() {
   const now = new Date();
-  const todayStr = now.toISOString().split('T')[0];
-  const currentTimeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const todayStr = `${year}-${month}-${day}`;
+  const currentMinutesNum = now.getHours() * 60 + now.getMinutes();
 
   reminders.forEach(r => {
-    if (!r.done && !r.emailSent && r.sendEmail && r.date === todayStr && r.time) {
-      if (r.time === currentTimeStr) {
+    if (!r.done && !r.emailSent && r.sendEmail && r.date && r.time) {
+      const [h, m] = r.time.split(':').map(Number);
+      const remMinutesNum = (h || 0) * 60 + (m || 0);
+      const isDue = (r.date < todayStr) || (r.date === todayStr && remMinutesNum <= currentMinutesNum);
+
+      if (isDue) {
         r.emailSent = true;
         saveToStorage();
+        if (typeof saveReminderToCloud === 'function') {
+          saveReminderToCloud(r);
+        }
 
         if ('Notification' in window && Notification.permission === 'granted') {
-          new Notification(`Moodly Reminder: ${r.title}`, {
-            body: r.note || 'Waktunya menjalankan agendamu sekarang.',
-            icon: 'img/jes-memoji.svg',
-          });
+          try {
+            new Notification(`Moodly Reminder: ${r.title}`, {
+              body: r.note || 'Waktunya menjalankan agendamu sekarang.',
+              icon: 'img/jes-memoji.svg',
+            });
+          } catch {}
         }
 
         const targetEmail = r.userEmail || getUserEmail();
         if (targetEmail && targetEmail.includes('@')) {
-          sendEmailNow(r.id);
+          sendEmailNow(r.id, true);
         }
       }
     }
