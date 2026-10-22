@@ -14,7 +14,7 @@ const THEMES = [
     bg: 'linear-gradient(160deg, #0a3d1f 0%, #1a6b3a 50%, #0d8c3e 100%)',
     accent: '#4ade80',
     text: '#e8faf0',
-    particle: '🌿',
+    particle: '<span class="story-dot"></span>',
   },
   {
     id: 'sunset',
@@ -22,7 +22,7 @@ const THEMES = [
     bg: 'linear-gradient(160deg, #1a0a2e 0%, #4a1942 50%, #c0392b 100%)',
     accent: '#f97316',
     text: '#fff5f0',
-    particle: '✨',
+    particle: '<span class="story-dot"></span>',
   },
   {
     id: 'ocean',
@@ -30,7 +30,7 @@ const THEMES = [
     bg: 'linear-gradient(160deg, #0c1445 0%, #1a4a8a 50%, #2980b9 100%)',
     accent: '#38bdf8',
     text: '#f0f9ff',
-    particle: '🌊',
+    particle: '<span class="story-dot"></span>',
   },
   {
     id: 'sakura',
@@ -38,7 +38,7 @@ const THEMES = [
     bg: 'linear-gradient(160deg, #3b0764 0%, #7c3aed 50%, #db2777 100%)',
     accent: '#f9a8d4',
     text: '#fdf2f8',
-    particle: '🌸',
+    particle: '<span class="story-dot"></span>',
   },
   {
     id: 'night',
@@ -46,7 +46,7 @@ const THEMES = [
     bg: 'linear-gradient(160deg, #020617 0%, #0f172a 60%, #1e293b 100%)',
     accent: '#818cf8',
     text: '#f1f5f9',
-    particle: '⭐',
+    particle: '<span class="story-dot"></span>',
   },
 ];
 
@@ -220,7 +220,7 @@ export async function shareStory() {
     try {
       await navigator.share({
         title: 'Moodly — Mood Check-in',
-        text: `Mood hari ini: ${currentEntry?.mood?.e} ${currentEntry?.mood?.l} · Cek mood kamu juga di Moodly 🌱`,
+        text: `Mood hari ini: ${currentEntry?.mood?.l} · Cek mood kamu juga di Moodly`,
         url: window.location.href,
       });
       return;

@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════
    MOODLY — api/chat.js
-   Vercel Serverless Function → Google AI Studio (Primary) + Groq (Fallback)
+   Vercel Serverless Function → Google AI Studio (Primary) + Groq (Fallback) + Jes Empathy Core
    ═══════════════════════════════════════ */
 
 export default async function handler(req, res) {
@@ -17,21 +17,36 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { messages, apiKey: clientApiKey, geminiKey: clientGeminiKey } = req.body || {};
+  const { messages = [], apiKey: clientApiKey, geminiKey: clientGeminiKey } = req.body || {};
   const geminiApiKey = clientGeminiKey || process.env.GEMINI_API_KEY;
   const groqApiKey   = clientApiKey   || process.env.GROQ_API_KEY;
 
-  const sysMsg = messages.find(m => m.role === 'system')?.content || '';
-  const chatMsgs = messages.filter(m => m.role !== 'system');
+  const safeMsgs = Array.isArray(messages) ? messages : [];
+  const sysMsg = safeMsgs.find(m => m.role === 'system')?.content || '';
+  const chatMsgs = safeMsgs.filter(m => m.role !== 'system');
   const lastUserMsg = chatMsgs.filter(m => m.role === 'user').slice(-1)[0]?.parts?.[0]?.text || chatMsgs.slice(-1)[0]?.content || '';
 
-  // 1. PRIMARY: Try Google AI Studio (Gemini) with fast 4.5s timeout
+  // 1. PRIMARY: Try Google AI Studio (Gemini) with fast 3.5s timeout
   if (geminiApiKey) {
     try {
-      const contents = chatMsgs.map(m => ({
-        role: m.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: m.content }]
-      }));
+      // Gemini strict format: MUST start with 'user', roles MUST alternate
+      const contents = [];
+      let lastRole = null;
+      for (const m of chatMsgs) {
+        const role = m.role === 'assistant' ? 'model' : 'user';
+        const text = (m.content || '').trim();
+        if (!text) continue;
+        if (contents.length === 0 && role !== 'user') continue;
+        if (role === lastRole) {
+          contents[contents.length - 1].parts[0].text += '\n' + text;
+        } else {
+          contents.push({ role, parts: [{ text }] });
+          lastRole = role;
+        }
+      }
+      if (contents.length === 0) {
+        contents.push({ role: 'user', parts: [{ text: lastUserMsg || 'Halo Jes' }] });
+      }
 
       const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${geminiApiKey}`;
       const geminiRes = await fetch(geminiUrl, {
@@ -42,10 +57,10 @@ export default async function handler(req, res) {
           contents,
           generationConfig: {
             temperature: 0.75,
-            maxOutputTokens: 500,
+            maxOutputTokens: 450,
           }
         }),
-        signal: AbortSignal.timeout(4500)
+        signal: AbortSignal.timeout(3500)
       });
 
       if (geminiRes.ok) {
@@ -56,15 +71,14 @@ export default async function handler(req, res) {
         }
       } else {
         const errText = await geminiRes.text().catch(() => '');
-        console.warn(`[api/chat] Gemini responded with status ${geminiRes.status}:`, errText.slice(0, 200));
-        // If quota exceeded (429) or invalid/no balance (400), don't retry other gemini models, immediately go to Groq
+        console.warn(`[api/chat] Gemini error status ${geminiRes.status}:`, errText.slice(0, 160));
       }
     } catch (ge) {
-      console.warn('[api/chat] Gemini primary engine timed out or error:', ge.message);
+      console.warn('[api/chat] Gemini timeout/error:', ge.message);
     }
   }
 
-  // 2. SECONDARY / FALLBACK: Try Groq with 4.5s timeout
+  // 2. SECONDARY / FALLBACK: Try Groq with fast 3.5s timeout
   if (groqApiKey) {
     const candidateGroqModels = ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant'];
     for (const model of candidateGroqModels) {
@@ -77,11 +91,11 @@ export default async function handler(req, res) {
           },
           body: JSON.stringify({
             model,
-            max_tokens: 450,
+            max_tokens: 400,
             temperature: 0.75,
-            messages,
+            messages: safeMsgs,
           }),
-          signal: AbortSignal.timeout(4500)
+          signal: AbortSignal.timeout(3500)
         });
 
         if (groqRes.ok) {
@@ -97,13 +111,12 @@ export default async function handler(req, res) {
     }
   }
 
-  // 3. FINAL SAFETY NET: Always return HTTP 200 with warm, empathetic Jes reply
-  // This ensures the client NEVER hangs or stays in "mengetik..." state indefinitely!
+  // 3. FINAL SMART SAFETY NET: Immediate empathetic response, never hangs
   const empatheticReplies = [
-    'Aku di sini mendengarkanmu. Ceritakan pelan-pelan ya, apa yang paling bikin perasaanmu berat saat ini?',
-    'Terima kasih sudah mau berbagi denganku. Luapkan saja semua unek-unekmu, kamu aman di sini.',
+    'Aku di sini mendengarkanmu dengan tulus. Ceritakan pelan-pelan ya, apa yang paling bikin perasaanmu berat saat ini?',
+    'Terima kasih sudah mau berbagi denganku. Luapkan saja semua perasaanmu, kamu aman dan didengar di sini.',
     'Aku paham ini bukan hal yang mudah buatmu. Apapun yang lagi kamu rasakan sekarang, itu wajar dan valid kok.',
-    'Tarik napas dalam-dalam dulu ya. Aku siap menemani dan mendengarkan keluh kesahmu hari ini.'
+    'Tarik napas perlahan ya. Aku siap menemani dan mendengarkan keluh kesahmu tanpa penghakiman.'
   ];
   const chosenReply = empatheticReplies[Math.floor(Math.random() * empatheticReplies.length)];
   const fallbackJson = JSON.stringify({

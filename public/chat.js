@@ -54,7 +54,7 @@ function buildOpeningMessage(ctx) {
     const dayInfo = ctx.dayOfCycle ? ` (hari ke-${ctx.dayOfCycle})` : '';
     const phaseOpeners = {
       mens: `Aku lihat kamu lagi di fase menstruasi${dayInfo}. Gimana kondisi fisik dan perasaanmu hari ini? Kalau terasa lelah, cerita saja.`,
-      foll: `Aku lihat kamu lagi di fase folikular${dayInfo}. Energi biasanya mulai pulih di sini. Gimana yang kamu rasakan hari ini?`,
+      foll: `Aku lihat kamu lagi di fase folikular${dayInfo}. Energi fisik biasanya mulai kembali pulih. Gimana rasanya hari ini?`,
       ovul: `Kamu sedang di fase ovulasi${dayInfo}. Biasanya ini momen energi puncak. Gimana harimu berjalan?`,
       lute: `Aku lihat kamu lagi di fase luteal${dayInfo}. Fase ini wajar kalau terasa lebih sensitif. Gimana keadaanmu sekarang?`,
     };
@@ -64,16 +64,16 @@ function buildOpeningMessage(ctx) {
   /* ── Kondisi 3: Ada check-in mood ── */
   else if (mood) {
     const moodMap = {
-      'Happy':     `Senang melihat mood kamu hari ini — ${mood.e} ${mood.l}. Ada momen menyenangkan apa yang bikin harimu terasa cerah?`,
-      'Oke':       `Aku lihat mood kamu hari ini — ${mood.e} ${mood.l}. Merasa cukup oke itu sudah sangat baik. Ada hal yang mau kamu bagi?`,
-      'Biasa':     `Aku lihat mood kamu — ${mood.e} ${mood.l}. Kadang hari yang tenang menyimpan banyak refleksi. Ada yang sedang kamu pikirkan?`,
-      'Sedih':     `Aku lihat mood kamu — ${mood.e} ${mood.l}. Terima kasih sudah jujur dengan perasaanmu. Pelan-pelan saja ya, aku di sini menemani.`,
-      'Anxious':   `Aku lihat mood kamu — ${mood.e} ${mood.l}. Rasa cemas memang menguras energi. Tarik napas perlahan... Apa yang paling membuat pikiranmu sibuk?`,
-      'Frustrasi': `Aku lihat mood kamu — ${mood.e} ${mood.l}. Rasa frustrasi itu sangat valid. Mau cerita apa yang terasa belum sesuai harapan?`,
-      'Exhausted': `Aku lihat mood kamu — ${mood.e} ${mood.l}. Hari ini sepertinya cukup berat ya. Istirahatkan dulu pundakmu, apa hal yang paling melelahkan?`,
-      'Burnout':   `Aku lihat mood kamu — ${mood.e} ${mood.l}. Tubuh dan pikiranmu mungkin sedang butuh jeda yang nyata. Ceritakan apa yang kamu rasakan.`,
+      'Happy':     `Senang melihat mood kamu hari ini — ${mood.l}. Ada momen menyenangkan apa yang bikin harimu terasa cerah?`,
+      'Oke':       `Aku lihat mood kamu hari ini — ${mood.l}. Merasa cukup oke itu sudah sangat baik. Ada hal yang mau kamu bagi?`,
+      'Biasa':     `Aku lihat mood kamu — ${mood.l}. Kadang hari yang tenang menyimpan banyak refleksi. Ada yang sedang kamu pikirkan?`,
+      'Sedih':     `Aku lihat mood kamu — ${mood.l}. Terima kasih sudah jujur dengan perasaanmu. Pelan-pelan saja ya, aku di sini menemani.`,
+      'Anxious':   `Aku lihat mood kamu — ${mood.l}. Rasa cemas memang menguras energi. Tarik napas perlahan... Apa yang paling membuat pikiranmu sibuk?`,
+      'Frustrasi': `Aku lihat mood kamu — ${mood.l}. Rasa frustrasi itu sangat valid. Mau cerita apa yang terasa belum sesuai harapan?`,
+      'Exhausted': `Aku lihat mood kamu — ${mood.l}. Hari ini sepertinya cukup berat ya. Istirahatkan dulu pundakmu, apa hal yang paling melelahkan?`,
+      'Burnout':   `Aku lihat mood kamu — ${mood.l}. Tubuh dan pikiranmu mungkin sedang butuh jeda yang nyata. Ceritakan apa yang kamu rasakan.`,
     };
-    followUp = moodMap[mood.l] || `Aku lihat mood kamu hari ini — ${mood.e} ${mood.l}. Terima kasih sudah check-in. Ada yang mau kamu ceritakan?`;
+    followUp = moodMap[mood.l] || `Aku lihat mood kamu hari ini — ${mood.l}. Terima kasih sudah check-in. Ada yang mau kamu ceritakan?`;
 
     /* ── Tambahan konteks siklus (hanya jika ada) ── */
     if (phase) {
@@ -229,17 +229,16 @@ function getSmartFallbackReply(userText, ctx, history = []) {
    API CALL (Vercel Proxy -> Direct Client Groq/Gemini Fallback)
 ════════════════ */
 async function callChatAPI(history, ctx) {
-  const name    = ctx.userName || 'pengguna';
+  const name    = ctx.userName || 'kamu';
   const mood    = ctx.mood
-    ? `${ctx.mood.l} (${ctx.mood.e}), intensitas: ${ctx.intensity || 'tidak diketahui'}`
+    ? `${ctx.mood.l}, intensitas: ${ctx.intensity || 'sedang'}`
     : 'belum check-in hari ini';
   const causes  = ctx.causes?.length ? ctx.causes.join(', ') : 'tidak disebutkan';
-  const hasMood = !!ctx.mood;
 
   const phaseNames = {
     mens: 'Menstruasi',
     foll: 'Folikular',
-    ovul: 'Ovulasi ⭐',
+    ovul: 'Ovulasi',
     lute: 'Luteal',
   };
   const cycleInfo = ctx.cyclePhase
@@ -249,63 +248,46 @@ async function callChatAPI(history, ctx) {
   const memFacts = jesMemory.facts || [];
   const memStr   = memFacts.length
     ? memFacts.map((f, i) => `${i + 1}. ${f}`).join('\n')
-    : 'Belum ada (sesi pertama atau memory kosong)';
+    : 'Belum ada (sesi baru)';
 
-  const availableArts = (artStore || []).slice(0, 8).map((a, i) =>
-    `[${i}] "${a.title}" — ${a.cat}`
-  ).join('\n');
-
-  const systemPrompt = `Kamu adalah Jes, sahabat curhat dalam aplikasi Moodly. Kamu bukan bot — kamu teman paling safe buat diajak ngobrol soal perasaan.
+  const systemPrompt = `Kamu adalah Jes, sahabat curhat dalam aplikasi Moodly. Kamu bukan robot — kamu teman paling aman buat diajak ngobrol soal perasaan.
 
 KEPRIBADIAN JES:
-Jes ngobrol seperti manusia beneran — hangat, ada empati mendalam, kadang menyapa santai dan dewasa khas Apple iMessage. Tidak kaku, tidak formal, tidak robotik. Tidak pernah mulai dengan "Tentu!", "Baik!", atau "Halo!". Gunakan bahasa Indonesia santai yang natural dan penuh penerimaan.
+Jes ngobrol seperti sahabat sejati — hangat, empatik, santai, dan penuh penerimaan khas Apple iMessage. Tidak kaku, tidak robotik. Jangan mulai dengan "Tentu!", "Baik!", atau "Halo!". Gunakan bahasa Indonesia natural.
 
 KONTEKS PENGGUNA:
 - Nama: ${name}
-- Check-in mood: ${hasMood ? 'sudah' : 'belum hari ini'}
 - Mood: ${mood}
 - Penyebab: ${causes}
-- Fase siklus: ${cycleInfo}
-
-INGATAN JES TENTANG ${name.toUpperCase()}:
-${memStr}
+- Fase tubuh: ${cycleInfo}
 
 FORMAT RESPONS WAJIB:
-Kamu HARUS membalas HANYA dengan JSON valid tanpa tanda petik kode:
-{"reply":"<pesan Jes>","remember":[],"article":null}
-
-ATURAN RESPONS:
-1. Validasi perasaan dulu
-2. 2-3 kalimat padat, hangat, tanpa emoji berlebihan
-3. Akhiri dengan 1 pertanyaan reflektif yang tulus
-4. Jangan menghakimi`;
+Kamu HARUS membalas HANYA dengan JSON valid:
+{"reply":"<pesan Jes hangat 2-3 kalimat dan akhiri 1 pertanyaan tulus>","remember":[],"article":null}`;
 
   const messages = [
     { role: 'system', content: systemPrompt },
-    ...history.slice(-14),
+    ...history.slice(-12),
   ];
 
-  const loadedConfig = await loadAIConfig().catch(() => ({ groqKey: '', geminiKey: '' }));
-  const aiConfig = {
-    groqKey: loadedConfig.groqKey || '',
-    geminiKey: loadedConfig.geminiKey || '',
-  };
+  // Read local keys synchronously without blocking on network
+  const groqKey = localStorage.getItem('moodly_groq_key') || '';
+  const geminiKey = localStorage.getItem('moodly_gemini_key') || '';
 
-  // 1. Coba Serverless Endpoint /api/chat terlebih dahulu
   let raw = '';
   let apiSuccess = false;
 
   try {
     const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages,
-          apiKey: aiConfig.groqKey || undefined,
-          geminiKey: aiConfig.geminiKey || undefined,
-        }),
-        signal: AbortSignal.timeout(6000)
-      });
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages,
+        apiKey: groqKey || undefined,
+        geminiKey: geminiKey || undefined,
+      }),
+      signal: AbortSignal.timeout(4500)
+    });
 
     if (res.ok) {
       const data = await res.json();
@@ -315,79 +297,20 @@ ATURAN RESPONS:
       }
     }
   } catch (err) {
-    console.warn('[chat] /api/chat unreachable, testing direct client API:', err.message);
+    console.warn('[chat] /api/chat error/timeout:', err.message);
   }
 
-  // 2. PRIMARY: Direct Client-side Google AI Studio (Gemini)
-  const geminiKeyToUse = aiConfig.geminiKey || '';
-  if (!apiSuccess && geminiKeyToUse) {
-    try {
-      const chatMsgs = history.slice(-14).map(m => ({
-        role: m.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: m.content }]
-      }));
-      const gModels = ['gemini-flash-latest', 'gemini-1.5-flash'];
-      for (const mName of gModels) {
-        try {
-          const gUrl = `https://generativelanguage.googleapis.com/v1beta/models/${mName}:generateContent?key=${geminiKeyToUse}`;
-          const gemRes = await fetch(gUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              system_instruction: { parts: [{ text: systemPrompt }] },
-              contents: chatMsgs,
-              generationConfig: {
-                temperature: 0.75,
-                maxOutputTokens: 600,
-              }
-            })
-          });
-          if (gemRes.ok) {
-            const gemData = await gemRes.json();
-            raw = gemData.candidates?.[0]?.content?.parts?.[0]?.text || '';
-            if (raw) { apiSuccess = true; break; }
-          }
-        } catch {}
-      }
-    } catch (gme) {
-      console.warn('[chat] Direct Gemini error:', gme.message);
-    }
-  }
-
-  // 3. FALLBACK: Direct Client-side Groq jika key tersedia
-  if (!apiSuccess && aiConfig.groqKey) {
-    try {
-      const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${aiConfig.groqKey}`,
-        },
-        body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
-          max_tokens: 450,
-          temperature: 0.75,
-          messages,
-        }),
-      });
-      if (groqRes.ok) {
-        const gData = await groqRes.json();
-        raw = gData.choices?.[0]?.message?.content?.trim() || '';
-        if (raw) apiSuccess = true;
-      }
-    } catch (ge) {
-      console.warn('[chat] Direct Groq error:', ge.message);
-    }
-  }
-
+  // If serverless is offline or timed out, IMMEDIATELY use smart local fallback (never hang!)
   if (!apiSuccess || !raw) {
-    throw new Error('Semua AI endpoint offline, beralih ke Jes Empathy Engine');
+    const lastText = history.slice(-1)[0]?.content || '';
+    const fallbackText = getSmartFallbackReply(lastText, ctx, history);
+    return { reply: fallbackText, articleIdx: null, newFacts: [] };
   }
 
   let reply = '', newFacts = [], articleIdx = null;
   try {
     const clean     = raw.replace(/```json|```/g, '').trim();
-    const jsonMatch = clean.match(/\{[\s\S]*\}/);
+    const jsonMatch = clean.match(/{[sS]*}/);
     const parsed    = JSON.parse(jsonMatch ? jsonMatch[0] : clean);
     reply      = parsed.reply || '';
     newFacts   = parsed.remember || [];
@@ -397,17 +320,15 @@ ATURAN RESPONS:
     if (replyMatch) {
       reply = replyMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"');
     } else {
-      reply = raw
-        .replace(/```json|```/g, '')
-        .replace(/"reply"\s*:\s*"/g, '')
-        .replace(/"remember"\s*:\s*\[[\s\S]*?\]/g, '')
-        .replace(/"article"\s*:\s*[\d\w"null]+/g, '')
-        .replace(/[{}"]/g, '')
-        .replace(/,\s*$/gm, '')
-        .trim();
+      reply = raw.replace(/[{}"[\]]/g, '').trim();
     }
   }
-  if (reply) reply = reply.charAt(0).toUpperCase() + reply.slice(1);
+
+  if (!reply) {
+    reply = getSmartFallbackReply(history.slice(-1)[0]?.content || '', ctx, history);
+  } else {
+    reply = reply.charAt(0).toUpperCase() + reply.slice(1);
+  }
 
   return { reply, articleIdx, newFacts };
 }

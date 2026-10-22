@@ -20,10 +20,10 @@ let nb = {
 };
 
 const FILTERS = [
-  { id:'semua',     label:'Semua',    emoji:'🗺️' },
-  { id:'Psikolog',  label:'Psikolog', emoji:'🧠' },
-  { id:'Psikiatri', label:'Psikiater',emoji:'🏥' },
-  { id:'Konseling', label:'Konseling',emoji:'💬' },
+  { id:'semua',     label:'Semua',    svg:`<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><circle cx='12' cy='12' r='10'></circle><polygon points='16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76'></polygon></svg>` },
+  { id:'Psikolog',  label:'Psikolog', svg:`<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z'></path></svg>` },
+  { id:'Psikiatri', label:'Psikiater',svg:`<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><rect x='3' y='3' width='18' height='18' rx='2'></rect><path d='M12 8v8'></path><path d='M8 12h8'></path></svg>` },
+  { id:'Konseling', label:'Konseling',svg:`<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'></path></svg>` },
 ];
 
 /* ─── Koordinat REAL tiap kabupaten_kota (bukan dari CSV) ── */
@@ -120,7 +120,7 @@ export function initNearby() {
   }
   el.innerHTML = `
     <div class="nb-idle">
-      <div class="nb-idle-ico">🏥</div>
+      <div class="nb-idle-ico"><img src="img/3d/3d-target.png" style="width:48px;height:48px;object-fit:contain" alt="Klinik"></div>
       <div class="nb-idle-txt">Temukan psikolog, psikiater & layanan konseling terdekat dari lokasimu</div>
       <button class="nb-cta" onclick="window._findNearby()">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none">

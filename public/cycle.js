@@ -252,7 +252,7 @@ export async function stopPeriod() {
 
   const dayNum = getDayOfPeriod(active);
   window._moodlyConfirm({
-    icon: '🌸',
+    icon: 'img/3d/3d-heart.png',
     title: 'Menstruasi selesai?',
     msg: `Periode hari ke-${dayNum} (mulai ${fmtDate(active.startDate)}). Kapan menstruasimu selesai?`,
     confirmTxt: 'Selesai Hari Ini ✓',
@@ -297,7 +297,7 @@ async function setPeriodEnd(periodId, endStr, silent = false) {
   // Tawarkan isi hari yang terlewat
   const missing = getMissingDates(p).length;
   if (missing > 0) {
-    setTimeout(() => window._moodlyToast?.(`Ada ${missing} hari belum diisi — tap 📝 di riwayat untuk isi mundur`), 1800);
+    setTimeout(() => window._moodlyToast?.(`Ada ${missing} hari belum diisi — tap tombol riwayat untuk isi mundur`), 1800);
   }
   return true;
 }
@@ -834,7 +834,7 @@ function _renderAIPredData(el, d) {
     <div class="ai-pred-card">
       <div class="apc-header">
         <div class="apc-title-row">
-          <span class="apc-badge">✨ Prediksi Siklus</span>
+          <span class="apc-badge"><img src="img/3d/3d-star.png" style="width:12px;height:12px;vertical-align:-2px;margin-right:4px">Prediksi Siklus</span>
           <button class="apc-refresh" onclick="window._refreshAIPred()">↻</button>
         </div>
         <div class="apc-motivasi">${d.motivasi || ''}</div>
@@ -1391,7 +1391,7 @@ export function renderInsightCycleMini() {
     const d = aiPredCache.data;
     el.innerHTML += `<div class="icm-row" style="background:rgba(255,107,138,.04);border-radius:8px;margin-top:4px">
       <div class="icm-phase-dot" style="background:#ff6b8a;opacity:.4"></div>
-      <div class="icm-label">🔮 Prediksi berikutnya</div>
+      <div class="icm-label"><img src="img/3d/3d-clock.png" style="width:14px;height:14px;vertical-align:-2px;margin-right:4px">Prediksi Berikutnya</div>
       <div class="icm-syms" style="color:#ff6b8a;font-weight:700">${d.prediksi}${d.daysUntil > 0 ? ' · ' + d.daysUntil + 'h lagi' : ''}</div>
     </div>`;
   }
@@ -1485,7 +1485,7 @@ window._setEndFromInput = async (periodId) => {
 
 window._deletePeriod  = async (id) => {
   window._moodlyConfirm({
-    icon:'🗑', title:'Hapus periode ini?',
+    icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff3b30" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>', title:'Hapus periode ini?',
     msg:'Data menstruasi dan log harian-nya akan terhapus.',
     confirmTxt:'Hapus', danger:true,
     onConfirm: async () => {

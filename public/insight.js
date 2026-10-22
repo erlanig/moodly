@@ -163,7 +163,7 @@ function renderJournal(entries) {
 ════════════════ */
 export function exportPDF(entries, periods, cycleInfo) {
   if (!entries.length) {
-    window._moodlyAlert({ icon:'📊', title:'Belum ada data', msg:'Coba check-in dulu ya biar ada data yang bisa diekspor!' });
+    window._moodlyAlert({ icon:'img/3d/3d-target.png', title:'Belum ada data', msg:'Coba check-in dulu ya biar ada data yang bisa diekspor!' });
     return;
   }
   const today = new Date();
@@ -188,7 +188,7 @@ export function exportPDF(entries, periods, cycleInfo) {
     .mens-bv{color:#ff6b8a}
     @media print{body{margin:0}}
   </style></head><body>
-  <h1>🌱 Moodly Report</h1>
+  <h1><img src="img/3d/3d-heart.png" style="width:24px;height:24px;vertical-align:-4px;margin-right:6px">Moodly Report</h1>
   <p style="color:#999;font-size:13px;margin-bottom:18px">
     ${today.toLocaleDateString('id-ID',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}
   </p>
@@ -200,7 +200,7 @@ export function exportPDF(entries, periods, cycleInfo) {
   </div>
   ${periods?.length ? `<div class="sec"><h2>Riwayat Siklus (${periods.length} periode)</h2>
     ${periods.slice(0,6).map(p => `<div class="entry">
-      <span style="font-size:20px">🩸</span>
+      <img src="img/3d/3d-heart.png" style="width:20px;height:20px;object-fit:contain">
       <div>
         <div style="font-weight:700;font-size:13px">${p.startDate}${p.endDate?' – '+p.endDate:''}</div>
         <div style="font-size:11px;color:#999">${p.flow||''}${p.symptoms?.length?' · '+p.symptoms.join(', '):''}</div>
@@ -208,7 +208,7 @@ export function exportPDF(entries, periods, cycleInfo) {
   </div>` : ''}
   <div class="sec"><h2>Riwayat Mood (${entries.length} total)</h2>
     ${entries.slice(-20).reverse().map(e => `<div class="entry">
-      <span style="font-size:20px">${e.mood?.e||'😐'}</span>
+      <img src="${e.mood?.img || 'img/3d/mood-biasa.png'}" style="width:24px;height:24px;object-fit:contain">
       <div>
         <div style="font-weight:700;font-size:13px">${e.mood?.l||'—'} · ${e.intensity||''}</div>
         <div style="font-size:11px;color:#999">${new Date(e.ts).toLocaleDateString('id-ID',{weekday:'short',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</div>

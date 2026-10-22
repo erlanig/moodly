@@ -203,7 +203,7 @@ function updateHome() {
     const t = d.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
     const moodIconHtml = last.mood?.img
       ? `<img src="${last.mood.img}" alt="${last.mood.l}" class="lcard-3d-img">`
-      : (last.mood?.e || '😐');
+      : `<img src="img/3d/mood-biasa.png" alt="Mood" class="lcard-3d-img">`;
     el.innerHTML = `<div class="lcard">
       <div class="lcard-em">${moodIconHtml}</div>
       <div>
@@ -599,7 +599,7 @@ window._openStoryFromCheckin = () => {
   if (last) {
     openStories(last);
   } else {
-    window._moodlyAlert({ icon: '📸', title: 'Belum ada check-in', msg: 'Check-in dulu ya biar bisa share story!' });
+    window._moodlyAlert({ icon: 'img/3d/3d-target.png', title: 'Belum ada check-in', msg: 'Check-in dulu ya biar bisa share story!' });
   }
 };
 window._openStoriesDirect = (entryJson) => {

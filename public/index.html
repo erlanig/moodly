@@ -48,47 +48,56 @@
     </div>
   </div>
 
-  <!-- Hero Card: Finetiks Main Card Layout -->
+  <!-- Hero Card: BP Rewards & Finetiks Gradient iOS Style -->
   <div class="hero-card">
-    <div class="hero-top-row">
-      <div class="hero-date-tag" id="hero-tag">Pagi yang tenang</div>
-      <div class="hero-streak-badge">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ff2d55" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 11-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg>
-        <span id="streak">0</span> hari
+    <div class="hero-card-content">
+      <div class="hero-top-row">
+        <div class="hero-date-tag" id="hero-tag">Pagi yang tenang</div>
+        <div class="hero-streak-badge">
+          <img src="img/3d/3d-fire.png" alt="Streak">
+          <span id="streak">0</span> hari
+        </div>
       </div>
+      <div class="hero-h" id="hero-h">Hari ini,<br>gimana perasaanmu?</div>
+      <div class="hero-sub">Jujur pada dirimu sendiri, tanpa ada penghakiman.</div>
     </div>
+    <div class="hero-3d-art">
+      <img src="img/3d/3d-heart.png" alt="Moodly Heart" class="hero-floating-3d">
+    </div>
+  </div>
 
-    <div class="hero-h" id="hero-h">Hari ini,<br>gimana perasaanmu?</div>
-    <div class="hero-sub">Jujur pada dirimu sendiri, tanpa ada penghakiman.</div>
-
-    <!-- 3 Quick Action Pills -->
-    <div class="hero-actions-label">Menu Cepat</div>
-    <div class="hero-actions-row">
-      <button class="hero-pill-btn p-pink" onclick="window._startCheckin()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ff2d55" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
-        Check-in
-      </button>
-      <button class="hero-pill-btn p-purple" onclick="window._openChatDirect()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5856d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-        Teman Curhat
-      </button>
-      <button class="hero-pill-btn p-blue" onclick="window._showScreen('safeplace')">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V10l7-7 7 7v11M9 21v-6h6v6"/></svg>
-        Rohani
-      </button>
-      <button class="hero-pill-btn p-green" onclick="window._openReminderModal()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34c759" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        Pengingat
-      </button>
+  <!-- BP Rewards / Bibit Style 4-Circular-Action Card -->
+  <div class="bp-quick-actions">
+    <div class="bp-qa-item" onclick="window._startCheckin()">
+      <div class="bp-qa-circle bp-qa-pink">
+        <img src="img/3d/3d-heart.png" alt="Check-in">
+      </div>
+      <span class="bp-qa-label">Check-in</span>
+    </div>
+    <div class="bp-qa-item" onclick="window._openChatDirect()">
+      <div class="bp-qa-circle bp-qa-purple">
+        <img src="img/3d/3d-chat.png" alt="Curhat">
+      </div>
+      <span class="bp-qa-label">Curhat</span>
+    </div>
+    <div class="bp-qa-item" onclick="window._showScreen('safeplace')">
+      <div class="bp-qa-circle bp-qa-blue">
+        <img src="img/3d/3d-star.png" alt="Rohani">
+      </div>
+      <span class="bp-qa-label">Rohani</span>
+    </div>
+    <div class="bp-qa-item" onclick="window._openReminderModal()">
+      <div class="bp-qa-circle bp-qa-green">
+        <img src="img/3d/3d-clock.png" alt="Pengingat">
+      </div>
+      <span class="bp-qa-label">Pengingat</span>
     </div>
   </div>
 
   <!-- Special Birthday Date Reminder Banner -->
   <div id="home-date-pill" onclick="window._openDateInvitation()">
     <div class="hdp-left">
-      <div class="hdp-icon-tile">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff2d55" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      </div>
+      <div class="hdp-icon-tile"><img src="img/3d/3d-calendar.png" alt="Undangan"></div>
       <div>
         <div class="hdp-title">Undangan Kencan Ulang Tahun</div>
         <div class="hdp-sub">Sabtu, 24 Okt 2026 · Giur Bistro, Bandung</div>
@@ -109,24 +118,14 @@
   <!-- Statistics Row -->
   <div class="stats">
     <div class="scard">
-      <div class="scard-ic p">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff2d55" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
-          <polyline points="22 4 12 14.01 9 11.01"/>
-        </svg>
-      </div>
+      <div class="scard-ic p"><img src="img/3d/3d-target.png" style="width:26px;height:26px;object-fit:contain" alt="Total"></div>
       <div>
         <div class="scard-val" id="s-total">0</div>
         <div class="scard-lbl">Total Check-in</div>
       </div>
     </div>
     <div class="scard">
-      <div class="scard-ic o">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff9500" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/>
-          <path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/>
-        </svg>
-      </div>
+      <div class="scard-ic o"><img src="img/3d/3d-sun.png" style="width:26px;height:26px;object-fit:contain" alt="Mood"></div>
       <div>
         <div class="scard-val" id="s-avg">—</div>
         <div class="scard-lbl">Rata-rata Mood</div>
@@ -270,7 +269,7 @@
   <div class="tb">
     <div>
       <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em">7 Hari Terakhir</div>
-      <div class="ins-h">Weekly<br>Insights ✨</div>
+      <div class="ins-h">Weekly<br>Insights</div>
     </div>
     <div class="tb-icon" onclick="window._exportPDF()" title="Ekspor PDF">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -292,7 +291,7 @@
     <div class="card-ttl">
       <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="#ff2d55" stroke-width="2"/><path d="M3 10h18M8 2v4M16 2v4" stroke="#ff2d55" stroke-width="2"/></svg>
       Kalender Bulan Ini
-      <span style="font-size:9px;color:var(--muted);margin-left:4px">(🩸 = mens · emoji = mood)</span>
+      <span style="font-size:9px;color:var(--muted);margin-left:4px">(Siklus & Mood Bulanan)</span>
     </div>
     <div class="cal-wdays">
       <div>Min</div><div>Sen</div><div>Sel</div><div>Rab</div><div>Kam</div><div>Jum</div><div>Sab</div>
@@ -326,7 +325,7 @@
   </div>
 
   <div class="pill">
-    <div class="pill-hd ph-g">📔 Jurnal Terkini</div>
+    <div class="pill-hd ph-g"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-1px;margin-right:4px;display:inline-block"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>Jurnal Terkini</div>
     <div id="journal"></div>
   </div>
 </div>
@@ -336,7 +335,7 @@
   <div class="news-hd">
     <div>
       <div class="news-lbl">Artikel & Tips</div>
-      <div class="news-title">Mental<br>Health Hub 🧠</div>
+      <div class="news-title">Mental<br>Health Hub</div>
     </div>
     <div class="news-right">
       <div class="date-pill" id="date-pill">
@@ -360,7 +359,7 @@
     <button class="ftab"     onclick="window._filterNews('tidur',this)">Tidur</button>
     <button class="ftab"     onclick="window._filterNews('self-care',this)">Self-Care</button>
     <button class="ftab"     onclick="window._filterNews('motivasi',this)">Motivasi</button>
-    <button class="ftab"     onclick="window._filterNews('islam',this)">☪️ Islam & Psikologi</button>
+    <button class="ftab"     onclick="window._filterNews('islam',this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px;margin-right:4px;display:inline-block"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>Islam & Psikologi</button>
     <button class="ftab"     onclick="window._filterNews('bookmark',this)">⭐ Tersimpan</button>
   </div>
 
@@ -418,11 +417,11 @@
 <!-- ═══════════════ BOTTOM NAV ═══════════════ -->
 <nav id="nav">
   <button class="ni on" id="ni-home" onclick="window._showScreen('home')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#ff2d55" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/>
       <path d="M9 21V12h6v9"/>
     </svg>
-    <span class="ni-lbl" style="color:#ffffff">Home</span>
+    <span class="ni-lbl" style="color:#ff2d55">Home</span>
   </button>
   <button class="ni" id="ni-checkin" onclick="window._startCheckin()">
     <svg viewBox="0 0 24 24" fill="none" stroke="#8e8e93" stroke-width="2" stroke-linecap="round">
@@ -479,7 +478,7 @@
   <div class="modal-sheet">
     <div class="sh-handle"></div>
     <div class="pm-av">
-      <img src="img/moodly.png" alt="" onerror="this.parentElement.innerHTML='🌱'">
+      <img src="img/moodly.png" alt="" onerror="this.parentElement.innerHTML='<img src=\'img/3d/3d-heart.png\' style=\'width:40px;height:40px\'>'">
     </div>
     <div class="pm-name" id="pm-name">—</div>
     <div class="pm-stats">
@@ -534,7 +533,7 @@
 
 <!-- ═══════════════ SUCCESS ═══════════════ -->
 <div id="success">
-  <div class="suc-ring" id="suc-em">🎉</div>
+  <div class="suc-ring" id="suc-em"><img src="img/3d/3d-trophy.png" style="width:48px;height:48px;object-fit:contain;" alt="Sukses"></div>
   <div class="suc-t">Check-in selesai!</div>
   <div class="suc-s" id="suc-s">Proud of you buat check-in hari ini</div>
   <button id="post-checkin-chat" class="suc-chat-btn" style="display:none"
@@ -674,7 +673,7 @@
     <div class="modal-handle"></div>
     <div class="kajian-header">
       <div class="kajian-h-top">
-        <span id="kajian-modal-emoji" class="kjh-emoji">📖</span>
+        <span id="kajian-modal-emoji" class="kjh-emoji"><img src="img/3d/3d-star.png" style="width:32px;height:32px;object-fit:contain"></span>
         <div class="kjh-meta">
           <div id="kajian-modal-cat" class="kjh-cat">Kategori</div>
           <div id="kajian-modal-title" class="kjh-title">Judul Kajian</div>

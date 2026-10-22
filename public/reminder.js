@@ -202,13 +202,13 @@ export function toggleReminderDone(id) {
   item.done = !item.done;
   saveToStorage();
   if (item.done) {
-    window._moodlyToast?.('Tugas diselesaikan! Bagus sekali 🎉');
+    window._moodlyToast?.('Tugas diselesaikan! Kerja bagus ✓');
   }
 }
 
 export function deleteReminder(id) {
   window._moodlyConfirm({
-    icon: '🗑️',
+    icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff3b30" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>',
     title: 'Hapus Pengingat?',
     msg: 'Pengingat ini akan dihapus dari daftar agendamu.',
     confirmTxt: 'Hapus',
@@ -283,7 +283,7 @@ export function saveReminderFromModal() {
   const time = document.getElementById('rem-modal-time')?.value || '';
   const note = document.getElementById('rem-modal-note')?.value?.trim() || '';
   const sendEmail = document.getElementById('rem-modal-email')?.checked ?? true;
-  const userEmail = document.getElementById('rem-modal-user-email')?.value?.trim() || '';
+  let userEmail = document.getElementById('rem-modal-user-email')?.value?.trim() || '';
 
   if (!title) {
     window._moodlyToast?.('Mohon isi judul pengingat');
@@ -342,7 +342,7 @@ export function saveReminderFromModal() {
 
   if (sendEmail) {
     setTimeout(() => {
-      window._moodlyToast?.(`Email reminder akan dikirim ke ${userEmail || getUserEmail()} 📧`);
+      window._moodlyToast?.(`Email reminder akan dikirim ke ${userEmail || getUserEmail()} ✓`);
     }, 1500);
   }
 }
@@ -381,7 +381,7 @@ export async function sendEmailNow(id) {
       item.emailSent = true;
       saveToStorage();
       window._moodlyAlert?.({
-        icon: '✉️',
+        icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff2d55" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>',
         title: 'Pengingat Terkirim!',
         msg: `Notifikasi "${item.title}" berhasil dikirim otomatis dari sistem Moodly ke email kamu (${targetEmail}).`,
         okTxt: 'Bagus Sekali',
@@ -425,7 +425,7 @@ export async function sendDailyAgendaEmail() {
     const data = await res.json();
     if (res.ok && data.success) {
       window._moodlyAlert?.({
-        icon: '📋',
+        icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff2d55" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>',
         title: 'Ringkasan Terkirim!',
         msg: `Daftar seluruh agenda harianmu telah dikirimkan ke email kamu (${targetEmail}).`,
         okTxt: 'Sip!',

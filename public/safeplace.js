@@ -43,7 +43,7 @@ export function getKajianIconSvg(cat) {
 export const KAJIAN_LIST = [
   {
     id: 'k1',
-    emoji: '🤲',
+    icon3d: 'img/3d/3d-heart.png',
     category: 'Ketenangan Hati',
     title: 'Ketika Hati Terasa Berat',
     content: `"Ingatlah, hanya dengan mengingat Allah hati menjadi tenteram." (QS. Ar-Ra'd: 28)
@@ -52,30 +52,30 @@ Perasaan berat, gelisah, atau sedih adalah bagian dari ujian hidup yang Allah be
 
 Yang perlu kamu ingat: Allah tidak menguji seorang hamba melebihi kemampuannya. Setiap rasa berat yang kamu rasakan hari ini adalah bukti bahwa Allah percaya kamu mampu melewatinya.
 
-✦ Coba luangkan 5 menit untuk duduk diam, tarik napas dalam, dan ucapkan: "Hasbunallah wa ni'mal wakiil" — Cukuplah Allah sebagai pelindung kami, dan Dia sebaik-baik pelindung.`,
+• Coba luangkan 5 menit untuk duduk diam, tarik napas dalam, dan ucapkan: "Hasbunallah wa ni'mal wakiil" — Cukuplah Allah sebagai pelindung kami, dan Dia sebaik-baik pelindung.`,
     source: 'QS. Ar-Ra\'d: 28',
     readTime: '3 menit',
   },
   {
     id: 'k2',
-    emoji: '🌙',
+    icon3d: 'img/3d/3d-star.png',
     category: 'Doa & Dzikir',
     title: 'Dzikir Pagi untuk Memulai Hari',
     content: `Memulai pagi dengan dzikir adalah investasi terbaik untuk harimu. Rasulullah SAW mengajarkan beberapa dzikir singkat namun luar biasa manfaatnya:
 
-📿 "Bismillahilladzii laa yadurru ma'asmihi syai'un fil ardhi wa laa fis samaa'i wa huwas samii'ul 'aliim" (3x)
+"Bismillahilladzii laa yadurru ma'asmihi syai'un fil ardhi wa laa fis samaa'i wa huwas samii'ul 'aliim" (3x)
 — Artinya: Dengan nama Allah yang tidak ada sesuatu pun yang membahayakan bersama nama-Nya, baik di bumi maupun di langit, dan Dia Maha Mendengar lagi Maha Mengetahui.
 
-📿 "Alhamdulillaahilladzi ahyaanaa ba'da maa amaatanaa wa ilaihin nusyuur" (1x)
+"Alhamdulillaahilladzi ahyaanaa ba'da maa amaatanaa wa ilaihin nusyuur" (1x)
 — Segala puji bagi Allah yang telah menghidupkan kami setelah mematikan kami, dan kepada-Nya kami dikembalikan.
 
-✦ Konsistensi dzikir pagi lebih baik dari dzikir panjang yang bolong-bolong. 5 menit setiap pagi, cukup.`,
+• Konsistensi dzikir pagi lebih baik dari dzikir panjang yang bolong-bolong. 5 menit setiap pagi, cukup.`,
     source: 'HR. Abu Dawud & Tirmidzi',
     readTime: '4 menit',
   },
   {
     id: 'k3',
-    emoji: '💪',
+    icon3d: 'img/3d/3d-target.png',
     category: 'Kesabaran',
     title: 'Sabar Bukan Berarti Diam',
     content: `Sabar sering disalahpahami sebagai "mendiamkan semua masalah dan pura-pura baik-baik saja." Padahal sabar yang sesungguhnya jauh lebih aktif dari itu.
@@ -89,13 +89,13 @@ Sabar artinya:
 
 Yang tidak termasuk sabar: menekan perasaan, pura-pura kuat, tidak mau minta tolong. Itu bukan sabar — itu menyiksa diri.
 
-✦ Menangis, curhat, minta bantuan, istirahat — semua itu boleh dan tidak membatalkan kesabaran kamu.`,
+• Menangis, curhat, minta bantuan, istirahat — semua itu boleh dan tidak membatalkan kesabaran kamu.`,
     source: 'QS. Al-Kahfi: 28',
     readTime: '3 menit',
   },
   {
     id: 'k4',
-    emoji: '🌟',
+    icon3d: 'img/3d/3d-clock.png',
     category: 'Rasa Syukur',
     title: 'Syukur yang Mengubah Perspektif',
     content: `"Sesungguhnya jika kamu bersyukur, pasti Kami akan menambah nikmat kepadamu." (QS. Ibrahim: 7)
@@ -109,13 +109,13 @@ Coba praktik "3 hal kecil" setiap malam sebelum tidur:
 
 Otak manusia secara alami lebih mudah merekam hal negatif (negativity bias). Latihan syukur ini melatih otak untuk melihat lebih seimbang.
 
-✦ "Alhamdulillah" bukan sekadar kata — ia adalah pernyataan bahwa kamu melihat kebaikan Allah di hari ini.`,
+• "Alhamdulillah" bukan sekadar kata — ia adalah pernyataan bahwa kamu melihat kebaikan Allah di hari ini.`,
     source: 'QS. Ibrahim: 7',
     readTime: '3 menit',
   },
   {
     id: 'k5',
-    emoji: '🕊️',
+    icon3d: 'img/3d/3d-heart.png',
     category: 'Tawakkal & Cemas',
     title: 'Melepaskan yang Tak Bisa Kamu Kendalikan',
     content: `"Dan barangsiapa bertawakal kepada Allah niscaya Allah akan mencukupkan (keperluan)nya." (QS. At-Talaq: 3)
@@ -127,13 +127,13 @@ Formula ketenangan Islam:
 2. Pasrahkan hasil akhir sepenuhnya kepada Allah (Tawakkal)
 3. Ridha atas apapun takdir yang tiba
 
-✦ Ketika dada sesak oleh "bagaimana jika...", ubah pertanyaanmu menjadi: "Allah sudah merawatku sampai detik ini, kenapa aku ragu Dia akan menolongku nanti?"`,
+• Ketika dada sesak oleh "bagaimana jika...", ubah pertanyaanmu menjadi: "Allah sudah merawatku sampai detik ini, kenapa aku ragu Dia akan menolongku nanti?"`,
     source: 'QS. At-Talaq: 3',
     readTime: '4 menit',
   },
   {
     id: 'k6',
-    emoji: '🌸',
+    icon3d: 'img/3d/3d-sun.png',
     category: 'Self-Compassion',
     title: 'Lembutlah pada Dirimu Sendiri',
     content: `Rasulullah SAW bersabda: "Sesungguhnya kelembutan tidak ada pada sesuatu kecuali akan menghiasinya, dan tidak dicabut dari sesuatu kecuali akan memperburuknya." (HR. Muslim)
@@ -142,13 +142,13 @@ Seringkali orang yang paling keras menghakimi dirimu bukanlah orang lain, melain
 
 Allah itu Maha Pengasih dan Maha Penyayang. Jika Tuhanmu saja selalu membuka pintu taubat dan maaf, mengapa kamu begitu pelit memaafkan dirimu sendiri?
 
-✦ Bicaralah pada dirimu seperti kamu berbicara pada sahabat tercinta yang sedang terluka.`,
+• Bicaralah pada dirimu seperti kamu berbicara pada sahabat tercinta yang sedang terluka.`,
     source: 'HR. Muslim no. 2594',
     readTime: '3 menit',
   },
   {
     id: 'k7',
-    emoji: '🌿',
+    icon3d: 'img/3d/3d-sun.png',
     category: 'Muhasabah',
     title: 'Seni Memulai Lembaran Baru',
     content: `"Katakanlah: Hai hamba-hamba-Ku yang melampaui batas terhadap diri mereka sendiri, janganlah kamu berputus asa dari rahmat Allah." (QS. Az-Zumar: 53)
@@ -160,20 +160,20 @@ Langkah muhasabah yang sehat:
 → Minta ampun kepada Allah dengan istighfar tulus
 → Fokus pada perbaikan satu langkah kecil hari ini
 
-✦ Setiap tarikan napas adalah kesempatan baru dari Allah untuk menjadi pribadi yang lebih damai.`,
+• Setiap tarikan napas adalah kesempatan baru dari Allah untuk menjadi pribadi yang lebih damai.`,
     source: 'QS. Az-Zumar: 53',
     readTime: '4 menit',
   },
   {
     id: 'k8',
-    emoji: '🤍',
+    icon3d: 'img/3d/3d-star.png',
     category: 'Hubungan & Silaturahmi',
     title: 'Memaafkan untuk Ketenangan Jiwamu',
     content: `"Dan hendaklah mereka memaafkan dan berlapang dada. Apakah kamu tidak suka bahwa Allah mengampunimu?" (QS. An-Nur: 22)
 
 Menyimpan dendam itu ibarat meminum racun lalu berharap orang lain yang sakit. Memaafkan bukan berarti membenarkan perlakuan buruk mereka, melainkan membebaskan hatimu dari belenggu kebencian.
 
-✦ Doakan orang yang melukaimu agar mendapat hidayah. Di saat itulah hatimu akan terasa lapang luar biasa.`,
+• Doakan orang yang melukaimu agar mendapat hidayah. Di saat itulah hatimu akan terasa lapang luar biasa.`,
     source: 'QS. An-Nur: 22',
     readTime: '3 menit',
   }
@@ -185,7 +185,7 @@ Menyimpan dendam itu ibarat meminum racun lalu berharap orang lain yang sakit. M
 export const DOA_LIST = [
   {
     cat: 'cemas',
-    emoji: '😰', name: 'Ketika Gelisah & Cemas',
+    icon3d: 'img/3d/3d-star.png', name: 'Ketika Gelisah & Cemas',
     arabic: 'حَسْبُنَا اللَّهُ وَنِعْمَ الْوَكِيلُ',
     latin: 'Hasbunallaahu wa ni\'mal wakiil',
     arti: 'Cukuplah Allah menjadi penolong kami dan Allah adalah sebaik-baik pelindung.',
@@ -193,7 +193,7 @@ export const DOA_LIST = [
   },
   {
     cat: 'cemas',
-    emoji: '🕊️', name: 'Doa Penghilang Gundah & Hutang',
+    icon3d: 'img/3d/3d-target.png', name: 'Doa Penghilang Gundah & Hutang',
     arabic: 'اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْهَمِّ وَالْحَزَنِ، وَأَعُوذُ بِكَ مِنَ الْعَجْزِ وَالْكَسَلِ، وَأَعُوذُ بِكَ مِنَ الْجُبْنِ وَالْبُخْلِ، وَأَعُوذُ بِكَ مِنْ غَلَبَةِ الدَّيْنِ وَقَهْرِ الرِّجَالِ',
     latin: 'Allaahumma innii a\'uudzu bika minal hammi wal hazani, wa a\'uudzu bika minal \'ajzi wal kasali...',
     arti: 'Ya Allah, aku berlindung kepada-Mu dari rasa gelisah dan sedih, dari kelemahan dan kemalasan, dari sifat pengecut dan kikir, serta dari lilitan hutang dan tekanan orang lain.',
@@ -201,7 +201,7 @@ export const DOA_LIST = [
   },
   {
     cat: 'harian',
-    emoji: '🌅', name: 'Doa Bangun Tidur',
+    icon3d: 'img/3d/3d-target.png', name: 'Doa Bangun Tidur',
     arabic: 'الْحَمْدُ لِلَّهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورُ',
     latin: 'Alhamdulillaahil ladzii ahyaanaa ba\'da maa amaatanaa wa ilaihin nusyuur',
     arti: 'Segala puji bagi Allah yang telah menghidupkan kami setelah mematikan kami, dan kepada-Nya kami dibangkitkan kembali.',
@@ -209,7 +209,7 @@ export const DOA_LIST = [
   },
   {
     cat: 'harian',
-    emoji: '😴', name: 'Doa Sebelum Tidur',
+    icon3d: 'img/3d/3d-target.png', name: 'Doa Sebelum Tidur',
     arabic: 'بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا',
     latin: 'Bismikallaahumma amuutu wa ahyaa',
     arti: 'Dengan nama-Mu ya Allah, aku mati dan aku hidup.',
@@ -217,7 +217,7 @@ export const DOA_LIST = [
   },
   {
     cat: 'lapang',
-    emoji: '💖', name: 'Doa Kelapangan Hati (Nabi Musa)',
+    icon3d: 'img/3d/3d-target.png', name: 'Doa Kelapangan Hati (Nabi Musa)',
     arabic: 'رَبِّ اشْرَحْ لِي صَدْرِي وَيَسِّرْ لِي أَمْرِي وَاحْلُلْ عُقْدَةً مِّن لِّسَانِي يَفْقَهُوا قَوْلِي',
     latin: 'Rabbisy-rah lii shadrii, wa yassir lii amrii, wahlul \'uqdatam mil-lisaanii, yafqahuu qawlii',
     arti: 'Ya Tuhanku, lapangkanlah dadaku, mudahkanlah urusanku, dan lepaskanlah kekakuan dari lidahku, agar mereka mengerti perkataanku.',
@@ -225,7 +225,7 @@ export const DOA_LIST = [
   },
   {
     cat: 'sedih',
-    emoji: '🌧️', name: 'Doa Saat Sedih & Terluka',
+    icon3d: 'img/3d/3d-clock.png', name: 'Doa Saat Sedih & Terluka',
     arabic: 'إِنَّمَا أَشْكُو بَثِّي وَحُزْنِي إِلَى اللَّهِ',
     latin: 'Innamaa asykuu batstsii wa huznii ilallaah',
     arti: 'Hanya kepada Allah aku mengadukan kesusahan dan kesedihanku.',
@@ -233,7 +233,7 @@ export const DOA_LIST = [
   },
   {
     cat: 'harian',
-    emoji: '🚪', name: 'Doa Keluar Rumah',
+    icon3d: 'img/3d/3d-star.png', name: 'Doa Keluar Rumah',
     arabic: 'بِسْمِ اللَّهِ تَوَكَّلْتُ عَلَى اللَّهِ وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ',
     latin: 'Bismillaahi tawakkaltu \'alallaahi wa laa hawla wa laa quwwata illaa billaah',
     arti: 'Dengan nama Allah, aku bertawakal kepada Allah, tiada daya dan kekuatan kecuali dengan pertolongan Allah.',
@@ -241,7 +241,7 @@ export const DOA_LIST = [
   },
   {
     cat: 'harian',
-    emoji: '🍽️', name: 'Doa Sebelum Makan',
+    icon3d: 'img/3d/3d-target.png', name: 'Doa Sebelum Makan',
     arabic: 'اللَّهُمَّ بَارِكْ لَنَا فِيمَا رَزَقْتَنَا وَقِنَا عَذَابَ النَّارِ بِسْمِ اللَّهِ',
     latin: 'Allaahumma baarik lanaa fiimaa razaqtanaa wa qinaa \'adzaaban naar, bismillaah',
     arti: 'Ya Allah, berkahilah kami dalam rezeki yang telah Engkau berikan kepada kami dan peliharalah kami dari siksa api neraka.',
@@ -249,7 +249,7 @@ export const DOA_LIST = [
   },
   {
     cat: 'lapang',
-    emoji: '✨', name: 'Sayyidul Istighfar',
+    icon3d: 'img/3d/3d-sun.png', name: 'Sayyidul Istighfar',
     arabic: 'اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَهَ إِلَّا أَنْتَ، خَلَقْتَنِي وَأَنَا عَبْدُكَ، وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ...',
     latin: 'Allaahumma anta rabbii laa ilaaha illaa anta, khalaqtanii wa ana \'abduka...',
     arti: 'Ya Allah, Engkau adalah Tuhanku, tiada tuhan selain Engkau. Engkaulah yang menciptakanku dan aku adalah hamba-Mu...',
@@ -257,7 +257,7 @@ export const DOA_LIST = [
   },
   {
     cat: 'sedih',
-    emoji: '🐋', name: 'Doa Nabi Yunus (Keluar dari Kesulitan)',
+    icon3d: 'img/3d/3d-star.png', name: 'Doa Nabi Yunus (Keluar dari Kesulitan)',
     arabic: 'لَّا إِلَهَ إِلَّا أَنتَ سُبْحَانَكَ إِنِّي كُنتُ مِنَ الظَّالِمِينَ',
     latin: 'Laa ilaaha illaa anta subhaanaka innii kuntu minazh-zhaalimiin',
     arti: 'Tidak ada Tuhan selain Engkau. Maha Suci Engkau, sesungguhnya aku adalah termasuk orang-orang yang zalim.',
@@ -265,7 +265,7 @@ export const DOA_LIST = [
   },
   {
     cat: 'harian',
-    emoji: '📚', name: 'Doa Menuntut Ilmu & Fokus',
+    icon3d: 'img/3d/3d-star.png', name: 'Doa Menuntut Ilmu & Fokus',
     arabic: 'رَبِّ زِدْنِي عِلْمًا وَارْزُقْنِي فَهْمًا',
     latin: 'Rabbi zidnii \'ilman warzuqnii fahman',
     arti: 'Ya Tuhanku, tambahkanlah kepadaku ilmu dan karuniakanlah kepadaku pemahaman yang baik.',
@@ -273,7 +273,7 @@ export const DOA_LIST = [
   },
   {
     cat: 'lapang',
-    emoji: '🛡️', name: 'Perlindungan Dari Marabahaya',
+    icon3d: 'img/3d/3d-target.png', name: 'Perlindungan Dari Marabahaya',
     arabic: 'بِسْمِ اللَّهِ الَّذِي لَا يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الْأَرْضِ وَلَا فِي السَّمَاءِ وَهُوَ السَّمِيعُ الْعَلِيمُ',
     latin: 'Bismillaahil-ladzii laa yadhurru ma\'as-mihii syai-un fil ardhi wa laa fis-samaa-i wa huwas-samii\'ul \'aliim',
     arti: 'Dengan nama Allah yang bersama nama-Nya tidak ada sesuatu pun di bumi dan di langit yang dapat membawa bahaya, dan Dia Maha Mendengar lagi Maha Mengetahui.',
@@ -828,8 +828,8 @@ export function openKajian(id) {
     .split('\n')
     .map(line => {
       if (line.startsWith('→')) return `<div class="kjm-arrow">${line}</div>`;
-      if (line.startsWith('📿')) return `<div class="kjm-dzikir">${line}</div>`;
-      if (line.startsWith('✦')) return `<div class="kjm-tip">${line}</div>`;
+      if (line.startsWith('')) return `<div class="kjm-dzikir">${line}</div>`;
+      if (line.startsWith('• ')) return `<div class="kjm-tip">${line}</div>`;
       if (line.match(/^\d\./)) return `<div class="kjm-num">${line}</div>`;
       if (line.startsWith('"')) return `<div class="kjm-quote">${line}</div>`;
       if (!line.trim()) return '<div style="height:8px"></div>';
