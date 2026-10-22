@@ -3298,3 +3298,234 @@ html, body {
 .ret-switch input:checked + .ret-slider:before {
   transform: translateX(18px);
 }
+
+
+/* ─── GLOBAL 3D ASSET BOUNDING SAFETY (PREVENTS OVERFLOW) ─── */
+.hdp-icon-tile {
+  width: 36px; height: 36px; border-radius: 10px; background: #fff0f3;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  overflow: hidden;
+}
+.hdp-icon-tile img {
+  width: 24px !important; height: 24px !important; object-fit: contain !important; display: block;
+}
+.scard-ic img,
+.pm-av img,
+.bp-qa-circle img,
+.cause-ic img,
+.mood-3d-box img,
+.art-thumb img,
+.art-hero-ic img,
+.islamic-card-ico img,
+.doa-ico img,
+.kj-emoji img,
+.suc-ring img,
+.phase-dial-3d-ico {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* ─── EXCLUSIVE BIRTHDAY DATE CAMPAIGN BANNER (BLIBLI / BP STYLE) ─── */
+.bday-promo-card {
+  margin-bottom: 16px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+  flex-shrink: 0;
+}
+.bday-promo-card:active {
+  transform: scale(0.98);
+}
+.bpc-banner {
+  position: relative;
+  background: linear-gradient(135deg, #be123c 0%, #ff2d55 52%, #ff4b72 100%);
+  border-radius: 22px;
+  padding: 18px 16px 16px;
+  color: #ffffff;
+  overflow: hidden;
+  box-shadow: 0 10px 28px rgba(255, 45, 85, 0.26), 0 2px 8px rgba(255, 45, 85, 0.12);
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  min-height: 160px;
+}
+.bpc-glow {
+  position: absolute;
+  top: -50px; right: 20px;
+  width: 180px; height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0) 70%);
+  pointer-events: none;
+}
+.bpc-content {
+  flex: 1;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-right: 10px;
+}
+.bpc-top-tag {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 10px; font-weight: 800;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.95);
+  margin-bottom: 6px;
+}
+.bpc-brand {
+  background: rgba(255, 255, 255, 0.22);
+  padding: 2px 7px; border-radius: 6px;
+  backdrop-filter: blur(8px);
+}
+.bpc-sep { opacity: 0.6; }
+.bpc-loc { opacity: 0.9; }
+
+.bpc-title {
+  font-size: 18px; font-weight: 800;
+  line-height: 1.2; letter-spacing: -0.02em;
+  color: #ffffff; margin-bottom: 10px;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+.bpc-chips {
+  display: flex; flex-direction: column; gap: 4px;
+  margin-bottom: 12px;
+}
+.bpc-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+  line-height: 1.25;
+}
+.bpc-chip svg {
+  stroke: #ffffff; flex-shrink: 0;
+}
+.bpc-chip-accent {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 3px 8px; border-radius: 8px;
+  display: inline-flex; width: fit-content;
+  backdrop-filter: blur(6px);
+  margin-top: 2px;
+}
+.bpc-action-row {
+  margin-top: auto;
+}
+.bpc-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #ffffff; color: #ff2d55;
+  font-size: 11.5px; font-weight: 800;
+  padding: 6px 14px; border-radius: 100px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  letter-spacing: -0.01em;
+  transition: transform 0.15s ease;
+}
+.bpc-btn svg {
+  stroke: #ff2d55;
+}
+
+/* 3D Asset on Right Side bursting out */
+.bpc-art-wrap {
+  width: 124px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  flex-shrink: 0;
+}
+.bpc-3d-img {
+  width: 128px;
+  height: 128px;
+  object-fit: cover;
+  border-radius: 18px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3), 0 0 0 2px rgba(255, 255, 255, 0.25);
+  transform: perspective(600px) rotateY(-8deg) rotateX(4deg);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.bday-promo-card:hover .bpc-3d-img {
+  transform: perspective(600px) rotateY(-2deg) rotateX(2deg) scale(1.05);
+}
+
+/* Bottom carousel subbar (like #NOBLABLADIBLIBLI in uploaded image) */
+.bpc-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 10px 0;
+  font-size: 10px; font-weight: 700; color: #8e8e93;
+}
+.bpc-hashtag {
+  letter-spacing: 0.05em; text-transform: uppercase;
+  color: #8e8e93;
+}
+.bpc-hashtag span {
+  font-weight: 500; opacity: 0.8;
+}
+.bpc-dots {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: #f2f2f7; padding: 3px 8px; border-radius: 100px;
+}
+.bpc-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: #c7c7cc; transition: all 0.2s ease;
+}
+.bpc-dot.active {
+  width: 14px; border-radius: 10px;
+  background: #ff2d55;
+}
+
+/* ─── 3D HERO BANNERS FOR OTHER SCREENS ─── */
+.insight-3d-hero,
+.news-3d-spotlight {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 16px 16px 16px 18px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+  position: relative;
+  overflow: hidden;
+}
+.insight-3d-hero {
+  background: linear-gradient(135deg, #ffffff 0%, #fff5f8 100%);
+  border-color: rgba(255, 45, 85, 0.12);
+}
+.news-3d-spotlight {
+  background: linear-gradient(135deg, #ffffff 0%, #fff8eb 100%);
+  border-color: rgba(255, 149, 0, 0.15);
+}
+.i3d-text, .n3d-text {
+  flex: 1;
+  padding-right: 12px;
+}
+.i3d-badge {
+  font-size: 9.5px; font-weight: 800; color: #ff2d55;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  background: #fff0f3; padding: 2px 8px; border-radius: 100px;
+  display: inline-block; margin-bottom: 5px;
+}
+.n3d-tag {
+  font-size: 9.5px; font-weight: 800; color: #ff9500;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  background: #fff8eb; padding: 2px 8px; border-radius: 100px;
+  display: inline-block; margin-bottom: 5px;
+}
+.i3d-title, .n3d-title {
+  font-size: 15px; font-weight: 800; color: #1c1c1e;
+  letter-spacing: -0.02em; margin-bottom: 3px; line-height: 1.25;
+}
+.i3d-sub, .n3d-sub {
+  font-size: 11px; color: #8e8e93; font-weight: 400;
+  line-height: 1.4;
+}
+.i3d-art, .n3d-art {
+  width: 52px; height: 52px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.i3d-img, .n3d-img {
+  width: 48px; height: 48px; object-fit: contain;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.1));
+  animation: hero-float 4s ease-in-out infinite;
+}

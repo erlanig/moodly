@@ -94,18 +94,57 @@
     </div>
   </div>
 
-  <!-- Special Birthday Date Reminder Banner -->
-  <div id="home-date-pill" onclick="window._openDateInvitation()">
-    <div class="hdp-left">
-      <div class="hdp-icon-tile"><img src="img/3d/3d-calendar.png" alt="Undangan"></div>
-      <div>
-        <div class="hdp-title">Undangan Kencan Ulang Tahun</div>
-        <div class="hdp-sub">Sabtu, 24 Okt 2026 · Giur Bistro, Bandung</div>
+  <!-- Special Birthday Date Promotional Banner (Blibli / BP Rewards Style with 3dgiur.png) -->
+  <div class="bday-promo-card" id="home-date-pill" onclick="window._openDateInvitation()">
+    <div class="bpc-banner">
+      <div class="bpc-glow"></div>
+      
+      <div class="bpc-content">
+        <div class="bpc-top-tag">
+          <span class="bpc-brand">EXCLUSIVE INVITATION</span>
+          <span class="bpc-sep">•</span>
+          <span class="bpc-loc">GIUR BISTRO</span>
+        </div>
+
+        <div class="bpc-title">
+          Kencan Spesial &amp;<br>Ulang Tahunmu
+        </div>
+
+        <div class="bpc-chips">
+          <div class="bpc-chip">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span>Sabtu, 24 Okt 2026 · 15.00 WIB</span>
+          </div>
+          <div class="bpc-chip">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span>Giur Bistro, Jl. Aria Jipang Bandung</span>
+          </div>
+          <div class="bpc-chip bpc-chip-accent">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
+            <span>Dress Code: Nuansa Biru Muda</span>
+          </div>
+        </div>
+
+        <div class="bpc-action-row">
+          <div class="bpc-btn">
+            <span>Buka Undangan</span>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="bpc-art-wrap">
+        <img src="img/3dgiur.png" alt="Giur Bistro 3D" class="bpc-3d-img">
       </div>
     </div>
-    <div class="hdp-badge">
-      Buka
-      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+
+    <div class="bpc-footer">
+      <div class="bpc-hashtag">#GIURBISTROBANDUNG <span>| 24 Okt 2026</span></div>
+      <div class="bpc-dots">
+        <span class="bpc-dot active"></span>
+        <span class="bpc-dot"></span>
+        <span class="bpc-dot"></span>
+      </div>
     </div>
   </div>
 
@@ -360,7 +399,7 @@
     <button class="ftab"     onclick="window._filterNews('self-care',this)">Self-Care</button>
     <button class="ftab"     onclick="window._filterNews('motivasi',this)">Motivasi</button>
     <button class="ftab"     onclick="window._filterNews('islam',this)"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px;margin-right:4px;display:inline-block"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>Islam & Psikologi</button>
-    <button class="ftab"     onclick="window._filterNews('bookmark',this)">⭐ Tersimpan</button>
+    <button class="ftab"     onclick="window._filterNews('bookmark',this)"><svg width="12" height="12" viewBox="0 0 24 24" fill="#ff9500" stroke="#ff9500" stroke-width="1.5" style="vertical-align:-1px;margin-right:4px;display:inline-block"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>Tersimpan</button>
   </div>
 
   <div id="news-wrap">
@@ -749,11 +788,11 @@
 <div id="birthday-date-modal" onclick="if(event.target===this)window._closeDateInvitation()">
   <div class="bday-card">
     <!-- Subtle Watermark Silhouette di Belakang Kartu -->
-    <div class="bday-card-watermark" style="background-image: url('img/giur.png');"></div>
+    <div class="bday-card-watermark" style="background-image: url('img/3dgiur.png');"></div>
 
     <!-- Header dengan Siluet Background Giur Bistro -->
     <div class="bday-hero-img-box">
-      <div class="bday-silhouette-bg" style="background-image: url('img/giur.png');"></div>
+      <div class="bday-silhouette-bg" style="background-image: url('img/3dgiur.png');"></div>
       <div class="bday-hero-gradient"></div>
 
       <div class="bday-badge-top">
