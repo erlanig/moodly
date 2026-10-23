@@ -351,8 +351,6 @@ window._toggleFavSurah = toggleFavoriteSurah;
 /* ════════════════
    DIGITAL TASBIH
 ════════════════ */
-let tasbihCount = 0;
-let tasbihTarget = 33;
 const TASBIH_PRESETS = [
   { label: 'Subhanallah', target: 33, arti: 'Maha Suci Allah' },
   { label: 'Alhamdulillah', target: 33, arti: 'Segala Puji Bagi Allah' },
@@ -360,10 +358,19 @@ const TASBIH_PRESETS = [
   { label: 'Astaghfirullah', target: 100, arti: 'Aku memohon ampun kepada Allah' },
   { label: 'Shalawat Nabi', target: 100, arti: 'Allahumma sholli ala Muhammad' }
 ];
-let currentPresetIndex = 0;
+let currentPresetIndex = parseInt(localStorage.getItem('moodly_tasbih_preset') || '0', 10);
+if (isNaN(currentPresetIndex) || currentPresetIndex < 0 || currentPresetIndex >= TASBIH_PRESETS.length) {
+  currentPresetIndex = 0;
+}
+let tasbihTarget = TASBIH_PRESETS[currentPresetIndex].target;
+let tasbihCount = parseInt(localStorage.getItem('moodly_tasbih_count') || '0', 10);
+if (isNaN(tasbihCount) || tasbihCount < 0) {
+  tasbihCount = 0;
+}
 
 export function tapTasbih() {
   tasbihCount++;
+  localStorage.setItem('moodly_tasbih_count', String(tasbihCount));
   if (navigator.vibrate) navigator.vibrate(25);
   updateTasbihUI();
   if (tasbihCount >= tasbihTarget) {
@@ -375,15 +382,18 @@ window._tapTasbih = tapTasbih;
 
 export function resetTasbih() {
   tasbihCount = 0;
+  localStorage.setItem('moodly_tasbih_count', '0');
   updateTasbihUI();
 }
 window._resetTasbih = resetTasbih;
 
 export function switchTasbihPreset(idx) {
   currentPresetIndex = idx;
+  localStorage.setItem('moodly_tasbih_preset', String(idx));
   const p = TASBIH_PRESETS[idx];
   tasbihTarget = p.target;
   tasbihCount = 0;
+  localStorage.setItem('moodly_tasbih_count', '0');
   updateTasbihUI();
 }
 window._switchTasbihPreset = switchTasbihPreset;
@@ -537,7 +547,7 @@ function renderSafePlace() {
       <!-- Preset Pills -->
       <div class="sp-tasbih-presets">
         ${TASBIH_PRESETS.map((p, i) => `
-          <button class="sp-tasbih-pill ${i === 0 ? 'active' : ''}" onclick="window._switchTasbihPreset(${i}); document.querySelectorAll('.sp-tasbih-pill').forEach((b,idx)=>b.classList.toggle('active', idx===${i}))">
+          <button class="sp-tasbih-pill ${i === currentPresetIndex ? 'active' : ''}" onclick="window._switchTasbihPreset(${i}); document.querySelectorAll('.sp-tasbih-pill').forEach((b,idx)=>b.classList.toggle('active', idx===${i}))">
             ${p.label} (${p.target})
           </button>
         `).join('')}
@@ -546,8 +556,8 @@ function renderSafePlace() {
       <!-- Big Tap Button -->
       <div class="sp-tasbih-btn-wrap">
         <button class="sp-tasbih-main-btn" onclick="window._tapTasbih()">
-          <div id="tasbih-count-val" style="font-size:48px;font-weight:800;color:#fff;line-height:1">0</div>
-          <div id="tasbih-target-val" style="font-size:14px;color:rgba(255,255,255,.8);margin-top:4px">/ 33</div>
+          <div id="tasbih-count-val" style="font-size:48px;font-weight:800;color:#fff;line-height:1">${tasbihCount}</div>
+          <div id="tasbih-target-val" style="font-size:14px;color:rgba(255,255,255,.8);margin-top:4px">/ ${tasbihTarget}</div>
           <div style="font-size:11px;color:rgba(255,255,255,.9);margin-top:8px;font-weight:600">TAP UNTUK HITUNG</div>
         </button>
       </div>
@@ -613,6 +623,8 @@ function renderSafePlace() {
 
     <div style="height:32px"></div>
   `;
+
+  updateTasbihUI();
 }
 
 /* ════════════════

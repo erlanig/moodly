@@ -240,6 +240,37 @@ export function goStep(n) {
 /* ════════════════
    SUBMIT
 ════════════════ */
+let successDismissTimer = null;
+let lastCheckinEntry = null;
+
+export function closeSuccessOverlay() {
+  if (successDismissTimer) {
+    clearTimeout(successDismissTimer);
+    successDismissTimer = null;
+  }
+  const s = document.getElementById('success');
+  if (s) s.classList.remove('show');
+  const shareBtn = document.getElementById('post-checkin-share');
+  if (shareBtn) shareBtn.style.display = 'flex';
+  if (lastCheckinEntry && onSubmitCallback) {
+    const e = lastCheckinEntry;
+    lastCheckinEntry = null;
+    onSubmitCallback(e);
+  }
+}
+window._closeSuccessOverlay = closeSuccessOverlay;
+
+export function dismissSuccessOnly() {
+  if (successDismissTimer) {
+    clearTimeout(successDismissTimer);
+    successDismissTimer = null;
+  }
+  const s = document.getElementById('success');
+  if (s) s.classList.remove('show');
+  lastCheckinEntry = null;
+}
+window._dismissSuccessOnly = dismissSuccessOnly;
+
 export async function submitCheckin(entries) {
   const entry = {
     ts: new Date().toISOString(),
@@ -271,19 +302,15 @@ export async function submitCheckin(entries) {
     sucSub.textContent = msgs[Math.floor(Math.random() * msgs.length)];
   }
 
+  lastCheckinEntry = entry;
   const s = document.getElementById('success');
-  s.classList.add('show');
-  setTimeout(() => {
-    s.classList.remove('show');
-    if (onSubmitCallback) onSubmitCallback(entry);
-  }, 2100);
-  setTimeout(() => {
-    const shareBtn = document.getElementById('post-checkin-share');
-    if (shareBtn) {
-      shareBtn.style.display = 'flex';
-    }
-  }, 2200); // muncul setelah success toast hilang
+  if (s) s.classList.add('show');
 
+  // Auto-dismiss after 4.5 seconds if user doesn't tap an action
+  if (successDismissTimer) clearTimeout(successDismissTimer);
+  successDismissTimer = setTimeout(() => {
+    closeSuccessOverlay();
+  }, 4500);
 
   // Tunjukkan tombol chat ke Jes setelah check-in
   const chatBtn = document.getElementById('post-checkin-chat');

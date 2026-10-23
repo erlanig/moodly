@@ -427,10 +427,19 @@ window._closeModal = closeModal;
 /* ════════════════
    IOS PASSCODE LOGIC
 ════════════════ */
-function showPasscodeOverlay() {
+let isVerifyingPin = false;
+
+function showPasscodeOverlay(force = false) {
+  if (isSessionUnlocked) return;
   const overlay = document.getElementById('ios-passcode-overlay');
   if (!overlay) return;
   overlay.classList.remove('unlocked');
+
+  // Prevent background timers from wiping PIN while user is actively typing
+  if (enteredPin && !force) {
+    return;
+  }
+
   enteredPin = '';
   updatePinDots();
   const feedback = document.getElementById('pc-feedback');
@@ -438,17 +447,18 @@ function showPasscodeOverlay() {
 }
 
 function pressPin(digit) {
-  if (isSessionUnlocked || enteredPin.length >= 6) return;
+  if (isSessionUnlocked || isVerifyingPin || enteredPin.length >= 6) return;
   enteredPin += String(digit);
   updatePinDots();
 
   if (enteredPin.length === 6) {
-    setTimeout(verifyPin, 120);
+    isVerifyingPin = true;
+    setTimeout(verifyPin, 100);
   }
 }
 
 function backspacePin() {
-  if (isSessionUnlocked || enteredPin.length === 0) return;
+  if (isSessionUnlocked || isVerifyingPin || enteredPin.length === 0) return;
   enteredPin = enteredPin.slice(0, -1);
   updatePinDots();
   const feedback = document.getElementById('pc-feedback');
@@ -463,11 +473,26 @@ function updatePinDots() {
 }
 
 async function verifyPin() {
-  const passConfig = await loadAppPasscode();
-  configuredPasscode = String(passConfig.passcode || configuredPasscode).trim();
-
-  if (enteredPin === configuredPasscode) {
+  // 1. Instant local verification first (zero network lag while typing)
+  let targetCode = configuredPasscode;
+  if (enteredPin === targetCode) {
     unlockApp(true);
+    isVerifyingPin = false;
+    return;
+  }
+
+  // 2. Fallback check with cloud in case passcode was changed remotely
+  try {
+    const passConfig = await loadAppPasscode();
+    if (passConfig.passcode) {
+      configuredPasscode = String(passConfig.passcode).trim();
+      targetCode = configuredPasscode;
+    }
+  } catch {}
+
+  if (enteredPin === targetCode) {
+    unlockApp(true);
+    isVerifyingPin = false;
   } else {
     if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
     const row = document.getElementById('pc-dots');
@@ -480,12 +505,14 @@ async function verifyPin() {
     setTimeout(() => {
       enteredPin = '';
       updatePinDots();
+      isVerifyingPin = false;
     }, 450);
   }
 }
 
 function unlockApp(triggerGimmick = true) {
   isSessionUnlocked = true;
+  isVerifyingPin = false;
   const overlay = document.getElementById('ios-passcode-overlay');
   if (overlay) overlay.classList.add('unlocked');
 
@@ -660,6 +687,7 @@ function onCheckinDone(entry) {
    OPEN CHAT
 ════════════════ */
 function openChat(moodJson, intensity, causesJson) {
+  if (window._dismissSuccessOnly) window._dismissSuccessOnly();
   let mood = null, causes = [];
   try { mood = JSON.parse(moodJson); } catch {}
   try { causes = JSON.parse(causesJson); } catch {}

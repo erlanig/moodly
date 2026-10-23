@@ -13,6 +13,7 @@ let chatHistory = [];
 let chatContext = {};
 let jesMemory   = { facts: [] };
 let isTyping    = false;
+let typingWatchdog = null;
 
 /* ════════════════
    INIT
@@ -408,7 +409,10 @@ function appendMessage(role, text, animate = false, articleIdx = null) {
 }
 
 function showTypingIndicator() {
+  if (isTyping) return;
   isTyping = true;
+  if (typingWatchdog) clearTimeout(typingWatchdog);
+  typingWatchdog = setTimeout(() => { hideTypingIndicator(); }, 16000);
   const wrap = document.getElementById('chat-messages');
   if (!wrap) return;
   const div = document.createElement('div');
@@ -423,7 +427,7 @@ function showTypingIndicator() {
 }
 
 function hideTypingIndicator() {
-  clearTimeout(typingWatchdog);
+  if (typingWatchdog) { clearTimeout(typingWatchdog); typingWatchdog = null; }
   isTyping = false;
   document.getElementById('chat-typing')?.remove();
 }

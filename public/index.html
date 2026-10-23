@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#fff5f8">
+<meta name="theme-color" content="#ffffff">
 <meta name="apple-mobile-web-app-title" content="Moodly">
 <link rel="icon" type="image/svg+xml" href="img/jes-memoji.svg">
 <link rel="apple-touch-icon" href="img/jes-memoji.svg">
@@ -543,10 +543,16 @@
   <div class="suc-ring" id="suc-em"><img src="img/3d/3d-trophy.png" style="width:48px;height:48px;object-fit:contain;" alt="Sukses"></div>
   <div class="suc-t">Check-in selesai!</div>
   <div class="suc-s" id="suc-s">Proud of you buat check-in hari ini</div>
-  <button id="post-checkin-chat" class="suc-chat-btn" style="display:none"
-    onclick="window._openChat(this.dataset.mood, this.dataset.intensity, this.dataset.causes)">
-    Curhat ke Jes →
-  </button>
+  <div class="suc-actions">
+    <button id="post-checkin-chat" class="suc-chat-btn" style="display:none"
+      onclick="window._openChat(this.dataset.mood, this.dataset.intensity, this.dataset.causes)">
+      <span>Curhat ke Jes</span>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+    </button>
+    <button id="post-checkin-home" class="suc-home-btn" onclick="window._closeSuccessOverlay()">
+      Kembali ke Beranda
+    </button>
+  </div>
 </div>
 
 <!-- ═══════════════ SCRIPTS (ES Modules) ═══════════════ -->
@@ -565,7 +571,7 @@
           <div class="sh-sub">Sinkronisasi otomatis dengan Google Gmail API</div>
         </div>
       </div>
-      <button class="rem-close-btn" onclick="window._closeReminderModal()">✕</button>
+      <button class="rem-close-btn" onclick="window._closeReminderModal()" aria-label="Tutup"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
     </div>
 
     <input type="hidden" id="rem-modal-id">
@@ -645,7 +651,7 @@
     <div class="stories-handle"></div>
     <div class="stories-header">
       <span class="stories-title">Bagikan Mood Story</span>
-      <button class="stories-close" onclick="window._closeStories()">✕</button>
+      <button class="stories-close" onclick="window._closeStories()" aria-label="Tutup"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
     </div>
 
     <div id="story-canvas"></div>
@@ -669,7 +675,7 @@
     <div class="modal-handle"></div>
     <div class="surah-header">
       <div class="surah-header-title" id="surah-modal-title">Memuat...</div>
-      <button class="modal-close-btn" onclick="window._closeSurah()">✕</button>
+      <button class="modal-close-btn" onclick="window._closeSurah()" aria-label="Tutup"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
     </div>
     <div id="surah-modal-content"></div>
   </div>
@@ -685,7 +691,7 @@
           <div id="kajian-modal-cat" class="kjh-cat">Kategori</div>
           <div id="kajian-modal-title" class="kjh-title">Judul Kajian</div>
         </div>
-        <button class="modal-close-btn" onclick="window._closeKajian()">✕</button>
+        <button class="modal-close-btn" onclick="window._closeKajian()" aria-label="Tutup"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
       </div>
       <div class="kjh-info">
         <span id="kajian-modal-src">Sumber</span>
@@ -701,11 +707,11 @@
   <div class="doa-box">
     <div class="modal-handle"></div>
     <div class="doa-header">
-      <span id="doa-modal-emoji">🤲</span>
+      <span id="doa-modal-emoji" style="display:inline-flex;align-items:center;justify-content:center"><img src="img/3d/3d-heart.png" style="width:28px;height:28px;object-fit:contain" alt=""></span>
       <div class="doa-header-info">
         <div id="doa-modal-name">Nama Doa</div>
       </div>
-      <button class="modal-close-btn" onclick="window._closeDoa()">✕</button>
+      <button class="modal-close-btn" onclick="window._closeDoa()" aria-label="Tutup"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
     </div>
     <div class="doa-content">
       <div class="doa-ar" id="doa-modal-ar"></div>
