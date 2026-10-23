@@ -286,7 +286,7 @@ Kamu HARUS membalas HANYA dengan JSON valid:
         apiKey: groqKey || undefined,
         geminiKey: geminiKey || undefined,
       }),
-      signal: AbortSignal.timeout(4500)
+      signal: AbortSignal.timeout(14000)
     });
 
     if (res.ok) {
@@ -310,11 +310,15 @@ Kamu HARUS membalas HANYA dengan JSON valid:
   let reply = '', newFacts = [], articleIdx = null;
   try {
     const clean     = raw.replace(/```json|```/g, '').trim();
-    const jsonMatch = clean.match(/{[sS]*}/);
-    const parsed    = JSON.parse(jsonMatch ? jsonMatch[0] : clean);
-    reply      = parsed.reply || '';
-    newFacts   = parsed.remember || [];
-    articleIdx = typeof parsed.article === 'number' ? parsed.article : null;
+    const jsonMatch = clean.match(/\{[\s\S]*?\}/);
+    if (jsonMatch) {
+      const parsed = JSON.parse(jsonMatch[0]);
+      reply      = parsed.reply || '';
+      newFacts   = parsed.remember || [];
+      articleIdx = typeof parsed.article === 'number' ? parsed.article : null;
+    } else {
+      reply = clean;
+    }
   } catch {
     const replyMatch = raw.match(/"reply"\s*:\s*"([\s\S]*?)(?:",\s*"remember"|"\s*\})/);
     if (replyMatch) {

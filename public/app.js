@@ -254,8 +254,21 @@ function calcStreak() {
    PROFILE MODAL
 ════════════════ */
 function showProf() {
-  document.getElementById('pm-name').textContent = uname || 'User';
-  document.getElementById('pm-in').value = uname;
+  document.getElementById('pm-name').textContent = uname || 'Sahabat Moodly';
+  document.getElementById('pm-in').value = uname || '';
+  const emailIn = document.getElementById('pm-email-in');
+  if (emailIn) {
+    emailIn.value = localStorage.getItem('moodly_user_email') || localStorage.getItem('moodly_reminder_email') || '';
+  }
+  const bioIn = document.getElementById('pm-bio-in');
+  if (bioIn) {
+    bioIn.value = localStorage.getItem('moodly_user_bio') || '';
+  }
+  const focusIn = document.getElementById('pm-focus-in');
+  if (focusIn) {
+    focusIn.value = localStorage.getItem('moodly_user_focus') || 'Self-care & Pemulihan';
+  }
+
   document.getElementById('pm-ci').textContent = entries.length;
   document.getElementById('pm-st').textContent = calcStreak();
   if (entries.length) {
@@ -269,14 +282,43 @@ function showProf() {
 }
 
 async function updateName() {
-  const v = document.getElementById('pm-in').value.trim();
-  if (!v) return;
+  const v = document.getElementById('pm-in')?.value.trim();
+  const email = document.getElementById('pm-email-in')?.value.trim() || '';
+  const bio = document.getElementById('pm-bio-in')?.value.trim() || '';
+  const focus = document.getElementById('pm-focus-in')?.value || 'Self-care & Pemulihan';
+
+  if (!v) {
+    window._moodlyToast?.('Mohon isi nama kamu');
+    return;
+  }
+
   uname = v;
-  await saveProfile({ name: v });
   localStorage.setItem('moodly_user', v);
+  localStorage.setItem('moodly_uname', v);
+
+  if (email) {
+    localStorage.setItem('moodly_user_email', email);
+    localStorage.setItem('moodly_reminder_email', email);
+  }
+  if (bio) {
+    localStorage.setItem('moodly_user_bio', bio);
+  }
+  if (focus) {
+    localStorage.setItem('moodly_user_focus', focus);
+  }
+
+  await saveProfile({
+    name: v,
+    email: email,
+    bio: bio,
+    focus: focus,
+    updatedAt: new Date().toISOString()
+  });
+
   closeModal('prof-modal');
   greet();
   updateHome();
+  window._moodlyToast?.('Profil berhasil disimpan ✓');
 }
 
 async function clearUserData() {

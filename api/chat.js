@@ -26,61 +26,64 @@ export default async function handler(req, res) {
   const chatMsgs = safeMsgs.filter(m => m.role !== 'system');
   const lastUserMsg = chatMsgs.filter(m => m.role === 'user').slice(-1)[0]?.parts?.[0]?.text || chatMsgs.slice(-1)[0]?.content || '';
 
-  // 1. PRIMARY: Try Google AI Studio (Gemini) with fast 3.5s timeout
+  // 1. PRIMARY: Try Google AI Studio (Gemini) with official models & resilient loop
   if (geminiApiKey) {
-    try {
-      // Gemini strict format: MUST start with 'user', roles MUST alternate
-      const contents = [];
-      let lastRole = null;
-      for (const m of chatMsgs) {
-        const role = m.role === 'assistant' ? 'model' : 'user';
-        const text = (m.content || '').trim();
-        if (!text) continue;
-        if (contents.length === 0 && role !== 'user') continue;
-        if (role === lastRole) {
-          contents[contents.length - 1].parts[0].text += '\n' + text;
-        } else {
-          contents.push({ role, parts: [{ text }] });
-          lastRole = role;
-        }
-      }
-      if (contents.length === 0) {
-        contents.push({ role: 'user', parts: [{ text: lastUserMsg || 'Halo Jes' }] });
-      }
-
-      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${geminiApiKey}`;
-      const geminiRes = await fetch(geminiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          system_instruction: sysMsg ? { parts: [{ text: sysMsg }] } : undefined,
-          contents,
-          generationConfig: {
-            temperature: 0.75,
-            maxOutputTokens: 450,
+    const candidateGeminiModels = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-flash-lite'];
+    for (const model of candidateGeminiModels) {
+      try {
+        // Gemini strict format: MUST start with 'user', roles MUST alternate
+        const contents = [];
+        let lastRole = null;
+        for (const m of chatMsgs) {
+          const role = m.role === 'assistant' ? 'model' : 'user';
+          const text = (m.content || '').trim();
+          if (!text) continue;
+          if (contents.length === 0 && role !== 'user') continue;
+          if (role === lastRole) {
+            contents[contents.length - 1].parts[0].text += '\n' + text;
+          } else {
+            contents.push({ role, parts: [{ text }] });
+            lastRole = role;
           }
-        }),
-        signal: AbortSignal.timeout(3500)
-      });
-
-      if (geminiRes.ok) {
-        const gData = await geminiRes.json();
-        const text = gData.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
-        if (text) {
-          return res.status(200).json({ reply: text, model: 'gemini-flash-latest' });
         }
-      } else {
-        const errText = await geminiRes.text().catch(() => '');
-        console.warn(`[api/chat] Gemini error status ${geminiRes.status}:`, errText.slice(0, 160));
+        if (contents.length === 0) {
+          contents.push({ role: 'user', parts: [{ text: lastUserMsg || 'Halo Jes' }] });
+        }
+
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiApiKey}`;
+        const geminiRes = await fetch(geminiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            system_instruction: sysMsg ? { parts: [{ text: sysMsg }] } : undefined,
+            contents,
+            generationConfig: {
+              temperature: 0.75,
+              maxOutputTokens: 550,
+            }
+          }),
+          signal: AbortSignal.timeout(6000)
+        });
+
+        if (geminiRes.ok) {
+          const gData = await geminiRes.json();
+          const text = gData.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
+          if (text) {
+            return res.status(200).json({ reply: text, model });
+          }
+        } else {
+          const errText = await geminiRes.text().catch(() => '');
+          console.warn(`[api/chat] Gemini ${model} error status ${geminiRes.status}:`, errText.slice(0, 160));
+        }
+      } catch (ge) {
+        console.warn(`[api/chat] Gemini ${model} timeout/error:`, ge.message);
       }
-    } catch (ge) {
-      console.warn('[api/chat] Gemini timeout/error:', ge.message);
     }
   }
 
-  // 2. SECONDARY / FALLBACK: Try Groq with fast 3.5s timeout
+  // 2. SECONDARY / FALLBACK: Try Groq with ultra-fast models
   if (groqApiKey) {
-    const candidateGroqModels = ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant'];
+    const candidateGroqModels = ['llama-3.1-8b-instant', 'llama-3.3-70b-versatile'];
     for (const model of candidateGroqModels) {
       try {
         const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -91,11 +94,11 @@ export default async function handler(req, res) {
           },
           body: JSON.stringify({
             model,
-            max_tokens: 400,
+            max_tokens: 450,
             temperature: 0.75,
             messages: safeMsgs,
           }),
-          signal: AbortSignal.timeout(3500)
+          signal: AbortSignal.timeout(5000)
         });
 
         if (groqRes.ok) {
