@@ -520,7 +520,7 @@ async function acceptDateInvite() {
     window._moodlyAlert({
       iconSvg: '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#ff2d55" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>',
       title: 'Konfirmasi Diterima',
-      msg: 'Sampai jumpa di Giur Bistro, Sabtu 24 Oktober 2026 pukul 15.00 WIB. Jangan lupa kenakan pakaian cerah dengan nuansa biru muda ya.'
+      msg: 'Sampai jumpa di Giur Bistro, Sabtu 24 Oktober 2026 pukul 14.30 WIB. Jangan lupa kenakan pakaian cerah dengan nuansa biru muda ya.'
     });
   } else if (window._moodlyToast) {
     window._moodlyToast('Konfirmasi tersimpan. Sampai jumpa di Giur Bistro.');
@@ -535,8 +535,8 @@ function startCountdown() {
 }
 
 function updateCountdown() {
-  // Target: Sabtu, 24 Oktober 2026 15:00:00 WIB
-  const targetDate = new Date('2026-10-24T15:00:00+07:00').getTime();
+  // Target: Sabtu, 24 Oktober 2026 14:30:00 WIB
+  const targetDate = new Date('2026-10-24T14:30:00+07:00').getTime();
   const now = Date.now();
   const diff = targetDate - now;
 
