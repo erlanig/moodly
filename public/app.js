@@ -510,17 +510,12 @@ async function verifyPin() {
   }
 }
 
-function unlockApp(triggerGimmick = true) {
+function unlockApp(triggerGimmick = false) {
   isSessionUnlocked = true;
   isVerifyingPin = false;
   const overlay = document.getElementById('ios-passcode-overlay');
   if (overlay) overlay.classList.add('unlocked');
-
-  if (triggerGimmick) {
-    setTimeout(() => {
-      openDateInvitation();
-    }, 420);
-  }
+  // Pop up undangan dinonaktifkan
 }
 
 /* ════════════════
@@ -529,10 +524,10 @@ function unlockApp(triggerGimmick = true) {
 let countdownTimer = null;
 
 function openDateInvitation() {
-  const modal = document.getElementById('birthday-date-modal');
-  if (!modal) return;
-  modal.classList.add('show');
-  startCountdown();
+  // Pop up undangan dimatikan
+  if (window._moodlyToast) {
+    window._moodlyToast('Coming Soon 2027 ✨');
+  }
 }
 
 function closeDateInvitation() {

@@ -148,8 +148,8 @@ function getSmartFallbackReply(userText, ctx, history = []) {
   }
 
   // 2. Kencan Giur Bistro / Ultah
-  if (t.includes('kencan') || t.includes('bistro') || t.includes('giur') || t.includes('ulang tahun') || t.includes('undangan') || t.includes('oktober')) {
-    return `Undangan kencan ulang tahun di Giur Bistro tanggal 24 Oktober 2026 nanti pasti sangat berkesan. Jangan lupa siapkan outfit cerah nuansa biru muda ya. Gimana, kamu sudah siap buat hari bahagiamu?`;
+  if (t.includes('kencan') || t.includes('bistro') || t.includes('giur') || t.includes('ulang tahun') || t.includes('undangan') || t.includes('oktober') || t.includes('2027')) {
+    return `Momen spesial berikutnya sedang dipersiapkan untuk tahun 2027. Nantikan kejutan manis selanjutnya ya! Ada yang ingin kamu ceritakan hari ini?`;
   }
 
   // 3. Pekerjaan / Kuliah / Deadline / Tugas
