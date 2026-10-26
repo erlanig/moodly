@@ -515,7 +515,13 @@ function unlockApp(triggerGimmick = false) {
   isVerifyingPin = false;
   const overlay = document.getElementById('ios-passcode-overlay');
   if (overlay) overlay.classList.add('unlocked');
-  // Pop up undangan dinonaktifkan
+
+  // Munculkan ucapan ulang tahun dan balon berterbangan HANYA hari ini (26 Okt 2026 s.d. 23:59:59)
+  if (isBirthdayToday()) {
+    setTimeout(() => {
+      showBirthdayGreeting();
+    }, 450);
+  }
 }
 
 /* ════════════════
@@ -524,11 +530,101 @@ function unlockApp(triggerGimmick = false) {
 let countdownTimer = null;
 
 function openDateInvitation() {
-  // Pop up undangan dimatikan
-  if (window._moodlyToast) {
+  if (isBirthdayToday()) {
+    showBirthdayGreeting();
+  } else if (window._moodlyToast) {
     window._moodlyToast('Coming Soon 2027 ✨');
   }
 }
+
+/* ════════════════
+   BIRTHDAY GREETING & FLYING BALLOONS (KHUSUS HARI INI 26 OKT 2026 s.d. 23:59:59)
+════════════════ */
+function isBirthdayToday() {
+  const now = new Date();
+  // Valid HANYA hari ini (26 Oktober 2026) hingga jam 23.59.59
+  return now.getFullYear() === 2026 && now.getMonth() === 9 && now.getDate() === 26;
+}
+
+const BALLOON_PALETTES = [
+  { id: 'bg-pink', light: '#ffffff', mid: '#ff6b95', base: '#ff2d55', dark: '#ba1335' },
+  { id: 'bg-gold', light: '#ffffff', mid: '#ffd56b', base: '#ff9500', dark: '#b86000' },
+  { id: 'bg-purple', light: '#ffffff', mid: '#d68fff', base: '#af52de', dark: '#671991' },
+  { id: 'bg-rose', light: '#ffffff', mid: '#ff9eb5', base: '#ff527b', dark: '#b01b3f' },
+  { id: 'bg-blue', light: '#ffffff', mid: '#8fe5ff', base: '#007aff', dark: '#004aa8' }
+];
+
+function generateBalloonSvgString(c, size, uid) {
+  const h = Math.round(size * 1.35);
+  const gradId = `${c.id}-${uid}`;
+  return `
+  <svg class="bday-balloon-svg" viewBox="0 0 100 135" width="${size}" height="${h}">
+    <defs>
+      <radialGradient id="${gradId}" cx="35%" cy="30%" r="65%">
+        <stop offset="0%" stop-color="${c.light}" stop-opacity="0.85" />
+        <stop offset="25%" stop-color="${c.mid}" />
+        <stop offset="70%" stop-color="${c.base}" />
+        <stop offset="100%" stop-color="${c.dark}" />
+      </radialGradient>
+    </defs>
+    <!-- 3D Balloon Body -->
+    <path d="M50 6 C76 6, 94 28, 94 60 C94 90, 70 110, 54 114 L53 118 L57 122 L43 122 L47 118 L46 114 C30 110, 6 90, 6 60 C6 28, 24 6, 50 6 Z" fill="url(#${gradId})" filter="drop-shadow(0 8px 12px rgba(0,0,0,0.18))"/>
+    <!-- Specular Highlight -->
+    <ellipse cx="32" cy="28" rx="9" ry="15" fill="#ffffff" opacity="0.65" transform="rotate(-28 32 28)" />
+    <circle cx="23" cy="46" r="3.5" fill="#ffffff" opacity="0.45" />
+    <!-- Balloon String -->
+    <path d="M50 122 Q44 135 52 148 T48 175" stroke="rgba(255,255,255,0.7)" stroke-width="1.6" fill="none"/>
+  </svg>`;
+}
+
+function spawnBalloons() {
+  const container = document.getElementById('birthday-balloons-container');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const balloonCount = 24;
+  for (let i = 0; i < balloonCount; i++) {
+    const c = BALLOON_PALETTES[i % BALLOON_PALETTES.length];
+    const size = 50 + Math.floor(Math.random() * 32); // 50px to 82px
+    const left = Math.floor(Math.random() * 92) + 2; // 2% to 94%
+    const duration = 5.2 + Math.random() * 4.5; // 5.2s to 9.7s
+    const delay = Math.random() * 3.2; // 0s to 3.2s
+    const swayDuration = 2.4 + Math.random() * 1.8;
+
+    const item = document.createElement('div');
+    item.className = 'bday-balloon-item';
+    item.style.left = `${left}%`;
+    item.style.animationDuration = `${duration}s`;
+    item.style.animationDelay = `${delay}s`;
+
+    const inner = document.createElement('div');
+    inner.style.animation = `balloonSway ${swayDuration}s ease-in-out infinite alternate`;
+    inner.innerHTML = generateBalloonSvgString(c, size, i);
+
+    item.appendChild(inner);
+    container.appendChild(item);
+  }
+}
+
+function showBirthdayGreeting() {
+  if (!isBirthdayToday()) return;
+  const modal = document.getElementById('birthday-greeting-modal');
+  if (!modal) return;
+  modal.classList.add('show');
+  spawnBalloons();
+  if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
+}
+
+function closeBirthdayGreeting() {
+  const modal = document.getElementById('birthday-greeting-modal');
+  if (modal) modal.classList.remove('show');
+  const container = document.getElementById('birthday-balloons-container');
+  if (container) container.innerHTML = '';
+}
+
+window._showBirthdayGreeting = showBirthdayGreeting;
+window._closeBirthdayGreeting = closeBirthdayGreeting;
+
 
 function closeDateInvitation() {
   const modal = document.getElementById('birthday-date-modal');

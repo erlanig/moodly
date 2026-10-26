@@ -757,6 +757,59 @@
 </div>
 
 <!-- ═══════════════ MINIMALIST BIRTHDAY DATE INVITATION MODAL (SILHOUETTE GIUR BISTRO, NO EMOJI) ═══════════════ -->
+
+<!-- ═══════════════ BIRTHDAY GREETING & FLYING BALLOONS (KHUSUS HARI INI) ═══════════════ -->
+<div id="birthday-greeting-modal" class="bday-greet-overlay" onclick="if(event.target===this)window._closeBirthdayGreeting()">
+  <div class="bday-greet-backdrop"></div>
+  <div id="birthday-balloons-container" class="bday-balloons-container"></div>
+  
+  <div class="bday-greet-card">
+    <button class="bday-greet-close" onclick="window._closeBirthdayGreeting()" aria-label="Tutup">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+
+    <!-- 3D Celebration Header Composition -->
+    <div class="bday-greet-hero">
+      <div class="bday-float-3d bday-float-left">
+        <img src="img/3d/3d-heart.png" alt="Heart" class="bday-mini-3d">
+      </div>
+      <div class="bday-main-3d-wrap">
+        <div class="bday-3d-glow"></div>
+        <img src="img/3d/mood-happy.png" alt="Happy Birthday" class="bday-main-3d">
+      </div>
+      <div class="bday-float-3d bday-float-right">
+        <img src="img/3d/3d-star.png" alt="Star" class="bday-mini-3d">
+      </div>
+    </div>
+
+    <!-- Badge -->
+    <div class="bday-greet-badge-wrap">
+      <span class="bday-greet-badge">HARI SPESIAL UNTUKMU ✨</span>
+    </div>
+
+    <!-- Title -->
+    <h2 class="bday-greet-title">Selamat Ulang Tahun, Sayang! 🎂</h2>
+
+    <!-- Heartfelt Message -->
+    <div class="bday-greet-body">
+      <p class="bday-greet-msg">
+        Barakallahu fii umrik sayangku. Semoga di usiamu yang baru ini selalu dipenuhi limpahan berkah, kesehatan, kebahagiaan hati, dan kemudahan dalam menggapai semua impian manismu. Terima kasih sudah menjadi orang yang begitu berharga dan selalu menerangi hari-hariku. <i>Love you always!</i>
+      </p>
+    </div>
+
+    <!-- Action Button -->
+    <button class="bday-greet-btn" onclick="window._closeBirthdayGreeting()">
+      <span>Aamiin, Makasih Banyak Sayang 🤍</span>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+      </svg>
+    </button>
+  </div>
+</div>
+
 <div id="birthday-date-modal" style="display:none !important;" onclick="if(event.target===this)window._closeDateInvitation()">
   <div class="bday-card">
     <!-- Subtle Watermark Silhouette di Belakang Kartu -->
