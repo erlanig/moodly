@@ -55,7 +55,7 @@
     <div class="hero-card-content">
       <div class="hero-top-row">
         <div class="hero-date-tag" id="hero-tag">Pagi yang tenang</div>
-        <div class="hero-streak-badge">
+        <div class="hero-streak-badge" onclick="window._showStreakModal()" style="cursor:pointer;" title="Lihat Pencapaian Streak">
           <img src="img/3d/3d-fire.png" alt="Streak">
           <span id="streak">0</span> hari
         </div>
@@ -498,7 +498,7 @@
     <div class="pm-name" id="pm-name">—</div>
     <div class="pm-stats">
       <div class="pmst"><div class="pmst-v" id="pm-ci">0</div><div class="pmst-l">Check-in</div></div>
-      <div class="pmst"><div class="pmst-v" id="pm-st">0</div><div class="pmst-l">Streak</div></div>
+      <div class="pmst" onclick="window._showStreakModal()" style="cursor:pointer;" title="Lihat Pencapaian Streak"><div class="pmst-v" id="pm-st">0</div><div class="pmst-l">Streak</div></div>
       <div class="pmst"><div class="pmst-v" id="pm-av">—</div><div class="pmst-l">Avg Mood</div></div>
     </div>
     <div class="pm-lbl">Nama Panggilan</div>
@@ -583,6 +583,36 @@
 </div>
 
 <!-- ═══════════════ SCRIPTS (ES Modules) ═══════════════ -->
+
+<!-- ═══════════════ STREAK & MILESTONES MODAL (iOS PINK BOTTOM SHEET) ═══════════════ -->
+<div id="streak-modal" class="modal-bg" onclick="if(event.target===this)window._closeStreakModal()">
+  <div class="modal-sheet streak-sheet">
+    <div class="sh-handle"></div>
+    <div class="streak-sheet-header">
+      <div class="streak-hero-icon">
+        <img src="img/3d/3d-fire.png" alt="Streak" class="streak-3d-fire">
+      </div>
+      <div class="streak-current-val"><span id="sm-streak-val">0</span> Hari</div>
+      <div class="streak-current-sub" id="sm-streak-sub">Konsistensi Refleksi Diri</div>
+    </div>
+
+    <!-- Next Target Card -->
+    <div class="streak-prog-card">
+      <div class="streak-prog-header">
+        <span class="streak-prog-title">Target Berikutnya: <b id="sm-next-target">3 Hari</b></span>
+        <span class="streak-prog-remain" id="sm-remain-days">3 hari lagi</span>
+      </div>
+      <div class="streak-prog-bar">
+        <div class="streak-prog-fill" id="sm-prog-fill" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <div class="streak-milestones-title">Daftar Pencapaian Streak</div>
+    <div class="streak-milestones-list" id="sm-milestones-list"></div>
+
+    <button class="cta pink" style="margin-top:14px" onclick="window._closeStreakModal()">Tutup</button>
+  </div>
+</div>
 
 <!-- ═══════════════ REMINDER & TASK MODAL (iOS BOTTOM SHEET) ═══════════════ -->
 <div id="reminder-modal" class="modal-bg" onclick="if(event.target===this)window._closeReminderModal()">

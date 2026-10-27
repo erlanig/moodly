@@ -397,9 +397,22 @@ export async function submitCheckin(entries) {
     'Kamu sudah melakukan yang terbaik hari ini.',
     'Setiap check-in adalah bentuk kepedulian pada dirimu sendiri.',
   ];
+  // Calculate streak to check for milestone (3, 10, 30, 100, 200, 300, and multiples of 100)
+  const today = new Date(); today.setHours(0,0,0,0);
+  const sSet = new Set(entries.map(e => { const d = new Date(e.ts); d.setHours(0,0,0,0); return d.getTime(); }));
+  let currentStreak = 0;
+  for (let i = 0; i < 5000; i++) {
+    const d = new Date(today); d.setDate(today.getDate() - i);
+    if (sSet.has(d.getTime())) currentStreak++; else if (i > 0) break;
+  }
+
+  const isMilestone = (currentStreak === 3 || currentStreak === 10 || currentStreak === 30 || (currentStreak >= 100 && currentStreak % 100 === 0));
+
   const sucEm = document.getElementById('suc-em');
   if (sucEm) {
-    if (cur.mood?.img) {
+    if (isMilestone) {
+      sucEm.innerHTML = `<img src="img/3d/3d-trophy.png" alt="Milestone Streak" class="suc-3d-img">`;
+    } else if (cur.mood?.img) {
       sucEm.innerHTML = `<img src="${cur.mood.img}" alt="${cur.mood.l}" class="suc-3d-img">`;
     } else {
       sucEm.textContent = cur.mood?.e || '✨';
@@ -407,7 +420,11 @@ export async function submitCheckin(entries) {
   }
   const sucSub = document.getElementById('suc-s');
   if (sucSub) {
-    sucSub.textContent = msgs[Math.floor(Math.random() * msgs.length)];
+    if (isMilestone) {
+      sucSub.textContent = `Pencapaian Spesial! Kamu mencapai Milestone Streak ${currentStreak} Hari berturut-turut.`;
+    } else {
+      sucSub.textContent = msgs[Math.floor(Math.random() * msgs.length)];
+    }
   }
 
   lastCheckinEntry = entry;

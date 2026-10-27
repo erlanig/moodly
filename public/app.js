@@ -245,18 +245,126 @@ function greet() {
 }
 
 /* ════════════════
-   STREAK
+   STREAK & MILESTONES (3, 10, 30, 100, 200, 300, KELIPATAN 100)
 ════════════════ */
-function calcStreak() {
+export function calcStreak() {
   const t = new Date(); t.setHours(0,0,0,0);
   const s = new Set(entries.map(e => { const d=new Date(e.ts); d.setHours(0,0,0,0); return d.getTime(); }));
   let n = 0;
-  for (let i = 0; i < 90; i++) {
+  // Support 3, 10, 30, 100, 200, 300, and long-term milestones (multiples of 100 up to 5000+ days)
+  for (let i = 0; i < 5000; i++) {
     const d = new Date(t); d.setDate(t.getDate()-i);
-    if (s.has(d.getTime())) n++; else if (i>0) break;
+    if (s.has(d.getTime())) {
+      n++;
+    } else if (i > 0) {
+      break;
+    }
   }
   return n;
 }
+
+export function getStreakMilestoneList(currentStreak) {
+  const base = [
+    { target: 3,   title: 'Langkah Awal',            desc: '3 hari berturut-turut menjaga perhatian pada dirimu' },
+    { target: 10,  title: 'Komitmen Diri',           desc: '10 hari konsisten membangun kebiasaan refleksi' },
+    { target: 30,  title: 'Satu Bulan Penuh Makna',  desc: '30 hari terhubung dengan perasaanmu' },
+    { target: 100, title: 'Klub 100 Hari (Century)', desc: '100 hari dedikasi luar biasa merawat jiwa' },
+    { target: 200, title: 'Dua Ratus Hari Tangguh',  desc: '200 hari refleksi yang membuktikan keteguhanmu' },
+    { target: 300, title: 'Tiga Ratus Hari Tumbuh',  desc: '300 hari bertumbuh dan mengenal dirimu lebih dalam' },
+  ];
+
+  // Dynamic multiples of 100: 400, 500, 600, ...
+  const highestTarget = Math.max(300, (Math.floor(currentStreak / 100) + 1) * 100);
+  for (let m = 400; m <= highestTarget; m += 100) {
+    base.push({
+      target: m,
+      title: `Pencapaian ${m} Hari`,
+      desc: `${m} hari konsistensi legendaris dalam merawat kesehatan mentalmu`
+    });
+  }
+
+  return base;
+}
+
+export function showStreakModal() {
+  const currentStreak = calcStreak();
+  const modal = document.getElementById('streak-modal');
+  if (!modal) return;
+
+  const valEl = document.getElementById('sm-streak-val');
+  if (valEl) valEl.textContent = currentStreak;
+
+  const subEl = document.getElementById('sm-streak-sub');
+  if (subEl) {
+    if (currentStreak === 0) {
+      subEl.textContent = 'Mulai check-in hari ini untuk menyalakan streak!';
+    } else if (currentStreak < 3) {
+      subEl.textContent = `${3 - currentStreak} hari lagi menuju milestone pertama (3 Hari)`;
+    } else {
+      subEl.textContent = 'Konsistensi refleksi diri yang membanggakan';
+    }
+  }
+
+  const milestones = getStreakMilestoneList(currentStreak);
+  let nextMilestone = milestones.find(m => m.target > currentStreak);
+  if (!nextMilestone) {
+    const nextVal = (Math.floor(currentStreak / 100) + 1) * 100;
+    nextMilestone = {
+      target: nextVal,
+      title: `Pencapaian ${nextVal} Hari`,
+      desc: 'Target kelipatan 100 berikutnya'
+    };
+  }
+
+  // Prev milestone for progress calculation
+  const prevTarget = milestones.filter(m => m.target <= currentStreak).pop()?.target || 0;
+  const targetDiff = nextMilestone.target - prevTarget;
+  const currentDiff = Math.max(0, currentStreak - prevTarget);
+  const pct = Math.min(100, Math.round((currentDiff / targetDiff) * 100));
+
+  const targetEl = document.getElementById('sm-next-target');
+  if (targetEl) targetEl.textContent = `${nextMilestone.target} Hari`;
+
+  const remainEl = document.getElementById('sm-remain-days');
+  if (remainEl) remainEl.textContent = `${nextMilestone.target - currentStreak} hari lagi`;
+
+  const fillEl = document.getElementById('sm-prog-fill');
+  if (fillEl) fillEl.style.width = `${pct}%`;
+
+  // Render milestones list
+  const listEl = document.getElementById('sm-milestones-list');
+  if (listEl) {
+    listEl.innerHTML = milestones.map(m => {
+      const isAchieved = currentStreak >= m.target;
+      return `
+        <div class="streak-m-item ${isAchieved ? 'achieved' : 'locked'}">
+          <div class="streak-m-ic">
+            <img src="${isAchieved ? 'img/3d/3d-trophy.png' : 'img/3d/3d-target.png'}" alt="${m.title}">
+          </div>
+          <div class="streak-m-info">
+            <div class="streak-m-title-row">
+              <span class="streak-m-name">${m.title}</span>
+              <span class="streak-m-days">${m.target} Hari</span>
+            </div>
+            <div class="streak-m-desc">${m.desc}</div>
+            <div class="streak-m-status ${isAchieved ? 'done' : 'wait'}">
+              ${isAchieved ? '✓ Tercapai' : `Tersisa ${m.target - currentStreak} hari`}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  modal.classList.add('show');
+}
+window._showStreakModal = showStreakModal;
+
+export function closeStreakModal() {
+  const modal = document.getElementById('streak-modal');
+  if (modal) modal.classList.remove('show');
+}
+window._closeStreakModal = closeStreakModal;
 
 /* ════════════════
    PROFILE MODAL

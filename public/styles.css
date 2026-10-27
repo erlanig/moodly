@@ -180,6 +180,12 @@ html, body {
   color: #ffffff;
   padding: 4px 10px; border-radius: 100px;
   font-size: 11px; font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.12s ease, background 0.15s ease;
+}
+.hero-streak-badge:active {
+  transform: scale(0.94);
+  background: rgba(255, 255, 255, 0.35);
 }
 .hero-streak-badge img {
   width: 14px; height: 14px; object-fit: contain;
@@ -4503,4 +4509,182 @@ html, body {
   height: 60px;
   opacity: 0;
   cursor: pointer;
+}
+
+/* ════════════════════════════════════════
+   STREAK & MILESTONES MODAL (iOS PINK GLASS)
+════════════════════════════════════════ */
+.streak-sheet {
+  max-height: 88vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 16px 20px 24px;
+}
+.streak-sheet-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 16px;
+}
+.streak-hero-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff5f8 0%, #ffe4ea 100%);
+  border: 1.5px solid rgba(255, 45, 85, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 24px rgba(255, 45, 85, 0.2);
+  margin-bottom: 10px;
+}
+.streak-3d-fire {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+}
+.streak-current-val {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+.streak-current-sub {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+/* Progress card */
+.streak-prog-card {
+  background: #ffffff;
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  padding: 14px 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  margin-bottom: 16px;
+}
+.streak-prog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+.streak-prog-title {
+  color: var(--text);
+  font-weight: 600;
+}
+.streak-prog-title b {
+  color: var(--p1);
+  font-weight: 700;
+}
+.streak-prog-remain {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.streak-prog-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: #f4f4f5;
+  overflow: hidden;
+}
+.streak-prog-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--grad);
+  transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Milestones List */
+.streak-milestones-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text2);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.streak-milestones-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.streak-m-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #ffffff;
+  border: 1.5px solid var(--border);
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+.streak-m-item.achieved {
+  background: linear-gradient(135deg, rgba(255, 45, 85, 0.04) 0%, rgba(255, 255, 255, 0.9) 100%);
+  border-color: rgba(255, 45, 85, 0.22);
+}
+.streak-m-item.locked {
+  opacity: 0.72;
+}
+.streak-m-ic {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #fdf2f4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.streak-m-item.locked .streak-m-ic {
+  background: #f4f4f5;
+}
+.streak-m-ic img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+.streak-m-info {
+  flex: 1;
+  min-width: 0;
+}
+.streak-m-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+.streak-m-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+.streak-m-days {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--p1);
+}
+.streak-m-item.locked .streak-m-days {
+  color: var(--muted);
+}
+.streak-m-desc {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.35;
+  margin-bottom: 4px;
+}
+.streak-m-status {
+  font-size: 10px;
+  font-weight: 700;
+}
+.streak-m-status.done {
+  color: #10b981;
+}
+.streak-m-status.wait {
+  color: var(--muted);
 }
