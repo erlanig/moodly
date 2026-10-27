@@ -1,8 +1,9 @@
 /* ═══════════════════════════════════════
    MOODLY — stories.js
-   Mood Card Generator (Square 1:1 for Instagram)
-   • Strict 1:1 Square Card (1080x1080 HD Export)
-   • Instagram auto-adapts 1:1 cards perfectly in Stories
+   Instagram Stories Generator (Strict 9:16 Snapgram)
+   • Strict 9:16 Aspect Ratio (1080x1920 HD Export)
+   • Outer frame with sharp square corners (border-radius: 0)
+   • Polaroid card with soft rounded corners (border-radius: 14px)
    • All photos strictly cropped to fill (object-fit: cover, never shrunk)
    • Elegant Poppins Typography & Title Case (No All-Caps)
    • Solid Background Colors (Putih, Pink, Custom Color Picker, No Gradients)
@@ -241,13 +242,26 @@ function renderStoryPreview() {
 
         <div class="story-bottom-info">
           <div class="story-quote" style="color:${theme.text}">"${quote}"</div>
+
+          ${currentEntry.intensity ? `
+            <div class="story-int-pill" style="background:${theme.chipBg};border:1px solid ${theme.chipBorder};color:${theme.text}">
+              <span class="story-int-dot" style="background:${theme.accent}"></span>
+              <span>${currentEntry.intensity}</span>
+            </div>
+          ` : ''}
+
+          ${causes.length ? `
+            <div class="story-causes">
+              ${causes.map(c => `<span class="story-chip" style="background:${theme.chipBg};color:${theme.text};border-color:${theme.chipBorder}">${toTitleCase(c)}</span>`).join('')}
+            </div>
+          ` : ''}
         </div>
       </div>
     `;
   }
 
   // ════════════════════════════════════════
-  // TEMPLATE 2: MULTI-PHOTO GRID (1:1 KOTAK & CROPPED)
+  // TEMPLATE 2: MULTI-PHOTO GRID (9:16 CROPPED)
   // ════════════════════════════════════════
   else if (currentTemplateId === 'grid') {
     let gridLayout = '';
@@ -502,7 +516,7 @@ export function setCustomStoryColor(hex) {
 window._setCustomStoryColor = setCustomStoryColor;
 
 /* ════════════════
-   DOWNLOAD / SHARE (SQUARE 1:1 1080x1080 FOR INSTAGRAM)
+   DOWNLOAD / SHARE (STRICT 9:16 SNAPGRAM 1080x1920)
 ════════════════ */
 export async function downloadStory() {
   const frame = document.getElementById('story-frame');
@@ -520,12 +534,12 @@ export async function downloadStory() {
   }
 
   try {
-    if (window._moodlyToast) window._moodlyToast('Menyiapkan gambar kartu...');
+    if (window._moodlyToast) window._moodlyToast('Menyiapkan Instagram Story 9:16...');
 
-    // Scale precisely to 1080x1080 px (1:1 square)
-    const targetSize = 1080;
-    const currentWidth = frame.offsetWidth || 320;
-    const exportScale = targetSize / currentWidth;
+    // Scale precisely to 1080x1920 px (9:16)
+    const targetWidth = 1080;
+    const currentWidth = frame.offsetWidth || 252;
+    const exportScale = targetWidth / currentWidth;
 
     const canvas = await html2canvas(frame, {
       scale: exportScale,
@@ -535,10 +549,10 @@ export async function downloadStory() {
       logging: false,
     });
     const link = document.createElement('a');
-    link.download = `moodly-card-${Date.now()}.png`;
+    link.download = `moodly-story-${Date.now()}.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();
-    if (window._moodlyToast) window._moodlyToast('Kartu siap dibagikan ke Instagram!');
+    if (window._moodlyToast) window._moodlyToast('Story siap dibagikan ke Instagram!');
   } catch (e) {
     console.warn('[stories] download failed:', e);
   }
@@ -550,11 +564,11 @@ export async function shareStory() {
 
   if (navigator.share && typeof html2canvas !== 'undefined') {
     try {
-      if (window._moodlyToast) window._moodlyToast('Menyiapkan gambar untuk Instagram...');
+      if (window._moodlyToast) window._moodlyToast('Menyiapkan Instagram Story 9:16...');
 
-      const targetSize = 1080;
-      const currentWidth = frame.offsetWidth || 320;
-      const exportScale = targetSize / currentWidth;
+      const targetWidth = 1080;
+      const currentWidth = frame.offsetWidth || 252;
+      const exportScale = targetWidth / currentWidth;
 
       const canvas = await html2canvas(frame, {
         scale: exportScale,
@@ -566,12 +580,12 @@ export async function shareStory() {
 
       canvas.toBlob(async (blob) => {
         if (!blob) { downloadStory(); return; }
-        const file = new File([blob], `moodly-card-${Date.now()}.png`, { type: 'image/png' });
+        const file = new File([blob], `moodly-story-${Date.now()}.png`, { type: 'image/png' });
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           try {
             await navigator.share({
               files: [file],
-              title: 'Moodly Story Card',
+              title: 'Moodly Story',
               text: `Mood hari ini: ${toTitleCase(currentEntry?.mood?.l || 'Check-in')}`,
             });
             return;
