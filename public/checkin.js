@@ -202,12 +202,121 @@ export function buildCheckinUI() {
 /* ════════════════
    START / RESET
 ════════════════ */
+
+/* ════════════════
+   MULTI-PHOTO UPLOAD & COMPRESSION
+════════════════ */
+export function compressImageFile(file, maxDimension = 960, quality = 0.78) {
+  return new Promise((resolve, reject) => {
+    if (!file || !file.type.startsWith('image/')) {
+      return reject(new Error('File bukan gambar'));
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxDimension || height > maxDimension) {
+          if (width > height) {
+            height = Math.round((height * maxDimension) / width);
+            width = maxDimension;
+          } else {
+            width = Math.round((width * maxDimension) / height);
+            height = maxDimension;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        resolve(dataUrl);
+      };
+      img.onerror = () => reject(new Error('Gagal memuat gambar'));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error('Gagal membaca file'));
+    reader.readAsDataURL(file);
+  });
+}
+
+export async function handlePhotoSelect(input) {
+  const files = Array.from(input.files || []);
+  if (!files.length) return;
+
+  if (!cur.photos) cur.photos = [];
+  const remaining = 4 - cur.photos.length;
+  if (remaining <= 0) {
+    if (window._moodlyToast) window._moodlyToast('Maksimal 4 foto untuk setiap check-in ya!');
+    input.value = '';
+    return;
+  }
+
+  const toProcess = files.slice(0, remaining);
+  if (window._moodlyToast) window._moodlyToast(`Mengompres ${toProcess.length} foto...`);
+
+  for (const file of toProcess) {
+    try {
+      const compressed = await compressImageFile(file);
+      cur.photos.push(compressed);
+    } catch (err) {
+      console.warn('Gagal memproses foto:', err);
+    }
+  }
+
+  input.value = '';
+  renderPhotoPreview();
+}
+window._handlePhotoSelect = handlePhotoSelect;
+
+export function removePhoto(index) {
+  if (cur.photos && index >= 0 && index < cur.photos.length) {
+    cur.photos.splice(index, 1);
+    renderPhotoPreview();
+  }
+}
+window._removePhoto = removePhoto;
+
+export function renderPhotoPreview() {
+  const grid = document.getElementById('ci-photo-grid');
+  const countEl = document.getElementById('ci-photo-counter');
+  const addBtn = document.getElementById('ci-add-photo-btn');
+  if (!grid) return;
+
+  const photos = cur.photos || [];
+  if (countEl) countEl.textContent = `${photos.length}/4`;
+
+  // Hapus thumbnail lama
+  grid.querySelectorAll('.ci-photo-thumb').forEach(t => t.remove());
+
+  photos.forEach((src, idx) => {
+    const thumb = document.createElement('div');
+    thumb.className = 'ci-photo-thumb';
+    thumb.innerHTML = `
+      <img src="${src}" alt="Foto ${idx + 1}">
+      <button type="button" class="ci-thumb-del" onclick="window._removePhoto(${idx})" aria-label="Hapus foto">✕</button>
+    `;
+    if (addBtn) grid.insertBefore(thumb, addBtn);
+    else grid.appendChild(thumb);
+  });
+
+  if (addBtn) {
+    addBtn.style.display = photos.length >= 4 ? 'none' : 'inline-flex';
+  }
+}
+
 export function startCheckin(callback) {
   onSubmitCallback = callback;
-  cur = { mood: null, causes: [], intensity: null };
+  cur = { mood: null, causes: [], intensity: null, photos: [] };
   document.querySelectorAll('.mood-btn,.cause-btn,.int-btn').forEach(x => x.classList.remove('sel'));
   document.getElementById('btn1').disabled = true;
   document.getElementById('btn3').disabled = true;
+  renderPhotoPreview();
   goStep(1);
 }
 
@@ -277,6 +386,7 @@ export async function submitCheckin(entries) {
     mood: cur.mood,
     causes: [...cur.causes],
     intensity: cur.intensity,
+    photos: [...(cur.photos || [])],
   };
   const id = await addEntry(entry);
   if (id) entry.id = id;
