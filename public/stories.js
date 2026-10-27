@@ -1,10 +1,11 @@
 /* ═══════════════════════════════════════
    MOODLY — stories.js
-   Mood Stories: Instagram-Style Card Generator
-   • Multi-Photo & Single Photo Support
-   • 4 Aesthetic Story Templates (Polaroid, Grid, Editorial, Minimalist)
-   • 100% 3D Icons (Bukan Memoji/Emoji Biasa)
-   • Ultra High Resolution 9:16 Story Export
+   Instagram Stories Generator (Strict 9:16)
+   • Strict 9:16 Aspect Ratio (1080x1920 Export)
+   • Elegant Poppins Typography & Title Case (No All-Caps)
+   • Solid Background Colors (Putih, Pink, Custom Color Picker, No Gradients)
+   • 2-Tone moodly Logo Centered at Bottom
+   • 100% 3D Renders (No Memojis/Unclear Emojis)
    ═══════════════════════════════════════ */
 
 /* ════════════════
@@ -14,109 +15,85 @@ const TEMPLATES = [
   {
     id: 'polaroid',
     name: 'Polaroid',
-    svg: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>',
+    svg: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>',
     desc: 'Frame Foto Vintage'
   },
   {
     id: 'grid',
     name: 'Kolase Grid',
-    svg: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>',
+    svg: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>',
     desc: 'Kolase Multi-Foto'
   },
   {
     id: 'editorial',
     name: 'Editorial',
-    svg: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>',
+    svg: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>',
     desc: 'Hero Photo Majalah'
   },
   {
     id: 'minimal',
     name: 'Minimalis',
-    svg: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>',
+    svg: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>',
     desc: '3D Art Card'
   },
 ];
 
 /* ════════════════
-   STORY THEMES
+   SOLID BACKGROUND COLORS (NO GRADIENTS)
 ════════════════ */
-const THEMES = [
-  {
-    id: 'sakura',
-    name: 'Sakura Pink',
-    bg: 'linear-gradient(160deg, #2b0416 0%, #611032 50%, #b81d58 100%)',
-    cardBg: 'rgba(255, 255, 255, 0.12)',
-    accent: '#ff5e8a',
-    accentLight: '#ffa8c0',
-    text: '#fff5f8',
-    particle: '<span class="story-dot" style="background:#ff5e8a"></span>',
-  },
-  {
-    id: 'sunset',
-    name: 'Sunset Glow',
-    bg: 'linear-gradient(160deg, #1f0b24 0%, #521945 50%, #c0392b 100%)',
-    cardBg: 'rgba(255, 255, 255, 0.12)',
-    accent: '#f97316',
-    accentLight: '#fdba74',
-    text: '#fff5f0',
-    particle: '<span class="story-dot" style="background:#f97316"></span>',
-  },
-  {
-    id: 'ocean',
-    name: 'Deep Ocean',
-    bg: 'linear-gradient(160deg, #091129 0%, #15325b 50%, #1e5f8a 100%)',
-    cardBg: 'rgba(255, 255, 255, 0.12)',
-    accent: '#38bdf8',
-    accentLight: '#bae6fd',
-    text: '#f0f9ff',
-    particle: '<span class="story-dot" style="background:#38bdf8"></span>',
-  },
-  {
-    id: 'forest',
-    name: 'Emerald Forest',
-    bg: 'linear-gradient(160deg, #062413 0%, #114c28 50%, #17723e 100%)',
-    cardBg: 'rgba(255, 255, 255, 0.12)',
-    accent: '#4ade80',
-    accentLight: '#bbf7d0',
-    text: '#e8faf0',
-    particle: '<span class="story-dot" style="background:#4ade80"></span>',
-  },
-  {
-    id: 'night',
-    name: 'Midnight Slate',
-    bg: 'linear-gradient(160deg, #020617 0%, #0f172a 60%, #1e293b 100%)',
-    cardBg: 'rgba(255, 255, 255, 0.12)',
-    accent: '#818cf8',
-    accentLight: '#c7d2fe',
-    text: '#f1f5f9',
-    particle: '<span class="story-dot" style="background:#818cf8"></span>',
-  },
-  {
-    id: 'latte',
-    name: 'Warm Latte',
-    bg: 'linear-gradient(160deg, #2b1810 0%, #543324 50%, #875c43 100%)',
-    cardBg: 'rgba(255, 255, 255, 0.14)',
-    accent: '#d97706',
-    accentLight: '#fde68a',
-    text: '#fefce8',
-    particle: '<span class="story-dot" style="background:#f59e0b"></span>',
-  }
+const SOLID_COLORS = [
+  { id: 'white',      name: 'Putih Bersih',  hex: '#ffffff' },
+  { id: 'soft-pink',  name: 'Pink Lembut',   hex: '#fff0f3' },
+  { id: 'blush-pink', name: 'Blush Pink',    hex: '#ffe4ea' },
+  { id: 'rose-pink',  name: 'Rose Pastel',   hex: '#ffd1dc' },
+  { id: 'warm-cream', name: 'Krem Hangat',   hex: '#faf8f5' },
+  { id: 'charcoal',   name: 'Charcoal Dark', hex: '#18181b' },
 ];
 
 /* ════════════════
    STATE
 ════════════════ */
-let currentThemeIdx   = 0;
+let currentColorHex   = '#ffffff'; // Default: Clean Solid White
 let currentTemplateId = 'polaroid';
 let selectedPhotoIdx  = 0;
 let currentEntry      = null;
+
+/* ════════════════
+   COLOR LUMINANCE HELPER
+════════════════ */
+function isDarkColor(hex) {
+  if (!hex) return false;
+  let c = hex.replace('#', '');
+  if (c.length === 3) c = c[0] + c[0] + c[1] + c[1] + c[2] + c[2];
+  const r = parseInt(c.substr(0, 2), 16) || 255;
+  const g = parseInt(c.substr(2, 2), 16) || 255;
+  const b = parseInt(c.substr(4, 2), 16) || 255;
+  const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+  return yiq < 135;
+}
+
+function getThemeStyles(hex) {
+  const isDark = isDarkColor(hex);
+  return {
+    bg: hex,
+    isDark,
+    text: isDark ? '#ffffff' : '#1c1c1e',
+    textMuted: isDark ? 'rgba(255, 255, 255, 0.68)' : 'rgba(28, 28, 30, 0.60)',
+    cardBg: isDark ? 'rgba(255, 255, 255, 0.08)' : '#ffffff',
+    cardBorder: isDark ? 'rgba(255, 255, 255, 0.14)' : 'rgba(0, 0, 0, 0.07)',
+    cardShadow: isDark ? '0 10px 26px rgba(0,0,0,0.45)' : '0 10px 26px rgba(0,0,0,0.06)',
+    chipBg: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.04)',
+    chipBorder: isDark ? 'rgba(255, 255, 255, 0.18)' : 'rgba(0, 0, 0, 0.08)',
+    accent: '#ff2d55',
+  };
+}
 
 /* ════════════════
    OPEN STORIES MODAL
 ════════════════ */
 export function openStories(entry) {
   currentEntry = entry;
-  currentThemeIdx = 0;
+  currentColorHex = '#ffffff';
   selectedPhotoIdx = 0;
 
   // Auto-detect template yang paling pas
@@ -138,38 +115,65 @@ export function openStories(entry) {
 }
 
 /* ════════════════
-   RENDER PREVIEWS
+   3D ICON & TITLE CASE HELPERS
 ════════════════ */
-function getMood3DIconHtml(mood, size = 68) {
+function getMood3DIconHtml(mood, size = 64) {
   if (mood && mood.img) {
     return `<img src="${mood.img}" class="story-3d-main-img" style="width:${size}px;height:${size}px;object-fit:contain" alt="${mood.l}">`;
   }
-  // Fallback 3D icon
   return `<img src="img/3d/3d-heart.png" class="story-3d-main-img" style="width:${size}px;height:${size}px;object-fit:contain" alt="Moodly">`;
+}
+
+function toTitleCase(str) {
+  if (!str) return '';
+  return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
 }
 
 function getQuoteForMood(score) {
   const quotes = {
-    5: ['Energi positifmu hari ini begitu nyata & memancar.', 'Hari yang indah milikmu seutuhnya.', 'Kebahagiaanmu selalu valid & berharga.'],
-    4: ['Merasa cukup oke itu sudah sangat luar biasa.', 'Pelan-pelan saja, semua akan baik-baik saja.', 'Kamu mampu melewati harimu dengan sangat baik.'],
-    3: ['Hari yang tenang tetap sangat berharga.', 'Kamu hadir seutuhnya hari ini, itu pencapaian besar.', 'Proses bertumbuh tidak selalu harus terburu-buru.'],
-    2: ['Boleh merasa lelah, kamu manusia seutuhnya.', 'Perasaanmu valid. Berikan dirimu waktu untuk bernapas.', 'Kamu tidak sendirian melewati proses ini.'],
-    1: ['Menyadari perasaan adalah langkah pertama pemulihan.', 'Satu langkah kecil pada satu waktu.', 'Istirahat adalah bagian dari pemulihan dirimu.']
+    5: [
+      'Hari yang indah untuk disyukuri dan dinikmati.',
+      'Energi positifmu mengalir dengan hangat hari ini.',
+      'Setiap momen bahagia layak untuk dirayakan.'
+    ],
+    4: [
+      'Pelan tapi pasti, harimu berjalan dengan sangat baik.',
+      'Menikmati proses dan hal-hal sederhana hari ini.',
+      'Ketenangan hati adalah kebahagiaan yang nyata.'
+    ],
+    3: [
+      'Hari yang tenang dan mengalir apa adanya.',
+      'Hadir seutuhnya di hari ini sudah sangat berarti.',
+      'Setiap proses bertumbuh punya ritmenya sendiri.'
+    ],
+    2: [
+      'Istirahat sejenak adalah bentuk kepedulian pada dirimu.',
+      'Tarik napas perlahan, semuanya akan baik-baik saja.',
+      'Perasaanmu valid. Beri ruang tenang untuk dirimu.'
+    ],
+    1: [
+      'Satu langkah kecil hari ini adalah awal kebaikan baru.',
+      'Jaga dirimu dengan penuh kasih dan kesabaran.',
+      'Hari esok selalu membawa harapan dan ruang baru.'
+    ]
   };
   const list = quotes[score] || quotes[3];
   return list[Math.floor(Math.random() * list.length)];
 }
 
+/* ════════════════
+   RENDER STORY PREVIEW (STRICT 9:16)
+════════════════ */
 function renderStoryPreview() {
   const canvas = document.getElementById('story-canvas');
   if (!canvas || !currentEntry) return;
 
-  const theme  = THEMES[currentThemeIdx];
+  const theme  = getThemeStyles(currentColorHex);
   const mood   = currentEntry.mood;
   const photos = currentEntry.photos || [];
   const now    = new Date(currentEntry.ts || new Date());
   const dateStr = now.toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'short' });
-  const timeStr = now.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' });
+  const timeStr = now.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' }).replace(':', '.');
 
   const intMap = {
     'Ringan': 33, 'Lumayan': 66, 'Berat': 100,
@@ -180,71 +184,51 @@ function renderStoryPreview() {
   const intPct = intMap[currentEntry.intensity] || 50;
   const causes = (currentEntry.causes || []).slice(0, 3);
   const quote  = getQuoteForMood(mood?.s || 3);
+  const moodLabel = toTitleCase(mood?.l || 'Biasa');
 
-  // Common Header
-  const headerHtml = `
-    <div class="story-header" style="color:${theme.text}">
-      <div class="story-brand">
-        <img src="img/3d/3d-heart.png" class="story-3d-header-ic" alt="">
-        <span class="story-app">moodly</span>
-      </div>
-      <div class="story-time-box">
-        <span>${dateStr}</span>
-        <span class="story-bullet">·</span>
-        <span>${timeStr}</span>
-      </div>
+  // Top Minimalist Meta
+  const topMetaHtml = `
+    <div class="story-top-meta" style="color:${theme.textMuted}">
+      <span>${dateStr}</span>
+      <span class="story-dot-sep">·</span>
+      <span>${timeStr}</span>
     </div>
   `;
 
-  // Common Footer
-  const footerHtml = `
-    <div class="story-footer" style="color:${theme.text}">
-      <div class="story-footer-txt">check in · track · grow</div>
-      <div class="story-watermark">@moodly.app</div>
-    </div>
-  `;
-
-  // Background blobs
-  const blobsHtml = `
-    <div class="story-blob story-blob-1" style="background:${theme.accent};opacity:0.25;filter:blur(50px)"></div>
-    <div class="story-blob story-blob-2" style="background:${theme.accentLight};opacity:0.2;filter:blur(60px)"></div>
-    <div class="story-particles">
-      ${Array.from({length:6}, (_,i) => `<span style="left:${12+i*16}%;animation-delay:${i*0.4}s;opacity:${0.3+Math.random()*0.4}">${theme.particle}</span>`).join('')}
+  // Bottom 2-Tone Moodly Logo (mood dark/light + ly pink)
+  const footerLogoHtml = `
+    <div class="story-brand-bottom">
+      <span class="story-logo-mood" style="color:${theme.isDark ? '#ffffff' : '#1c1c1e'}">mood</span><span class="story-logo-ly">ly</span>
     </div>
   `;
 
   let bodyHtml = '';
 
   // ════════════════════════════════════════
-  // TEMPLATE 1: POLAROID MEMORY
+  // TEMPLATE 1: POLAROID (CLEAN & MINIMAL)
   // ════════════════════════════════════════
   if (currentTemplateId === 'polaroid') {
     const activePhoto = photos.length ? (photos[selectedPhotoIdx] || photos[0]) : null;
 
     bodyHtml = `
       <div class="story-polaroid-container">
-        <!-- Polaroid Pin Decoration -->
-        <div class="story-polaroid-pin">
-          <img src="img/3d/3d-star.png" class="story-3d-star-pin" alt="">
-        </div>
-
         <!-- Polaroid Card -->
         <div class="story-polaroid-card">
           <div class="story-polaroid-photo-frame">
-            ${activePhoto ? `<img src="${activePhoto}" class="story-polaroid-img" alt="Momen">` : `
+            ${activePhoto ? `<img src="${activePhoto}" class="story-polaroid-img" alt="Foto">` : `
               <div class="story-photo-empty">
-                <img src="img/3d/3d-sun.png" style="width:48px;height:48px;object-fit:contain" alt="">
-                <span>Momen Spesial Hari Ini</span>
+                <img src="img/3d/3d-sun.png" style="width:40px;height:40px;object-fit:contain" alt="">
+                <span>Momen Hari Ini</span>
               </div>
             `}
           </div>
           <div class="story-polaroid-bottom">
             <div class="story-polaroid-meta">
               <div class="story-polaroid-3d-icon">
-                ${getMood3DIconHtml(mood, 38)}
+                ${getMood3DIconHtml(mood, 34)}
               </div>
               <div>
-                <div class="story-polaroid-mood-title">${mood?.l || 'Biasa'}</div>
+                <div class="story-polaroid-mood-title">${moodLabel}</div>
                 <div class="story-polaroid-date">${dateStr}</div>
               </div>
             </div>
@@ -252,12 +236,12 @@ function renderStoryPreview() {
           </div>
         </div>
 
-        <!-- Quote & Intensity below Polaroid -->
+        <!-- Quote & Intensity (Title Case) -->
         <div class="story-bottom-info">
-          <div class="story-quote" style="color:${theme.text}dd">"${quote}"</div>
+          <div class="story-quote" style="color:${theme.text}">"${quote}"</div>
 
           ${currentEntry.intensity ? `
-            <div class="story-int-pill" style="background:${theme.cardBg};border:1px solid ${theme.accent}44;color:${theme.text}">
+            <div class="story-int-pill" style="background:${theme.chipBg};border:1px solid ${theme.chipBorder};color:${theme.text}">
               <span class="story-int-dot" style="background:${theme.accent}"></span>
               <span>${currentEntry.intensity}</span>
             </div>
@@ -265,7 +249,7 @@ function renderStoryPreview() {
 
           ${causes.length ? `
             <div class="story-causes">
-              ${causes.map(c => `<span class="story-chip" style="background:${theme.cardBg};color:${theme.text};border-color:${theme.accent}44">${c}</span>`).join('')}
+              ${causes.map(c => `<span class="story-chip" style="background:${theme.chipBg};color:${theme.text};border-color:${theme.chipBorder}">${toTitleCase(c)}</span>`).join('')}
             </div>
           ` : ''}
         </div>
@@ -274,7 +258,7 @@ function renderStoryPreview() {
   }
 
   // ════════════════════════════════════════
-  // TEMPLATE 2: MULTI-PHOTO COLLAGE / GRID
+  // TEMPLATE 2: MULTI-PHOTO GRID (CLEAN)
   // ════════════════════════════════════════
   else if (currentTemplateId === 'grid') {
     let gridLayout = '';
@@ -282,9 +266,9 @@ function renderStoryPreview() {
 
     if (pCount === 0) {
       gridLayout = `
-        <div class="story-photo-empty story-grid-empty" style="background:${theme.cardBg}">
-          <img src="img/3d/3d-sun.png" style="width:52px;height:52px;object-fit:contain" alt="">
-          <span>Tambah foto saat check-in untuk kolase estetik</span>
+        <div class="story-photo-empty story-grid-empty" style="background:${theme.chipBg};color:${theme.textMuted}">
+          <img src="img/3d/3d-sun.png" style="width:48px;height:48px;object-fit:contain" alt="">
+          <span>Tambah foto saat check-in untuk kolase</span>
         </div>
       `;
     } else if (pCount === 1) {
@@ -323,37 +307,37 @@ function renderStoryPreview() {
 
     bodyHtml = `
       <div class="story-grid-container">
-        <!-- Foto Grid Display -->
+        <!-- Photo Frame -->
         <div class="story-grid-frame">
           ${gridLayout}
 
-          <!-- Floating Center 3D Mood Pill -->
-          <div class="story-grid-floating-badge" style="background:rgba(20, 10, 16, 0.78);border:1.5px solid ${theme.accent}66;box-shadow:0 12px 30px rgba(0,0,0,0.5)">
+          <!-- Floating Badge -->
+          <div class="story-grid-floating-badge" style="background:${theme.isDark ? 'rgba(24, 24, 27, 0.92)' : 'rgba(255, 255, 255, 0.96)'};border:1px solid ${theme.cardBorder};box-shadow:${theme.cardShadow}">
             <div class="story-grid-3d-wrap">
-              ${getMood3DIconHtml(mood, 50)}
+              ${getMood3DIconHtml(mood, 38)}
             </div>
             <div>
-              <div class="story-grid-mood-lbl" style="color:#ffffff">${mood?.l || 'Biasa'}</div>
-              <div class="story-grid-date-lbl" style="color:rgba(255,255,255,0.7)">${currentEntry.intensity || 'Check-in'}</div>
+              <div class="story-grid-mood-lbl" style="color:${theme.text}">${moodLabel}</div>
+              <div class="story-grid-date-lbl" style="color:${theme.textMuted}">${currentEntry.intensity || 'Refleksi'}</div>
             </div>
           </div>
         </div>
 
         <!-- Causes & Quote -->
-        <div class="story-bottom-info" style="margin-top:14px">
+        <div class="story-bottom-info" style="margin-top:12px">
           ${causes.length ? `
             <div class="story-causes">
-              ${causes.map(c => `<span class="story-chip" style="background:${theme.cardBg};color:${theme.text};border-color:${theme.accent}44">${c}</span>`).join('')}
+              ${causes.map(c => `<span class="story-chip" style="background:${theme.chipBg};color:${theme.text};border-color:${theme.chipBorder}">${toTitleCase(c)}</span>`).join('')}
             </div>
           ` : ''}
-          <div class="story-quote" style="color:${theme.text}dd;margin-top:8px">"${quote}"</div>
+          <div class="story-quote" style="color:${theme.text};margin-top:6px">"${quote}"</div>
         </div>
       </div>
     `;
   }
 
   // ════════════════════════════════════════
-  // TEMPLATE 3: EDITORIAL MAGAZINE
+  // TEMPLATE 3: EDITORIAL (TITLE CASE)
   // ════════════════════════════════════════
   else if (currentTemplateId === 'editorial') {
     const activePhoto = photos.length ? (photos[selectedPhotoIdx] || photos[0]) : null;
@@ -362,31 +346,29 @@ function renderStoryPreview() {
       <div class="story-editorial-container">
         ${activePhoto ? `
           <div class="story-editorial-hero" style="background-image:url('${activePhoto}')">
-            <div class="story-editorial-grad"></div>
+            <div class="story-editorial-overlay"></div>
           </div>
         ` : `
-          <div class="story-editorial-hero-empty" style="background:${theme.cardBg}">
-            <img src="img/3d/3d-sun.png" style="width:60px;height:60px;object-fit:contain" alt="">
+          <div class="story-editorial-hero-empty" style="background:${theme.chipBg}">
+            <img src="img/3d/3d-sun.png" style="width:50px;height:50px;object-fit:contain" alt="">
           </div>
         `}
 
-        <!-- Editorial Typography & Glassmorphism Card -->
         <div class="story-editorial-content">
-          <div class="story-editorial-tag" style="color:${theme.accent}">DAILY MOOD REFLECTION</div>
-          <div class="story-editorial-title" style="color:#ffffff">
-            <span>FEELING</span><br>
-            <span style="color:${theme.accentLight}">${(mood?.l || 'BIASA').toUpperCase()}</span>
+          <div class="story-editorial-tag">Refleksi Mood Hari Ini</div>
+          <div class="story-editorial-title">
+            <span>Merasa</span> <span style="color:#ff85a1">${moodLabel}</span>
           </div>
 
-          <div class="story-editorial-card" style="background:rgba(255,255,255,0.14);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.25)">
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
-              ${getMood3DIconHtml(mood, 44)}
+          <div class="story-editorial-card">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+              ${getMood3DIconHtml(mood, 36)}
               <div>
-                <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.7);text-transform:uppercase">Tingkat Energi</div>
-                <div style="font-size:14px;font-weight:800;color:#ffffff">${currentEntry.intensity || 'Stabil'}</div>
+                <div style="font-size:9.5px;font-weight:600;color:rgba(255,255,255,0.8)">Intensitas Perasaan</div>
+                <div style="font-size:12.5px;font-weight:700;color:#ffffff">${currentEntry.intensity || 'Stabil'}</div>
               </div>
             </div>
-            <div class="story-quote" style="color:#ffffff;max-width:100%;font-size:12px;text-align:left">"${quote}"</div>
+            <div class="story-quote" style="color:#ffffff;max-width:100%;font-size:10.5px;text-align:left">"${quote}"</div>
           </div>
         </div>
       </div>
@@ -399,32 +381,26 @@ function renderStoryPreview() {
   else {
     bodyHtml = `
       <div class="story-minimal-container">
-        <!-- Floating 3D Star & Heart -->
-        <div class="story-3d-decor-wrap">
-          <img src="img/3d/3d-star.png" class="story-3d-star-fl" alt="">
-          <img src="img/3d/3d-heart.png" class="story-3d-heart-fl" alt="">
-        </div>
-
         <div class="story-center">
-          <div class="story-em-wrap" style="background:${theme.cardBg};box-shadow:0 16px 40px rgba(0,0,0,0.25);border:2px solid ${theme.accent}33">
-            ${getMood3DIconHtml(mood, 80)}
+          <div class="story-em-wrap" style="background:${theme.cardBg};box-shadow:${theme.cardShadow};border:1.5px solid ${theme.cardBorder}">
+            ${getMood3DIconHtml(mood, 74)}
           </div>
-          <div class="story-mood-name" style="color:${theme.text};margin-top:14px">${mood?.l || 'Biasa'}</div>
-          <div class="story-quote" style="color:${theme.text}dd;margin-top:8px">"${quote}"</div>
+          <div class="story-mood-name" style="color:${theme.text};margin-top:12px">${moodLabel}</div>
+          <div class="story-quote" style="color:${theme.text};margin-top:8px">"${quote}"</div>
         </div>
 
         ${currentEntry.intensity ? `
-          <div class="story-int-wrap" style="margin-top:20px">
-            <div class="story-int-label" style="color:${theme.text}99">Intensitas Perasaan · ${currentEntry.intensity}</div>
-            <div class="story-int-track" style="background:${theme.accent}22">
+          <div class="story-int-wrap" style="margin-top:16px">
+            <div class="story-int-label" style="color:${theme.textMuted}">Intensitas Perasaan · ${currentEntry.intensity}</div>
+            <div class="story-int-track" style="background:${theme.chipBg}">
               <div class="story-int-fill" style="width:${intPct}%;background:${theme.accent}"></div>
             </div>
           </div>
         ` : ''}
 
         ${causes.length ? `
-          <div class="story-causes" style="margin-top:16px">
-            ${causes.map(c => `<span class="story-chip" style="background:${theme.cardBg};color:${theme.text};border-color:${theme.accent}44">${c}</span>`).join('')}
+          <div class="story-causes" style="margin-top:14px">
+            ${causes.map(c => `<span class="story-chip" style="background:${theme.chipBg};color:${theme.text};border-color:${theme.chipBorder}">${toTitleCase(c)}</span>`).join('')}
           </div>
         ` : ''}
       </div>
@@ -432,13 +408,12 @@ function renderStoryPreview() {
   }
 
   canvas.innerHTML = `
-    <div id="story-frame" class="story-frame tpl-${currentTemplateId}" style="background:${theme.bg}">
-      ${blobsHtml}
-      ${headerHtml}
+    <div id="story-frame" class="story-frame tpl-${currentTemplateId}" style="background-color:${theme.bg};color:${theme.text};">
+      ${topMetaHtml}
       <div class="story-main-area">
         ${bodyHtml}
       </div>
-      ${footerHtml}
+      ${footerLogoHtml}
     </div>
   `;
 }
@@ -471,20 +446,21 @@ window._setStoryTemplate = setStoryTemplate;
 ════════════════ */
 function renderPhotoPicker() {
   const wrap = document.getElementById('story-photo-picker-wrap');
-  const picker = document.getElementById('story-photo-picker');
-  if (!wrap || !picker) return;
+  const bar  = document.getElementById('story-photo-picker');
+  if (!wrap || !bar) return;
 
   const photos = currentEntry?.photos || [];
-  if (photos.length > 1 && (currentTemplateId === 'polaroid' || currentTemplateId === 'editorial')) {
-    wrap.style.display = 'block';
-    picker.innerHTML = photos.map((src, i) => `
-      <div class="story-photo-opt ${i === selectedPhotoIdx ? 'on' : ''}" onclick="window._selectStoryPhoto(${i})">
-        <img src="${src}" alt="Foto ${i+1}">
-      </div>
-    `).join('');
-  } else {
+  if (photos.length <= 1 || currentTemplateId === 'grid' || currentTemplateId === 'minimal') {
     wrap.style.display = 'none';
+    return;
   }
+
+  wrap.style.display = 'block';
+  bar.innerHTML = photos.map((p, idx) => `
+    <div class="story-photo-opt ${idx === selectedPhotoIdx ? 'on' : ''}" onclick="window._selectStoryPhoto(${idx})">
+      <img src="${p}" alt="Foto ${idx + 1}">
+    </div>
+  `).join('');
 }
 
 export function selectStoryPhoto(idx) {
@@ -495,27 +471,57 @@ export function selectStoryPhoto(idx) {
 window._selectStoryPhoto = selectStoryPhoto;
 
 /* ════════════════
-   THEME SELECTOR
+   SOLID COLOR SELECTOR (PUTIH, PINK, PICK COLOR SENDIRI)
 ════════════════ */
 function renderThemeSelector() {
   const wrap = document.getElementById('story-themes');
   if (!wrap) return;
-  wrap.innerHTML = THEMES.map((t, i) => `
-    <button class="story-theme-btn ${i === currentThemeIdx ? 'on' : ''}"
-      style="background:${t.bg}" onclick="window._storyTheme(${i})">
-      <span class="story-theme-name">${t.name}</span>
-    </button>
-  `).join('');
+
+  const swatchesHtml = SOLID_COLORS.map(c => {
+    const isCurrent = c.hex.toLowerCase() === currentColorHex.toLowerCase();
+    return `
+      <button class="story-color-btn ${isCurrent ? 'on' : ''}"
+        style="background-color:${c.hex}"
+        onclick="window._setStorySolidColor('${c.hex}')"
+        title="${c.name}">
+        ${isCurrent ? '<span class="story-color-check"></span>' : ''}
+      </button>
+    `;
+  }).join('');
+
+  const isPreset = SOLID_COLORS.some(c => c.hex.toLowerCase() === currentColorHex.toLowerCase());
+
+  const customHtml = `
+    <label class="story-color-btn story-color-custom ${!isPreset ? 'on' : ''}" title="Pilih Warna Sendiri">
+      <input type="color" id="story-custom-color" value="${currentColorHex}" onchange="window._setCustomStoryColor(this.value)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M12 8v8M8 12h8"></path>
+      </svg>
+    </label>
+  `;
+
+  wrap.innerHTML = `<div class="story-colors-row">${swatchesHtml}${customHtml}</div>`;
 }
 
-export function setStoryTheme(idx) {
-  currentThemeIdx = idx;
+export function setStorySolidColor(hex) {
+  currentColorHex = hex;
   renderThemeSelector();
   renderStoryPreview();
 }
+window._setStorySolidColor = setStorySolidColor;
+window._storyTheme = setStorySolidColor;
+
+export function setCustomStoryColor(hex) {
+  if (!hex) return;
+  currentColorHex = hex;
+  renderThemeSelector();
+  renderStoryPreview();
+}
+window._setCustomStoryColor = setCustomStoryColor;
 
 /* ════════════════
-   DOWNLOAD / SHARE
+   DOWNLOAD / SHARE (EXACT 1080x1920 9:16)
 ════════════════ */
 export async function downloadStory() {
   const frame = document.getElementById('story-frame');
@@ -533,9 +539,15 @@ export async function downloadStory() {
   }
 
   try {
-    if (window._moodlyToast) window._moodlyToast('Memproses gambar Instagram Story...');
+    if (window._moodlyToast) window._moodlyToast('Menyiapkan Instagram Story 9:16...');
+
+    // Scale precisely to Instagram Stories 1080x1920 px resolution
+    const targetWidth = 1080;
+    const currentWidth = frame.offsetWidth || 252;
+    const exportScale = targetWidth / currentWidth;
+
     const canvas = await html2canvas(frame, {
-      scale: 3,
+      scale: exportScale,
       useCORS: true,
       allowTaint: true,
       backgroundColor: null,
@@ -545,7 +557,7 @@ export async function downloadStory() {
     link.download = `moodly-story-${Date.now()}.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();
-    if (window._moodlyToast) window._moodlyToast('Story siap dibagikan ke Instagram! 📸');
+    if (window._moodlyToast) window._moodlyToast('Story siap dibagikan ke Instagram!');
   } catch (e) {
     console.warn('[stories] download failed:', e);
   }
@@ -557,9 +569,14 @@ export async function shareStory() {
 
   if (navigator.share && typeof html2canvas !== 'undefined') {
     try {
-      if (window._moodlyToast) window._moodlyToast('Menyiapkan gambar untuk Instagram...');
+      if (window._moodlyToast) window._moodlyToast('Menyiapkan Instagram Story 9:16...');
+
+      const targetWidth = 1080;
+      const currentWidth = frame.offsetWidth || 252;
+      const exportScale = targetWidth / currentWidth;
+
       const canvas = await html2canvas(frame, {
-        scale: 3,
+        scale: exportScale,
         useCORS: true,
         allowTaint: true,
         backgroundColor: null,
@@ -574,7 +591,7 @@ export async function shareStory() {
             await navigator.share({
               files: [file],
               title: 'Moodly Story',
-              text: `Mood hari ini: ${currentEntry?.mood?.l} ✨`,
+              text: `Mood hari ini: ${toTitleCase(currentEntry?.mood?.l || 'Check-in')}`,
             });
             return;
           } catch(e) {
@@ -602,7 +619,6 @@ export function closeStories() {
 /* ════════════════
    GLOBAL BINDINGS
 ════════════════ */
-window._storyTheme    = setStoryTheme;
 window._downloadStory = downloadStory;
 window._shareStory    = shareStory;
 window._closeStories  = closeStories;
