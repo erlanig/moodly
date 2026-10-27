@@ -359,8 +359,6 @@ export function closeSuccessOverlay() {
   }
   const s = document.getElementById('success');
   if (s) s.classList.remove('show');
-  const shareBtn = document.getElementById('post-checkin-share');
-  if (shareBtn) shareBtn.style.display = 'flex';
   if (lastCheckinEntry && onSubmitCallback) {
     const e = lastCheckinEntry;
     lastCheckinEntry = null;
@@ -416,11 +414,11 @@ export async function submitCheckin(entries) {
   const s = document.getElementById('success');
   if (s) s.classList.add('show');
 
-  // Auto-dismiss after 4.5 seconds if user doesn't tap an action
+  // Auto-dismiss after 12 seconds if user doesn't tap an action
   if (successDismissTimer) clearTimeout(successDismissTimer);
   successDismissTimer = setTimeout(() => {
     closeSuccessOverlay();
-  }, 4500);
+  }, 12000);
 
   // Tunjukkan tombol chat ke Jes setelah check-in
   const chatBtn = document.getElementById('post-checkin-chat');

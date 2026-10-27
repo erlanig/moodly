@@ -11,10 +11,30 @@
    STORY TEMPLATES
 ════════════════ */
 const TEMPLATES = [
-  { id: 'polaroid', name: 'Polaroid', icon: '📸', desc: 'Frame Foto Vintage' },
-  { id: 'grid',     name: 'Kolase Grid', icon: '🖼️', desc: 'Kolase Multi-Foto' },
-  { id: 'editorial',name: 'Editorial', icon: '✨', desc: 'Hero Photo Majalah' },
-  { id: 'minimal',  name: 'Minimalis', icon: '🌸', desc: '3D Art Card' },
+  {
+    id: 'polaroid',
+    name: 'Polaroid',
+    svg: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>',
+    desc: 'Frame Foto Vintage'
+  },
+  {
+    id: 'grid',
+    name: 'Kolase Grid',
+    svg: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>',
+    desc: 'Kolase Multi-Foto'
+  },
+  {
+    id: 'editorial',
+    name: 'Editorial',
+    svg: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>',
+    desc: 'Hero Photo Majalah'
+  },
+  {
+    id: 'minimal',
+    name: 'Minimalis',
+    svg: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>',
+    desc: '3D Art Card'
+  },
 ];
 
 /* ════════════════
@@ -432,7 +452,7 @@ function renderTemplateSelector() {
 
   bar.innerHTML = TEMPLATES.map(t => `
     <button class="story-tpl-btn ${t.id === currentTemplateId ? 'on' : ''}" onclick="window._setStoryTemplate('${t.id}')">
-      <span class="story-tpl-ic">${t.icon}</span>
+      <span class="story-tpl-ic">${t.svg}</span>
       <span class="story-tpl-name">${t.name}</span>
     </button>
   `).join('');

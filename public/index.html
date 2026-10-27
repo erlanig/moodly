@@ -218,9 +218,6 @@
     </div>
 
     <button class="cta" id="btn3" disabled onclick="window._submitCheckin()">Selesai ✓</button>
-    <button id="post-checkin-share" onclick="window._openStoryFromCheckin()">
-      Bagikan ke Story
-    </button>
     <button class="cta out" onclick="window._goStep(2)">← Kembali</button>
   </div>
 </div>
@@ -565,6 +562,14 @@
   <div class="suc-t">Check-in selesai!</div>
   <div class="suc-s" id="suc-s">Proud of you buat check-in hari ini</div>
   <div class="suc-actions">
+    <button id="post-checkin-story" class="suc-story-btn" onclick="window._openStoryFromSuccess()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+      </svg>
+      <span>Bagikan ke Instagram Story</span>
+    </button>
     <button id="post-checkin-chat" class="suc-chat-btn" style="display:none"
       onclick="window._openChat(this.dataset.mood, this.dataset.intensity, this.dataset.causes)">
       <span>Curhat ke Jes</span>

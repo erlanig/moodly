@@ -206,12 +206,20 @@ function updateHome() {
       : `<img src="img/3d/mood-biasa.png" alt="Mood" class="lcard-3d-img">`;
     el.innerHTML = `<div class="lcard">
       <div class="lcard-em">${moodIconHtml}</div>
-      <div>
+      <div style="flex:1;min-width:0">
         <div class="lcard-tag">Terakhir Check-in</div>
         <div class="lcard-name">${last.mood?.l||'—'}${last.intensity?' · '+last.intensity:''}</div>
         <div class="lcard-meta">${t}</div>
         ${last.causes?.length ? `<div class="lcard-chips">${last.causes.map(c=>`<span class="lchip">${c}</span>`).join('')}</div>` : ''}
       </div>
+      <button class="lcard-share-btn" onclick="window._openStoryFromCheckin()" title="Bagikan ke Instagram Story">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+          <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+        </svg>
+        <span>Story</span>
+      </button>
     </div>`;
   } else {
     el.innerHTML = `<div style="text-align:center;padding:18px;color:var(--muted);font-size:13px">
@@ -754,6 +762,19 @@ window._sendQuick = (btn) => {
 window._chatKeydown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); window._sendChat(); } };
 
 // Stories
+window._openStoryFromSuccess = () => {
+  if (window._closeSuccessOverlay) {
+    window._closeSuccessOverlay();
+  } else if (window._dismissSuccessOnly) {
+    window._dismissSuccessOnly();
+  }
+  const last = entries.length ? entries[entries.length - 1] : null;
+  if (last) {
+    openStories(last);
+  } else {
+    window._moodlyAlert({ icon: 'img/3d/3d-target.png', title: 'Belum ada check-in', msg: 'Check-in dulu ya biar bisa share story!' });
+  }
+};
 window._openStoryFromCheckin = () => {
   const last = entries.length ? entries[entries.length - 1] : null;
   if (last) {
