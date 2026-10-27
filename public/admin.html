@@ -202,6 +202,76 @@
     color: #fff; font-family: inherit; font-size: 14px; outline: none;
     margin-bottom: 16px; text-align: center;
   }
+
+  /* ── CYCLE & PERIOD TRACKING STYLES ── */
+  .phase-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700;
+  }
+  .phase-badge.mens { background: rgba(255, 75, 114, 0.12); color: #ff2d55; border: 1px solid rgba(255, 75, 114, 0.28); }
+  .phase-badge.foll { background: rgba(245, 158, 11, 0.12); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.28); }
+  .phase-badge.ovul { background: rgba(168, 85, 247, 0.12); color: #9333ea; border: 1px solid rgba(168, 85, 247, 0.28); }
+  .phase-badge.lute { background: rgba(59, 130, 246, 0.12); color: #2563eb; border: 1px solid rgba(59, 130, 246, 0.28); }
+  .phase-badge.none { background: rgba(142, 142, 147, 0.12); color: #8e8e93; border: 1px solid rgba(142, 142, 147, 0.28); }
+
+  .status-pill {
+    display: inline-block; padding: 3px 8px; border-radius: 6px;
+    font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .status-pill.active { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
+  .status-pill.done { background: #dcfce7; color: #16a34a; border: 1px solid #86efac; }
+
+  .cycle-phase-card {
+    background: linear-gradient(135deg, #ffffff 0%, #fff7fa 100%);
+    border-radius: 18px; border: 1.5px solid var(--border); padding: 18px 20px;
+    margin-bottom: 20px; box-shadow: 0 4px 16px rgba(255, 45, 85, 0.04);
+  }
+  .cycle-phase-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 12px; flex-wrap: wrap; gap: 10px;
+  }
+
+  .flow-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 999px;
+    font-size: 10.5px; font-weight: 700;
+  }
+  .flow-deras { background: #fee2e2; color: #b91c1c; }
+  .flow-sedang { background: #ffedd5; color: #c2410c; }
+  .flow-sedikit { background: #fef3c7; color: #b45309; }
+  .flow-bercak { background: #f3e8ff; color: #7e22ce; }
+
+  .symptom-tag {
+    display: inline-block; padding: 2px 8px; border-radius: 6px;
+    background: rgba(255, 45, 85, 0.08); color: var(--text2);
+    font-size: 10.5px; font-weight: 600; margin: 2px;
+  }
+
+  /* ── ADMIN MODAL (DETAIL LOG HARIAN PERIODE) ── */
+  .admin-modal-overlay {
+    position: fixed; inset: 0; z-index: 10000;
+    background: rgba(18, 5, 12, 0.65);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    display: none; align-items: center; justify-content: center; padding: 20px;
+  }
+  .admin-modal-overlay.show { display: flex; }
+  .admin-modal-box {
+    background: #ffffff; border-radius: 22px; max-width: 620px; width: 100%;
+    max-height: 85vh; overflow-y: auto; padding: 24px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); border: 1.5px solid var(--border);
+  }
+  .admin-modal-hd {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--border);
+  }
+  .admin-modal-title { font-size: 17px; font-weight: 800; color: var(--text); }
+  .admin-modal-close {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: rgba(0, 0, 0, 0.05); border: none;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    color: #666; font-size: 16px; font-weight: 700;
+  }
+  .admin-modal-close:hover { background: rgba(0,0,0,0.1); }
+
 </style>
 </head>
 <body>
@@ -230,6 +300,7 @@
 
   <nav class="admin-nav">
     <button class="admin-nav-btn active" onclick="switchTab('users', this)">Pengguna</button>
+    <button class="admin-nav-btn" onclick="switchTab('cycle', this)">🌸 Siklus & Periode</button>
     <button class="admin-nav-btn" onclick="switchTab('passcode', this)">Passcode 6-Digit</button>
     <button class="admin-nav-btn" onclick="switchTab('ai', this)">AI & Chatbot</button>
     <button class="admin-nav-btn" onclick="switchTab('rsvp', this)">Respon Kencan</button>
@@ -262,6 +333,65 @@
           <div style="font-size:16px;font-weight:800;color:var(--text)">Pilih Pengguna di Sidebar</div>
           <div style="font-size:12px;margin-top:4px">Klik salah satu nama pengguna di sebelah kiri untuk melihat riwayat check-in & siklus.</div>
         </div>
+      </div>
+    </div>
+
+    
+    <!-- 1.5. TAB: SIKLUS & PERIODE (CYCLE TRACKER OVERVIEW) -->
+    <div id="tab-cycle" class="admin-view">
+      <div class="stat-grid" style="margin-bottom:20px">
+        <div class="stat-card">
+          <div class="stat-ic" style="background:#fff0f4;color:#ff2d55">🌸</div>
+          <div><div class="stat-val" id="cy-total-users">0</div><div class="stat-lbl">Pengguna Terlacak</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-ic" style="background:#fee2e2;color:#dc2626">🩸</div>
+          <div><div class="stat-val" id="cy-active-mens">0</div><div class="stat-lbl">Sedang Menstruasi</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-ic" style="background:#eff6ff;color:#2563eb">🔄</div>
+          <div><div class="stat-val" id="cy-avg-cycle">28 Hari</div><div class="stat-lbl">Rata-Rata Siklus</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-ic" style="background:#fef3c7;color:#b45309">⏳</div>
+          <div><div class="stat-val" id="cy-avg-duration">5 Hari</div><div class="stat-lbl">Rata-Rata Durasi Mens</div></div>
+        </div>
+      </div>
+
+      <div class="card-box">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px">
+          <div>
+            <div class="card-title" style="margin-bottom:4px">Pelacakan Siklus Semua Pengguna</div>
+            <div class="card-desc" style="margin-bottom:0">Status fase menstruasi, hari siklus, dan perkiraan periode berikutnya secara real-time.</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <input type="text" id="cycle-search-input" class="admin-input" placeholder="Cari nama pengguna..." style="margin-bottom:0;width:200px;padding:8px 12px;font-size:12px" oninput="filterCycleOverview(this.value)">
+            <select id="cycle-filter-phase" class="admin-input" style="margin-bottom:0;width:150px;padding:8px 10px;font-size:12px" onchange="filterCycleOverview()">
+              <option value="all">Semua Fase</option>
+              <option value="mens">Menstruasi</option>
+              <option value="foll">Folikular</option>
+              <option value="ovul">Ovulasi</option>
+              <option value="lute">Luteal (PMS)</option>
+            </select>
+          </div>
+        </div>
+
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Pengguna</th>
+              <th>Fase Hari Ini</th>
+              <th>Hari Siklus</th>
+              <th>Periode Terakhir (LMP)</th>
+              <th>Estimasi Mens Berikutnya</th>
+              <th>Total Periode</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="cycle-overview-tbody">
+            <tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted)">Memuat data siklus...</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -441,6 +571,7 @@ window.switchTab = (tab, btn) => {
   const sidebar = document.getElementById('admin-sidebar');
   if (sidebar) sidebar.style.display = tab === 'users' ? 'flex' : 'none';
 
+  if (tab === 'cycle') loadAllUsersCycleOverview();
   if (tab === 'passcode') loadPasscodeSetting();
   if (tab === 'ai') loadAIKeys();
   if (tab === 'rsvp') loadRsvpData();
@@ -630,7 +761,142 @@ window.invalidateNewsCache = async () => {
   setTimeout(() => { msg.style.display = 'none'; }, 3000);
 };
 
-// LOAD USERS
+// ════════════════════════════════════════
+// CYCLE TRACKING & ENGINE HELPERS
+// ════════════════════════════════════════
+function formatDateIndo(dateStr) {
+  if (!dateStr) return '-';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function calcUserCycleInfo(periods) {
+  if (!periods || !periods.length) {
+    return {
+      hasData: false,
+      phase: 'none',
+      phaseLabel: 'Belum Ada Data',
+      phaseDesc: 'Pengguna belum mencatat periode menstruasi.',
+      dayOfCycle: null,
+      cycleLen: 28,
+      duration: 5,
+      activePeriod: null,
+      lastPeriod: null,
+      nextPeriodDate: null,
+      daysUntilNext: null
+    };
+  }
+
+  const completed = periods.filter(p => p.endDate);
+  let cycleLen = 28;
+  if (completed.length >= 2) {
+    const sorted = [...completed].sort((a,b) => new Date(a.startDate) - new Date(b.startDate));
+    let tot = 0, cnt = 0;
+    for (let i = 1; i < sorted.length; i++) {
+      const d = Math.round((new Date(sorted[i].startDate) - new Date(sorted[i-1].startDate)) / 86400000);
+      if (d >= 21 && d <= 45) { tot += d; cnt++; }
+    }
+    if (cnt > 0) cycleLen = Math.round(tot / cnt);
+  }
+
+  let duration = 5;
+  if (completed.length > 0) {
+    let tot = 0;
+    completed.forEach(p => {
+      const d = Math.round((new Date(p.endDate) - new Date(p.startDate)) / 86400000) + 1;
+      tot += Math.max(1, Math.min(d, 15));
+    });
+    duration = Math.round(tot / completed.length);
+  }
+
+  const sortedRecent = [...periods].sort((a,b) => new Date(b.startDate) - new Date(a.startDate));
+  const lastPeriod = sortedRecent[0];
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const todayStr = today.toISOString().split('T')[0];
+
+  const activePeriod = periods.find(p => {
+    if (!p.endDate) {
+      const s = new Date(p.startDate);
+      const diff = Math.round((today - s) / 86400000);
+      return diff >= 0 && diff <= 14;
+    }
+    return todayStr >= p.startDate && todayStr <= p.endDate;
+  });
+
+  if (activePeriod) {
+    const s = new Date(activePeriod.startDate);
+    const dayOfPeriod = Math.max(1, Math.round((today - s) / 86400000) + 1);
+    return {
+      hasData: true,
+      phase: 'mens',
+      phaseLabel: `Menstruasi (Hari ke-${dayOfPeriod})`,
+      phaseDesc: 'Sedang dalam masa pendarahan menstruasi. Disarankan istirahat cukup & hidrasi optimal.',
+      dayOfCycle: dayOfPeriod,
+      cycleLen,
+      duration,
+      activePeriod,
+      lastPeriod,
+      nextPeriodDate: null,
+      daysUntilNext: 0
+    };
+  }
+
+  const lmp = new Date(lastPeriod.startDate);
+  lmp.setHours(0,0,0,0);
+  const daysSince = Math.round((today - lmp) / 86400000);
+  const dayOfCycle = ((daysSince % cycleLen) + cycleLen) % cycleLen + 1;
+
+  const follEnd = duration + Math.round((cycleLen - duration) * 0.35);
+  const ovulEnd = follEnd + 3;
+
+  let phase = 'lute';
+  let phaseLabel = `Fase Luteal / PMS (Hari ke-${dayOfCycle})`;
+  let phaseDesc = 'Progesteron meningkat. Mungkin terjadi gejala PMS seperti kram ringan, sensitif, atau lelah.';
+
+  if (dayOfCycle <= duration) {
+    phase = 'mens';
+    phaseLabel = `Fase Menstruasi (Hari ke-${dayOfCycle})`;
+    phaseDesc = 'Estimasi hari menstruasi. Pastikan istirahat dan nutrisi tercukupi.';
+  } else if (dayOfCycle <= follEnd) {
+    phase = 'foll';
+    phaseLabel = `Fase Folikular (Hari ke-${dayOfCycle})`;
+    phaseDesc = 'Estrogen mulai meningkat, energi dan fokus biasanya kembali membaik.';
+  } else if (dayOfCycle <= ovulEnd) {
+    phase = 'ovul';
+    phaseLabel = `Fase Ovulasi / Masa Subur (Hari ke-${dayOfCycle})`;
+    phaseDesc = 'Masa puncak kesuburan, estrogen mencapai titik tertinggi.';
+  }
+
+  const nextPeriodDate = new Date(lmp.getTime() + cycleLen * 86400000);
+  const daysUntilNext = Math.round((nextPeriodDate - today) / 86400000);
+
+  return {
+    hasData: true,
+    phase,
+    phaseLabel,
+    phaseDesc,
+    dayOfCycle,
+    cycleLen,
+    duration,
+    activePeriod: null,
+    lastPeriod,
+    nextPeriodDate,
+    daysUntilNext
+  };
+}
+
+function getPhaseBadgeHtml(phase, label) {
+  const p = phase || 'none';
+  const icMap = { mens: '🩸', foll: '✨', ovul: '💜', lute: '🌙', none: '⚪' };
+  const ic = icMap[p] || '⚪';
+  return `<span class="phase-badge ${p}"><span>${ic}</span> <span>${label || p}</span></span>`;
+}
+
+// ════════════════════════════════════════
+// LOAD USERS & SIDEBAR
+// ════════════════════════════════════════
 let allUsers = [];
 let currentUid = null;
 
@@ -641,12 +907,32 @@ async function loadUsers() {
     for (const d of snap.docs) {
       const data = d.data();
       let entriesCount = 0;
+      let periods = [];
+
       try {
         const es = await getDocs(collection(db, 'users', d.id, 'entries'));
         entriesCount = es.size;
       } catch {}
-      allUsers.push({ id: d.id, name: data.name || 'Anonymous', entriesCount, data });
+
+      try {
+        const pq = query(collection(db, 'users', d.id, 'periods'), orderBy('startDate', 'desc'));
+        const ps = await getDocs(pq);
+        periods = ps.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      } catch {}
+
+      const cycleInfo = calcUserCycleInfo(periods);
+
+      allUsers.push({
+        id: d.id,
+        name: data.name || 'Anonymous',
+        entriesCount,
+        periodsCount: periods.length,
+        periods,
+        cycleInfo,
+        data
+      });
     }
+
     renderSidebar(allUsers);
     calculateAnalytics();
   } catch(e) {
@@ -665,7 +951,7 @@ function renderSidebar(users) {
       <div class="user-avatar">${(u.name || '?')[0].toUpperCase()}</div>
       <div class="user-info">
         <div class="user-name">${u.name}</div>
-        <div class="user-meta">${u.entriesCount} check-in · ${u.id.slice(0, 10)}...</div>
+        <div class="user-meta">${u.entriesCount} check-in · ${u.periodsCount || 0} siklus</div>
       </div>
       <div class="user-dot"></div>
     </div>
@@ -678,12 +964,364 @@ window.filterUsers = (q) => {
   renderSidebar(filtered);
 };
 
+// ════════════════════════════════════════
+// USER DETAIL VIEW (CHECK-INS & CYCLE)
+// ════════════════════════════════════════
 window.selectUser = async (uid) => {
   currentUid = uid;
   renderSidebar(allUsers);
   const container = document.getElementById('user-detail-container');
-  container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted)">Memuat data pengguna...</div>`;
+  container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted)">Memuat data pengguna & riwayat siklus...</div>`;
 
+  let user = allUsers.find(u => u.id === uid);
+  let entries = [];
+  let periods = user?.periods || [];
+
+  try {
+    const eq = query(collection(db, 'users', uid, 'entries'), orderBy('ts', 'desc'));
+    const snap = await getDocs(eq);
+    entries = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch {}
+
+  try {
+    const pq = query(collection(db, 'users', uid, 'periods'), orderBy('startDate', 'desc'));
+    const ps = await getDocs(pq);
+    periods = ps.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    if (user) {
+      user.periods = periods;
+      user.periodsCount = periods.length;
+      user.cycleInfo = calcUserCycleInfo(periods);
+    }
+  } catch {}
+
+  const cycle = calcUserCycleInfo(periods);
+
+  // Status Menstruasi Berikutnya
+  let nextPeriodText = 'Belum dapat diprediksi';
+  if (cycle.activePeriod) {
+    nextPeriodText = '<span style="color:#ff2d55;font-weight:700">Sedang Menstruasi Aktif</span>';
+  } else if (cycle.nextPeriodDate) {
+    const diff = cycle.daysUntilNext;
+    const diffText = diff > 0 ? `${diff} hari lagi` : diff === 0 ? 'Hari ini' : `Terlambat ${Math.abs(diff)} hari`;
+    nextPeriodText = `${formatDateIndo(cycle.nextPeriodDate)} · <b>${diffText}</b>`;
+  }
+
+  // Generate Periods Table rows with cycle interval
+  let periodsTableRows = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">Belum ada riwayat periode menstruasi yang dicatat.</td></tr>';
+  if (periods.length > 0) {
+    const sorted = [...periods].sort((a,b) => new Date(b.startDate) - new Date(a.startDate));
+    periodsTableRows = sorted.map((p, idx) => {
+      let durText = '-';
+      if (p.startDate && p.endDate) {
+        const d = Math.round((new Date(p.endDate) - new Date(p.startDate)) / 86400000) + 1;
+        durText = `${d} Hari`;
+      } else if (p.startDate) {
+        const d = Math.round((new Date() - new Date(p.startDate)) / 86400000) + 1;
+        durText = `${d} Hari (berjalan)`;
+      }
+
+      // Interval dari periode sebelumnya (kronologis)
+      let intervalText = '-';
+      if (idx < sorted.length - 1) {
+        const prev = sorted[idx + 1];
+        const gap = Math.round((new Date(p.startDate) - new Date(prev.startDate)) / 86400000);
+        intervalText = `${gap} Hari`;
+      }
+
+      const isActive = !p.endDate;
+      const statusBadge = isActive
+        ? '<span class="status-pill active">Sedang Aktif</span>'
+        : '<span class="status-pill done">Selesai</span>';
+
+      return `
+        <tr>
+          <td>${statusBadge}</td>
+          <td><b>${formatDateIndo(p.startDate)}</b></td>
+          <td>${p.endDate ? formatDateIndo(p.endDate) : '<span style="color:#ff2d55;font-weight:700">Masih Berlangsung</span>'}</td>
+          <td>${durText}</td>
+          <td>${intervalText}</td>
+          <td>
+            <button class="admin-btn secondary" style="padding:6px 12px;font-size:11px" onclick="window.showPeriodDailyLogs('${uid}', '${p.id}', '${p.startDate}', '${p.endDate || ''}')">
+              📋 Detail Harian
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  container.innerHTML = `
+    <!-- USER HEADER -->
+    <div class="card-box" style="margin-bottom:18px">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="font-size:22px;font-weight:800;color:var(--text)">${user.name}</div>
+            ${getPhaseBadgeHtml(cycle.phase, cycle.phaseLabel)}
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">Device ID: <code>${user.id}</code></div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="admin-btn secondary" onclick="exportUserCSV('${user.id}')">⬇️ Export Check-In CSV</button>
+          <button class="admin-btn" style="background:linear-gradient(135deg, #ff4b72 0%, #ff2d55 100%)" onclick="exportCycleCSV('${user.id}')">🌸 Export Siklus CSV</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 STAT CARDS -->
+    <div class="stat-grid" style="margin-bottom:20px">
+      <div class="stat-card">
+        <div class="stat-ic">📝</div>
+        <div><div class="stat-val">${entries.length}</div><div class="stat-lbl">Check-In Mood</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-ic" style="background:#fff0f4;color:#ff2d55">🌸</div>
+        <div><div class="stat-val">${periods.length}</div><div class="stat-lbl">Periode Mens</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-ic" style="background:#eff6ff;color:#2563eb">🔄</div>
+        <div><div class="stat-val">${cycle.cycleLen} Hari</div><div class="stat-lbl">Rata-Rata Siklus</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-ic" style="background:#fef3c7;color:#b45309">⏳</div>
+        <div><div class="stat-val">${cycle.duration} Hari</div><div class="stat-lbl">Rata-Rata Durasi Mens</div></div>
+      </div>
+    </div>
+
+    <!-- PELACAKAN SIKLUS SAAT INI -->
+    <div class="card-box">
+      <div class="card-title">
+        <span>🌸 Status Pelacakan Siklus & Menstruasi</span>
+      </div>
+      <div class="cycle-phase-card">
+        <div class="cycle-phase-header">
+          <div>
+            <div style="font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em">Fase Siklus Hari Ini</div>
+            <div style="font-size:18px;font-weight:800;color:var(--text);margin-top:2px">${cycle.phaseLabel}</div>
+          </div>
+          <div>${getPhaseBadgeHtml(cycle.phase, cycle.phase)}</div>
+        </div>
+        <div style="font-size:12.5px;color:var(--text2);line-height:1.55;margin-bottom:14px">${cycle.phaseDesc}</div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:12px;background:#ffffff;border-radius:14px;padding:14px;border:1px solid var(--border)">
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--muted)">PERIODE TERAKHIR (LMP)</div>
+            <div style="font-size:13.5px;font-weight:800;color:var(--text);margin-top:3px">${cycle.lastPeriod ? formatDateIndo(cycle.lastPeriod.startDate) : '-'}</div>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--muted)">PREDIKSI MENS BERIKUTNYA</div>
+            <div style="font-size:13.5px;font-weight:800;color:var(--text);margin-top:3px">${nextPeriodText}</div>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--muted)">STATUS PERIODE</div>
+            <div style="font-size:13.5px;font-weight:800;color:var(--text);margin-top:3px">${cycle.activePeriod ? '<span style="color:#ff2d55">Aktif Menstruasi</span>' : 'Fase Non-Pendarahan'}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABEL RIWAYAT PERIODE SIKLUS -->
+      <div style="font-size:14px;font-weight:800;color:var(--text);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">
+        <span>Riwayat Periode Menstruasi</span>
+        <span style="font-size:11px;font-weight:600;color:var(--muted)">Total ${periods.length} Catatan</span>
+      </div>
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th>Tanggal Mulai</th>
+            <th>Tanggal Selesai</th>
+            <th>Durasi</th>
+            <th>Jarak Siklus</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${periodsTableRows}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- RIWAYAT CHECK-IN MOOD -->
+    <div class="card-box">
+      <div style="font-size:14px;font-weight:800;color:var(--text);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">
+        <span>Riwayat Check-In Mood</span>
+        <span style="font-size:11px;font-weight:600;color:var(--muted)">Total ${entries.length} Check-In</span>
+      </div>
+      <table class="admin-table">
+        <thead><tr><th>Tanggal</th><th>Mood</th><th>Intensitas</th><th>Pemicu</th><th>Catatan</th></tr></thead>
+        <tbody>
+          ${entries.length ? entries.slice(0, 15).map(e => `
+            <tr>
+              <td>${new Date(e.ts).toLocaleDateString('id-ID', {day:'numeric',month:'short',year:'numeric'})}</td>
+              <td>${e.mood ? `${e.mood.e} ${e.mood.l}` : '-'}</td>
+              <td>${e.intensity || '-'}</td>
+              <td>${(e.causes||[]).join(', ') || '-'}</td>
+              <td>${e.note || '-'}</td>
+            </tr>
+          `).join('') : '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--muted)">Belum ada check-in mood.</td></tr>'}
+        </tbody>
+      </table>
+    </div>
+  `;
+};
+
+// ════════════════════════════════════════
+// MODAL DETAIL HARIAN PERIODE (FLOW & SYMPTOMS)
+// ════════════════════════════════════════
+window.showPeriodDailyLogs = async (uid, periodId, startDate, endDate) => {
+  const modal = document.getElementById('period-detail-modal');
+  const title = document.getElementById('pmodal-title');
+  const sub = document.getElementById('pmodal-sub');
+  const body = document.getElementById('pmodal-body');
+
+  title.textContent = `Detail Log Harian Menstruasi`;
+  sub.textContent = `Periode: ${formatDateIndo(startDate)} s/d ${endDate ? formatDateIndo(endDate) : 'Sekarang'}`;
+  body.innerHTML = `<div style="text-align:center;padding:30px;color:var(--muted)">Memuat log harian dari database...</div>`;
+  modal.classList.add('show');
+
+  try {
+    const snap = await getDocs(collection(db, 'users', uid, 'periods', periodId, 'days'));
+    const days = snap.docs.map(d => ({ date: d.id, ...d.data() }));
+
+    if (!days.length) {
+      body.innerHTML = `<div style="text-align:center;padding:30px;color:var(--muted)">Tidak ada catatan log harian spesifik untuk periode ini.</div>`;
+      return;
+    }
+
+    days.sort((a,b) => new Date(a.date) - new Date(b.date));
+
+    body.innerHTML = `
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Tanggal</th>
+            <th>Aliran Darah</th>
+            <th>Tingkat Nyeri</th>
+            <th>Gejala</th>
+            <th>Catatan</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${days.map(d => {
+            const flow = d.flow || '-';
+            const flowClass = flow ? `flow-${flow.toLowerCase()}` : '';
+            const pain = typeof d.pain === 'number' ? `${d.pain}/5` : (d.pain || '-');
+            const syms = Array.isArray(d.symptoms) && d.symptoms.length
+              ? d.symptoms.map(s => `<span class="symptom-tag">${s}</span>`).join('')
+              : '-';
+
+            return `
+              <tr>
+                <td><b>${formatDateIndo(d.date)}</b></td>
+                <td><span class="flow-badge ${flowClass}">${flow}</span></td>
+                <td>${pain}</td>
+                <td>${syms}</td>
+                <td style="font-size:11px;color:var(--text2)">${d.note || '-'}</td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    `;
+  } catch(e) {
+    body.innerHTML = `<div style="color:#ff4b72;padding:20px;text-align:center">Gagal memuat log harian: ${e.message}</div>`;
+  }
+};
+
+window.closePeriodModal = () => {
+  const modal = document.getElementById('period-detail-modal');
+  if (modal) modal.classList.remove('show');
+};
+
+// ════════════════════════════════════════
+// OVERVIEW TAB: SIKLUS & PERIODE (ALL USERS)
+// ════════════════════════════════════════
+window.loadAllUsersCycleOverview = () => {
+  const tbody = document.getElementById('cycle-overview-tbody');
+  if (!allUsers.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted)">Belum ada data pengguna.</td></tr>';
+    return;
+  }
+
+  // Update stat cards
+  document.getElementById('cy-total-users').textContent = allUsers.length;
+  const activeMensCount = allUsers.filter(u => u.cycleInfo?.phase === 'mens').length;
+  document.getElementById('cy-active-mens').textContent = activeMensCount;
+
+  // Avg Cycle & Duration across all users
+  const withCycles = allUsers.filter(u => u.periods && u.periods.length > 0);
+  if (withCycles.length > 0) {
+    const avgC = Math.round(withCycles.reduce((sum, u) => sum + (u.cycleInfo?.cycleLen || 28), 0) / withCycles.length);
+    const avgD = Math.round(withCycles.reduce((sum, u) => sum + (u.cycleInfo?.duration || 5), 0) / withCycles.length);
+    document.getElementById('cy-avg-cycle').textContent = `${avgC} Hari`;
+    document.getElementById('cy-avg-duration').textContent = `${avgD} Hari`;
+  }
+
+  renderCycleOverviewRows(allUsers);
+};
+
+function renderCycleOverviewRows(users) {
+  const tbody = document.getElementById('cycle-overview-tbody');
+  if (!users.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted)">Tidak ada data siklus yang sesuai filter.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = users.map(u => {
+    const c = u.cycleInfo || calcUserCycleInfo(u.periods || []);
+    let nextText = '-';
+    if (c.activePeriod) {
+      nextText = '<span style="color:#ff2d55;font-weight:700">Sedang Mens</span>';
+    } else if (c.nextPeriodDate) {
+      const diff = c.daysUntilNext;
+      const dTxt = diff > 0 ? `${diff} hari lagi` : diff === 0 ? 'Hari ini' : `Terlambat ${Math.abs(diff)} hari`;
+      nextText = `${formatDateIndo(c.nextPeriodDate)} (${dTxt})`;
+    }
+
+    return `
+      <tr>
+        <td>
+          <div style="font-weight:800;color:var(--text)">${u.name}</div>
+          <div style="font-size:10.5px;color:var(--muted)">${u.id.slice(0, 12)}...</div>
+        </td>
+        <td>${getPhaseBadgeHtml(c.phase, c.phaseLabel)}</td>
+        <td><b>Hari ke-${c.dayOfCycle || '-'}</b> / ${c.cycleLen || 28}</td>
+        <td>${c.lastPeriod ? formatDateIndo(c.lastPeriod.startDate) : '-'}</td>
+        <td>${nextText}</td>
+        <td><b>${u.periodsCount || 0}</b> Periode</td>
+        <td>
+          <button class="admin-btn" style="padding:6px 14px;font-size:11px" onclick="jumpToUserCycle('${u.id}')">
+            Lihat Siklus Pengguna →
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+window.jumpToUserCycle = (uid) => {
+  switchTab('users', document.querySelector('.admin-nav-btn'));
+  window.selectUser(uid);
+};
+
+window.filterCycleOverview = () => {
+  const q = (document.getElementById('cycle-search-input')?.value || '').toLowerCase().trim();
+  const phaseFilter = document.getElementById('cycle-filter-phase')?.value || 'all';
+
+  const filtered = allUsers.filter(u => {
+    const matchName = u.name.toLowerCase().includes(q) || u.id.toLowerCase().includes(q);
+    const c = u.cycleInfo || calcUserCycleInfo(u.periods || []);
+    const matchPhase = phaseFilter === 'all' || c.phase === phaseFilter;
+    return matchName && matchPhase;
+  });
+
+  renderCycleOverviewRows(filtered);
+};
+
+// ════════════════════════════════════════
+// CSV EXPORT (CHECK-IN & SIKLUS)
+// ════════════════════════════════════════
+window.exportUserCSV = async (uid) => {
   const user = allUsers.find(u => u.id === uid);
   let entries = [];
   try {
@@ -692,53 +1330,52 @@ window.selectUser = async (uid) => {
     entries = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   } catch {}
 
-  container.innerHTML = `
-    <div class="card-box">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-        <div>
-          <div style="font-size:20px;font-weight:800;color:var(--text)">${user.name}</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px">Device ID: <code>${user.id}</code></div>
-        </div>
-        <button class="admin-btn secondary" onclick="exportUserCSV('${user.id}')">⬇️ Export CSV</button>
-      </div>
+  let csv = "Timestamp,Tanggal,Mood,Skor,Intensitas,Pemicu,Catatan\n";
+  entries.forEach(e => {
+    const tgl = new Date(e.ts).toISOString();
+    const mood = e.mood?.l || '';
+    const score = e.mood?.s || '';
+    const intens = e.intensity || '';
+    const causes = (e.causes || []).join('; ');
+    const note = (e.note || '').replace(/,/g, ' ');
+    csv += `"${tgl}","${tgl.slice(0,10)}","${mood}","${score}","${intens}","${causes}","${note}"\n`;
+  });
 
-      <div class="stat-grid" style="margin-bottom:16px">
-        <div class="stat-card">
-          <div class="stat-ic">📝</div>
-          <div><div class="stat-val">${entries.length}</div><div class="stat-lbl">Check-In</div></div>
-        </div>
-      </div>
-
-      <div style="font-size:14px;font-weight:800;color:var(--text);margin-bottom:10px">Riwayat Check-In Terbaru</div>
-      <table class="admin-table">
-        <thead><tr><th>Tanggal</th><th>Mood</th><th>Intensitas</th><th>Pemicu</th><th>Catatan</th></tr></thead>
-        <tbody>
-          ${entries.slice(0, 15).map(e => `
-            <tr>
-              <td>${new Date(e.ts).toLocaleDateString('id-ID', {day:'numeric',month:'short',year:'numeric'})}</td>
-              <td>${e.mood ? `${e.mood.e} ${e.mood.l}` : '-'}</td>
-              <td>${e.intensity || '-'}</td>
-              <td>${(e.causes||[]).join(', ') || '-'}</td>
-              <td>${e.note || '-'}</td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    </div>
-  `;
+  downloadCsvFile(csv, `moodly_checkin_${user?.name || uid}.csv`);
 };
 
-window.exportUserCSV = (uid) => {
+window.exportCycleCSV = async (uid) => {
   const user = allUsers.find(u => u.id === uid);
-  // Simple CSV download
-  const csvContent = "data:text/csv;charset=utf-8,ID,User\n" + uid + "," + (user?.name || '');
-  const encodedUri = encodeURI(csvContent);
+  let periods = user?.periods || [];
+  try {
+    const pq = query(collection(db, 'users', uid, 'periods'), orderBy('startDate', 'desc'));
+    const ps = await getDocs(pq);
+    periods = ps.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch {}
+
+  let csv = "ID_Periode,Tanggal_Mulai,Tanggal_Selesai,Durasi_Hari,Status\n";
+  periods.forEach(p => {
+    let dur = '-';
+    if (p.startDate && p.endDate) {
+      dur = Math.round((new Date(p.endDate) - new Date(p.startDate)) / 86400000) + 1;
+    }
+    const status = p.endDate ? 'Selesai' : 'Aktif';
+    csv += `"${p.id}","${p.startDate}","${p.endDate || ''}","${dur}","${status}"\n`;
+  });
+
+  downloadCsvFile(csv, `moodly_siklus_${user?.name || uid}.csv`);
+};
+
+function downloadCsvFile(csvContent, filename) {
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement("a");
-  link.setAttribute("href", encodedUri);
-  link.setAttribute("download", `moodly_user_${uid}.csv`);
+  link.href = URL.createObjectURL(blob);
+  link.setAttribute("download", filename);
   document.body.appendChild(link);
   link.click();
-};
+  document.body.removeChild(link);
+}
+
 
 function calculateAnalytics() {
   document.getElementById('st-users').textContent = allUsers.length;
@@ -764,5 +1401,22 @@ function calculateAnalytics() {
 loadUsers();
 loadPasscodeSetting();
 </script>
+
+<!-- ═══════════════ MODAL DETAIL LOG HARIAN PERIODE ═══════════════ -->
+<div id="period-detail-modal" class="admin-modal-overlay" onclick="if(event.target===this)closePeriodModal()">
+  <div class="admin-modal-box">
+    <div class="admin-modal-hd">
+      <div>
+        <div class="admin-modal-title" id="pmodal-title">Detail Log Harian Menstruasi</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px" id="pmodal-sub">Memuat tanggal...</div>
+      </div>
+      <button class="admin-modal-close" onclick="closePeriodModal()">✕</button>
+    </div>
+    <div id="pmodal-body">
+      <div style="text-align:center;padding:24px;color:var(--muted)">Memuat data harian...</div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
