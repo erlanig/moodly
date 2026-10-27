@@ -1,7 +1,9 @@
 /* ═══════════════════════════════════════
    MOODLY — stories.js
-   Instagram Stories Generator (Strict 9:16)
-   • Strict 9:16 Aspect Ratio (1080x1920 Export)
+   Mood Card Generator (Square 1:1 for Instagram)
+   • Strict 1:1 Square Card (1080x1080 HD Export)
+   • Instagram auto-adapts 1:1 cards perfectly in Stories
+   • All photos strictly cropped to fill (object-fit: cover, never shrunk)
    • Elegant Poppins Typography & Title Case (No All-Caps)
    • Solid Background Colors (Putih, Pink, Custom Color Picker, No Gradients)
    • 2-Tone moodly Logo Centered at Bottom
@@ -96,7 +98,7 @@ export function openStories(entry) {
   currentColorHex = '#ffffff';
   selectedPhotoIdx = 0;
 
-  // Auto-detect template yang paling pas
+  // Auto-detect template
   const hasPhotos = entry?.photos && entry.photos.length > 0;
   if (hasPhotos) {
     currentTemplateId = entry.photos.length > 1 ? 'grid' : 'polaroid';
@@ -117,7 +119,7 @@ export function openStories(entry) {
 /* ════════════════
    3D ICON & TITLE CASE HELPERS
 ════════════════ */
-function getMood3DIconHtml(mood, size = 64) {
+function getMood3DIconHtml(mood, size = 56) {
   if (mood && mood.img) {
     return `<img src="${mood.img}" class="story-3d-main-img" style="width:${size}px;height:${size}px;object-fit:contain" alt="${mood.l}">`;
   }
@@ -162,7 +164,7 @@ function getQuoteForMood(score) {
 }
 
 /* ════════════════
-   RENDER STORY PREVIEW (STRICT 9:16)
+   RENDER STORY PREVIEW (KOTAK 1:1)
 ════════════════ */
 function renderStoryPreview() {
   const canvas = document.getElementById('story-canvas');
@@ -196,28 +198,29 @@ function renderStoryPreview() {
   `;
 
   // Bottom 2-Tone Moodly Logo (mood dark/light + ly pink)
+  const isEditorial = currentTemplateId === 'editorial' && photos.length > 0;
+  const logoMoodColor = isEditorial ? '#ffffff' : (theme.isDark ? '#ffffff' : '#1c1c1e');
   const footerLogoHtml = `
     <div class="story-brand-bottom">
-      <span class="story-logo-mood" style="color:${theme.isDark ? '#ffffff' : '#1c1c1e'}">mood</span><span class="story-logo-ly">ly</span>
+      <span class="story-logo-mood" style="color:${logoMoodColor}">mood</span><span class="story-logo-ly">ly</span>
     </div>
   `;
 
   let bodyHtml = '';
 
   // ════════════════════════════════════════
-  // TEMPLATE 1: POLAROID (CLEAN & MINIMAL)
+  // TEMPLATE 1: POLAROID (1:1 KOTAK & CROPPED)
   // ════════════════════════════════════════
   if (currentTemplateId === 'polaroid') {
     const activePhoto = photos.length ? (photos[selectedPhotoIdx] || photos[0]) : null;
 
     bodyHtml = `
       <div class="story-polaroid-container">
-        <!-- Polaroid Card -->
         <div class="story-polaroid-card">
           <div class="story-polaroid-photo-frame">
             ${activePhoto ? `<img src="${activePhoto}" class="story-polaroid-img" alt="Foto">` : `
               <div class="story-photo-empty">
-                <img src="img/3d/3d-sun.png" style="width:40px;height:40px;object-fit:contain" alt="">
+                <img src="img/3d/3d-sun.png" style="width:36px;height:36px;object-fit:contain" alt="">
                 <span>Momen Hari Ini</span>
               </div>
             `}
@@ -225,7 +228,7 @@ function renderStoryPreview() {
           <div class="story-polaroid-bottom">
             <div class="story-polaroid-meta">
               <div class="story-polaroid-3d-icon">
-                ${getMood3DIconHtml(mood, 34)}
+                ${getMood3DIconHtml(mood, 28)}
               </div>
               <div>
                 <div class="story-polaroid-mood-title">${moodLabel}</div>
@@ -236,29 +239,15 @@ function renderStoryPreview() {
           </div>
         </div>
 
-        <!-- Quote & Intensity (Title Case) -->
         <div class="story-bottom-info">
           <div class="story-quote" style="color:${theme.text}">"${quote}"</div>
-
-          ${currentEntry.intensity ? `
-            <div class="story-int-pill" style="background:${theme.chipBg};border:1px solid ${theme.chipBorder};color:${theme.text}">
-              <span class="story-int-dot" style="background:${theme.accent}"></span>
-              <span>${currentEntry.intensity}</span>
-            </div>
-          ` : ''}
-
-          ${causes.length ? `
-            <div class="story-causes">
-              ${causes.map(c => `<span class="story-chip" style="background:${theme.chipBg};color:${theme.text};border-color:${theme.chipBorder}">${toTitleCase(c)}</span>`).join('')}
-            </div>
-          ` : ''}
         </div>
       </div>
     `;
   }
 
   // ════════════════════════════════════════
-  // TEMPLATE 2: MULTI-PHOTO GRID (CLEAN)
+  // TEMPLATE 2: MULTI-PHOTO GRID (1:1 KOTAK & CROPPED)
   // ════════════════════════════════════════
   else if (currentTemplateId === 'grid') {
     let gridLayout = '';
@@ -267,7 +256,7 @@ function renderStoryPreview() {
     if (pCount === 0) {
       gridLayout = `
         <div class="story-photo-empty story-grid-empty" style="background:${theme.chipBg};color:${theme.textMuted}">
-          <img src="img/3d/3d-sun.png" style="width:48px;height:48px;object-fit:contain" alt="">
+          <img src="img/3d/3d-sun.png" style="width:42px;height:42px;object-fit:contain" alt="">
           <span>Tambah foto saat check-in untuk kolase</span>
         </div>
       `;
@@ -307,14 +296,13 @@ function renderStoryPreview() {
 
     bodyHtml = `
       <div class="story-grid-container">
-        <!-- Photo Frame -->
         <div class="story-grid-frame">
           ${gridLayout}
 
           <!-- Floating Badge -->
           <div class="story-grid-floating-badge" style="background:${theme.isDark ? 'rgba(24, 24, 27, 0.92)' : 'rgba(255, 255, 255, 0.96)'};border:1px solid ${theme.cardBorder};box-shadow:${theme.cardShadow}">
             <div class="story-grid-3d-wrap">
-              ${getMood3DIconHtml(mood, 38)}
+              ${getMood3DIconHtml(mood, 32)}
             </div>
             <div>
               <div class="story-grid-mood-lbl" style="color:${theme.text}">${moodLabel}</div>
@@ -323,21 +311,15 @@ function renderStoryPreview() {
           </div>
         </div>
 
-        <!-- Causes & Quote -->
-        <div class="story-bottom-info" style="margin-top:12px">
-          ${causes.length ? `
-            <div class="story-causes">
-              ${causes.map(c => `<span class="story-chip" style="background:${theme.chipBg};color:${theme.text};border-color:${theme.chipBorder}">${toTitleCase(c)}</span>`).join('')}
-            </div>
-          ` : ''}
-          <div class="story-quote" style="color:${theme.text};margin-top:6px">"${quote}"</div>
+        <div class="story-bottom-info">
+          <div class="story-quote" style="color:${theme.text}">"${quote}"</div>
         </div>
       </div>
     `;
   }
 
   // ════════════════════════════════════════
-  // TEMPLATE 3: EDITORIAL (TITLE CASE)
+  // TEMPLATE 3: EDITORIAL (FULL SQUARE HERO CROP)
   // ════════════════════════════════════════
   else if (currentTemplateId === 'editorial') {
     const activePhoto = photos.length ? (photos[selectedPhotoIdx] || photos[0]) : null;
@@ -345,12 +327,11 @@ function renderStoryPreview() {
     bodyHtml = `
       <div class="story-editorial-container">
         ${activePhoto ? `
-          <div class="story-editorial-hero" style="background-image:url('${activePhoto}')">
-            <div class="story-editorial-overlay"></div>
-          </div>
+          <img src="${activePhoto}" class="story-editorial-hero-img" alt="Foto">
+          <div class="story-editorial-overlay"></div>
         ` : `
           <div class="story-editorial-hero-empty" style="background:${theme.chipBg}">
-            <img src="img/3d/3d-sun.png" style="width:50px;height:50px;object-fit:contain" alt="">
+            <img src="img/3d/3d-sun.png" style="width:46px;height:46px;object-fit:contain" alt="">
           </div>
         `}
 
@@ -361,14 +342,14 @@ function renderStoryPreview() {
           </div>
 
           <div class="story-editorial-card">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
-              ${getMood3DIconHtml(mood, 36)}
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+              ${getMood3DIconHtml(mood, 28)}
               <div>
-                <div style="font-size:9.5px;font-weight:600;color:rgba(255,255,255,0.8)">Intensitas Perasaan</div>
-                <div style="font-size:12.5px;font-weight:700;color:#ffffff">${currentEntry.intensity || 'Stabil'}</div>
+                <div style="font-size:9px;font-weight:600;color:rgba(255,255,255,0.8)">Intensitas Perasaan</div>
+                <div style="font-size:11.5px;font-weight:700;color:#ffffff">${currentEntry.intensity || 'Stabil'}</div>
               </div>
             </div>
-            <div class="story-quote" style="color:#ffffff;max-width:100%;font-size:10.5px;text-align:left">"${quote}"</div>
+            <div class="story-quote" style="color:#ffffff;max-width:100%;font-size:10px;text-align:left">"${quote}"</div>
           </div>
         </div>
       </div>
@@ -376,21 +357,21 @@ function renderStoryPreview() {
   }
 
   // ════════════════════════════════════════
-  // TEMPLATE 4: PURE MOOD MINIMALIST
+  // TEMPLATE 4: PURE MOOD MINIMALIST (1:1 KOTAK)
   // ════════════════════════════════════════
   else {
     bodyHtml = `
       <div class="story-minimal-container">
         <div class="story-center">
           <div class="story-em-wrap" style="background:${theme.cardBg};box-shadow:${theme.cardShadow};border:1.5px solid ${theme.cardBorder}">
-            ${getMood3DIconHtml(mood, 74)}
+            ${getMood3DIconHtml(mood, 68)}
           </div>
-          <div class="story-mood-name" style="color:${theme.text};margin-top:12px">${moodLabel}</div>
-          <div class="story-quote" style="color:${theme.text};margin-top:8px">"${quote}"</div>
+          <div class="story-mood-name" style="color:${theme.text};margin-top:10px">${moodLabel}</div>
+          <div class="story-quote" style="color:${theme.text};margin-top:6px">"${quote}"</div>
         </div>
 
         ${currentEntry.intensity ? `
-          <div class="story-int-wrap" style="margin-top:16px">
+          <div class="story-int-wrap" style="margin-top:12px">
             <div class="story-int-label" style="color:${theme.textMuted}">Intensitas Perasaan · ${currentEntry.intensity}</div>
             <div class="story-int-track" style="background:${theme.chipBg}">
               <div class="story-int-fill" style="width:${intPct}%;background:${theme.accent}"></div>
@@ -399,7 +380,7 @@ function renderStoryPreview() {
         ` : ''}
 
         ${causes.length ? `
-          <div class="story-causes" style="margin-top:14px">
+          <div class="story-causes" style="margin-top:10px">
             ${causes.map(c => `<span class="story-chip" style="background:${theme.chipBg};color:${theme.text};border-color:${theme.chipBorder}">${toTitleCase(c)}</span>`).join('')}
           </div>
         ` : ''}
@@ -409,7 +390,7 @@ function renderStoryPreview() {
 
   canvas.innerHTML = `
     <div id="story-frame" class="story-frame tpl-${currentTemplateId}" style="background-color:${theme.bg};color:${theme.text};">
-      ${topMetaHtml}
+      ${currentTemplateId !== 'editorial' ? topMetaHtml : ''}
       <div class="story-main-area">
         ${bodyHtml}
       </div>
@@ -521,7 +502,7 @@ export function setCustomStoryColor(hex) {
 window._setCustomStoryColor = setCustomStoryColor;
 
 /* ════════════════
-   DOWNLOAD / SHARE (EXACT 1080x1920 9:16)
+   DOWNLOAD / SHARE (SQUARE 1:1 1080x1080 FOR INSTAGRAM)
 ════════════════ */
 export async function downloadStory() {
   const frame = document.getElementById('story-frame');
@@ -539,12 +520,12 @@ export async function downloadStory() {
   }
 
   try {
-    if (window._moodlyToast) window._moodlyToast('Menyiapkan Instagram Story 9:16...');
+    if (window._moodlyToast) window._moodlyToast('Menyiapkan gambar kartu...');
 
-    // Scale precisely to Instagram Stories 1080x1920 px resolution
-    const targetWidth = 1080;
-    const currentWidth = frame.offsetWidth || 252;
-    const exportScale = targetWidth / currentWidth;
+    // Scale precisely to 1080x1080 px (1:1 square)
+    const targetSize = 1080;
+    const currentWidth = frame.offsetWidth || 320;
+    const exportScale = targetSize / currentWidth;
 
     const canvas = await html2canvas(frame, {
       scale: exportScale,
@@ -554,10 +535,10 @@ export async function downloadStory() {
       logging: false,
     });
     const link = document.createElement('a');
-    link.download = `moodly-story-${Date.now()}.png`;
+    link.download = `moodly-card-${Date.now()}.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();
-    if (window._moodlyToast) window._moodlyToast('Story siap dibagikan ke Instagram!');
+    if (window._moodlyToast) window._moodlyToast('Kartu siap dibagikan ke Instagram!');
   } catch (e) {
     console.warn('[stories] download failed:', e);
   }
@@ -569,11 +550,11 @@ export async function shareStory() {
 
   if (navigator.share && typeof html2canvas !== 'undefined') {
     try {
-      if (window._moodlyToast) window._moodlyToast('Menyiapkan Instagram Story 9:16...');
+      if (window._moodlyToast) window._moodlyToast('Menyiapkan gambar untuk Instagram...');
 
-      const targetWidth = 1080;
-      const currentWidth = frame.offsetWidth || 252;
-      const exportScale = targetWidth / currentWidth;
+      const targetSize = 1080;
+      const currentWidth = frame.offsetWidth || 320;
+      const exportScale = targetSize / currentWidth;
 
       const canvas = await html2canvas(frame, {
         scale: exportScale,
@@ -585,12 +566,12 @@ export async function shareStory() {
 
       canvas.toBlob(async (blob) => {
         if (!blob) { downloadStory(); return; }
-        const file = new File([blob], `moodly-story-${Date.now()}.png`, { type: 'image/png' });
+        const file = new File([blob], `moodly-card-${Date.now()}.png`, { type: 'image/png' });
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           try {
             await navigator.share({
               files: [file],
-              title: 'Moodly Story',
+              title: 'Moodly Story Card',
               text: `Mood hari ini: ${toTitleCase(currentEntry?.mood?.l || 'Check-in')}`,
             });
             return;
